@@ -1,7 +1,9 @@
+import Navbar from "@/components/Navbar";
+
 export default function Page() {
   return (
     <div>
-      Working perfectly.....
+     <Navbar></Navbar>
     </div>
   );
 }
