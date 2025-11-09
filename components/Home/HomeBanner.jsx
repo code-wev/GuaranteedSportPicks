@@ -46,7 +46,7 @@ const HomeBanner = () => {
               <div className="flex items-center gap-2">
                 <div className="relative w-5 h-5">
                   <Image
-                    src="/home/icon3.png"
+                    src="/home/icon1.png"
                     alt="Secure Payments"
                     fill
                     className="object-contain"
@@ -60,7 +60,7 @@ const HomeBanner = () => {
               <div className="flex items-center gap-2">
                 <div className="relative w-5 h-5">
                   <Image
-                    src="/home/icon3.png"
+                    src="/home/icon2.png"
                     alt="Verified Records"
                     fill
                     className="object-contain"
