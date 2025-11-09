@@ -1,12 +1,12 @@
 import User from "@/models/user.model";
-import bcrypt from "bcryptjs";
+// import bcrypt from "bcryptjs";
 
 // Register user
 export const registerUser = async ({ fullName, email, password, role }) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) throw new Error("User already exists");
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  // const hashedPassword = await bcrypt.hash(password, 10);
 
   const newUser = await User.create({
     fullName,
