@@ -18,7 +18,7 @@ export default function LiveOddsPicks() {
 
         {/* Live Ticker pill */}
         <div className="mt-6">
-          <div className="mx-auto max-w-[980px] rounded-full bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#00000008] h-[52px] px-5 flex items-center justify-between">
+          <div className="mx-auto max-w-[980px] h-[64px] rounded-full bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-[#00000008] h-[52px] px-5 flex items-center justify-between">
             {/* Left */}
             <div className="flex items-center gap-2 text-[13px] font-semibold text-[#111]">
               <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#E63946]" />
@@ -29,8 +29,8 @@ export default function LiveOddsPicks() {
 
             {/* Center matchup */}
             <div className="text-[14px] md:text-[15px] font-semibold">
-              <span className="text-[#111]">Dodgers vs Padres</span>
-              <span className="mx-2 text-[#b5b5b5]">•</span>
+              <span className="text-[#E63946]">Dodgers vs Padres</span>
+              <span className="mx-2 text-[#E63946]">-</span>
               <span className="text-[#E63946]">Dodgers -1.5 (+140)</span>
             </div>
 
@@ -43,14 +43,11 @@ export default function LiveOddsPicks() {
 
         {/* Partners block */}
         <div className="mt-10">
-         
-
           {/* Card container */}
           <div className="mt-5 rounded-[88px] bg-white border border-[#00000010] shadow-[0_12px_32px_rgba(0,0,0,0.08)] px-5 md:px-8 py-6">
-           
             <h3 className="text-center text-[18px] pb-5  md:text-[26px] font-semibold text-[#111]">
-            Our Trusted Sportsbook Partners
-          </h3>
+              Our Trusted Sportsbook Partners
+            </h3>
             {/* Logos row */}
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8 items-start justify-items-center">
@@ -166,9 +163,7 @@ function StatPill({ value, label, valueClass }) {
   return (
     <div className="h-[120px] rounded-[120px] bg-white border border-[#00000010] flex items-center justify-center text-center">
       <div>
-        <div
-          className={`text-[26px] leading-none font-extrabold ${valueClass}`}
-        >
+        <div className={`text-[26px] leading-none font-bold ${valueClass}`}>
           {value}
         </div>
         <div className="mt-1 text-[12.5px] text-[#7A7A7A]">{label}</div>
