@@ -1,13 +1,15 @@
 import HomeBanner from "@/components/Home/HomeBanner";
 import LiveOddsPicks from "@/components/Home/LiveOddsPicks";
 import Navbar from "@/components/Home/Navbar";
+import TodaysFeature from "@/components/Home/TodaysFeature";
 
 export default function Page() {
   return (
     <div>
-     <Navbar></Navbar>
-     <HomeBanner></HomeBanner>
-     <LiveOddsPicks></LiveOddsPicks>
+      <Navbar />
+      <HomeBanner />
+      <TodaysFeature />
+      <LiveOddsPicks />
     </div>
   );
 }
