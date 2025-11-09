@@ -7,7 +7,7 @@ export default function GetFreeDailyPicks() {
     <section className="w-full bg-white py-20">
       <div className="max-w-[980px] mx-auto px-4 text-center">
         {/* Heading */}
-        <h2 className="text-[28px] md:text-[32px] font-bold text-[#E53935] mb-3">
+        <h2 className="text-[28px] md:text-[40px] font-bold text-[#E53935] mb-3">
           Get Free Daily Picks
         </h2>
         <p className="text-[#555] text-[15px] leading-relaxed mb-8">
