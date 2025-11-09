@@ -1,3 +1,4 @@
+import GetFreeDailyPicks from "@/components/Home/GetFreeDailyPicks";
 import HomeBanner from "@/components/Home/HomeBanner";
 import LiveOddsPicks from "@/components/Home/LiveOddsPicks";
 import Navbar from "@/components/Home/Navbar";
@@ -10,6 +11,7 @@ export default function Page() {
       <HomeBanner />
       <TodaysFeature />
       <LiveOddsPicks />
+      <GetFreeDailyPicks/>
     </div>
   );
 }
