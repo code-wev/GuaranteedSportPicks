@@ -4,7 +4,9 @@ import HomeBanner from "@/components/Home/HomeBanner";
 import LatestBettingInsights from "@/components/Home/LatestBettingInsights";
 import LiveOddsPicks from "@/components/Home/LiveOddsPicks";
 import Navbar from "@/components/Home/Navbar";
+import Package from "@/components/Home/Package";
 import TodaysFeature from "@/components/Home/TodaysFeature";
+import WhyChoose from "@/components/Home/WhyChoose";
 
 export default function Page() {
   return (
@@ -12,6 +14,8 @@ export default function Page() {
       <Navbar />
       <HomeBanner />
       <TodaysFeature />
+      <WhyChoose />
+      <Package/>
       <LiveOddsPicks />
       <GetFreeDailyPicks/>
       <LatestBettingInsights/>

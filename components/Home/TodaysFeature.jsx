@@ -106,7 +106,7 @@ export default function TodaysFeature() {
             </h3>
             <ul className="text-sm text-gray-300 space-y-1">
               <li className="flex items-center gap-1">
-                <IoMdSunny className="text-yellow-600 text-base" />
+                <IoMdSunny className="text-yellow-400 text-base" />
                 Clear skies, 45°F
               </li>
               <li className="flex items-center gap-1">
