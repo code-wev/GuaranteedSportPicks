@@ -4,6 +4,7 @@ const TodaysFeature = () => {
     return (
         <div>
             Hello Todays Feature
+            <p>Hey</p>
         </div>
     );
 };
