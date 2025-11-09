@@ -1,5 +1,7 @@
+import Footer from "@/components/Home/Footer";
 import GetFreeDailyPicks from "@/components/Home/GetFreeDailyPicks";
 import HomeBanner from "@/components/Home/HomeBanner";
+import LatestBettingInsights from "@/components/Home/LatestBettingInsights";
 import LiveOddsPicks from "@/components/Home/LiveOddsPicks";
 import Navbar from "@/components/Home/Navbar";
 import Package from "@/components/Home/Package";
@@ -15,7 +17,9 @@ export default function Page() {
       <WhyChoose />
       <Package/>
       <LiveOddsPicks />
-      <GetFreeDailyPicks />
+      <GetFreeDailyPicks/>
+      <LatestBettingInsights/>
+      <Footer/>
     </div>
   );
 }
