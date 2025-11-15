@@ -1,5 +1,6 @@
-import User from "@/models/user.model"
+
 import { NextResponse } from "next/server"
+import User from "../UserModel";
 
 export const GET = async(req)=>{
     try {

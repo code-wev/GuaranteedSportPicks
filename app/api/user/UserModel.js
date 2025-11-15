@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, models } from "mongoose";
 
 const userSchema = new Schema(
   {
@@ -18,7 +18,6 @@ const userSchema = new Schema(
     phoneNumber: String,
     img: String,
 
-    // Roles
     role: {
       type: String,
       enum: ["user", "admin", "handicapper"],
@@ -30,15 +29,17 @@ const userSchema = new Schema(
       type: String,
       enum: ["active", "banned", "pending"],
       default: "active",
+      required: true,
     },
 
-    // Payments & Credits
     credits: {
       type: Number,
       default: 0,
     },
+
     promoUsed: [String],
     stripeCustomerId: String,
+
     payAfterWinHolds: [
       {
         pickId: String,
@@ -48,7 +49,6 @@ const userSchema = new Schema(
       },
     ],
 
-    // Picks & Purchases
     purchaseHistory: [
       {
         pickId: String,
@@ -64,17 +64,19 @@ const userSchema = new Schema(
       },
     ],
 
-    // Extra for Handicapper future
     isHandicapper: {
       type: Boolean,
       default: false,
     },
+
     bio: String,
+
     records: {
       wins: { type: Number, default: 0 },
       losses: { type: Number, default: 0 },
       pushes: { type: Number, default: 0 },
     },
+
     testimonials: [
       {
         name: String,
@@ -82,6 +84,7 @@ const userSchema = new Schema(
         date: Date,
       },
     ],
+
     affiliateCode: String,
     landingPageSlug: String,
 
@@ -90,7 +93,10 @@ const userSchema = new Schema(
       default: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 );
 
-module.exports = model("User", userSchema);
+// FIXED
+const User = models.User || model("User", userSchema);
+
+export default User;

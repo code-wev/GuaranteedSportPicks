@@ -1,7 +1,8 @@
 import { dbConnect } from "@/lib/dbConnect";
-import User from "@/models/user.model";
+
 import { NextResponse } from "next/server"
 import bcrypt from 'bcrypt'
+import User from "../UserModel";
 
 export const POST = async(req)=>{
    await dbConnect()

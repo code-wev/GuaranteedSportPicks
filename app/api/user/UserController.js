@@ -1,6 +1,7 @@
 import { dbConnect } from "@/lib/dbConnect";
-import User from "@/models/user.model"
+
 import bcrypt from 'bcrypt'
+import User from "./UserModel";
 
 export const saveUser = async(data)=>{
 

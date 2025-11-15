@@ -1,11 +1,14 @@
-import User from "@/models/user.model";
+import { dbConnect } from "@/lib/dbConnect";
+
 import { NextResponse } from "next/server";
+import User from "../../user/UserModel";
 
 export const GET = async (req, context) => {
     
 const params = await context.params;
 const email = params.email
 console.log(email, "ay parmas ay")
+await dbConnect()
   try {
 
     

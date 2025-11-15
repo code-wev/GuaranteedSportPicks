@@ -1,39 +1,45 @@
 import { NextResponse } from "next/server";
-import { saveUser } from "../UserController";
 import { dbConnect } from "@/lib/dbConnect";
-import User from "@/models/user.model";
-
-export const POST = async(req)=>{
-    await dbConnect()
-    try {
-
-        const data = await req.json();
+import User from "../UserModel";
 
 
-        const isExist = await User.findOne({email:data?.email});
-        if(isExist){
-            return NextResponse.json({
-                message:"User Already Exist",
+export const POST = async (req) => {
+  await dbConnect();
 
-            }, {status:401})
-        }
+  try {
+    const data = await req.json();
+    console.log(data, "Rakib tui header developer");
 
-        const saved = await saveUser(data);
-        return NextResponse.json({
-            message:'Success',
-            data:saved
+    // Check existing user
+    const isExist = await User.findOne({ email: data?.email });
 
-        }, {status:201})
-        
-    
-        
-    } catch (error) {
-        console.log(error, "This is my personal error")
-        return NextResponse.json({
-              error,
-            message:error.message
-          
-        }, {status:500})
+    if (isExist) {
+      return NextResponse.json(
+        { message: "User Already Exists" },
+        { status: 409 }
+      );
     }
 
-}
+    // Create new user
+    const newUser = new User(data);
+    const savedUser = await newUser.save();
+
+    return NextResponse.json(
+      {
+        message: "Success",
+        data: savedUser,
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.log("Error:", error);
+
+    return NextResponse.json(
+      {
+        error,
+        message: error.message,
+      },
+      { status: 500 }
+    );
+  }
+};
