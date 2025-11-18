@@ -1,5 +1,7 @@
-import User from "@/models/user.model";
+
 // import bcrypt from "bcryptjs";
+
+import User from "@/app/api/user/UserModel";
 
 // Register user
 export const registerUser = async ({ fullName, email, password, role }) => {
