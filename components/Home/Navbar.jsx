@@ -19,7 +19,7 @@ export default function Navbar() {
         {/* Middle - Nav links (Desktop) */}
         <ul className="hidden md:flex items-center space-x-6 text-[16px] font-[600] text-[#4B556C]">
           <li>
-            <Link href="#" className="text-[#d93732] font-semibold">
+            <Link href="/" className="text-[#d93732] font-semibold">
               Home
             </Link>
           </li>
@@ -74,8 +74,8 @@ export default function Navbar() {
           <ul className="flex flex-col space-y-4 py-4 px-6 text-[16px] font-[600] text-[#4B556C]">
             <li>
               <Link
-                href="#"
-                className="text-[#d93732] font-semibold"
+                href="/"
+                className=" font-semibold"
                 onClick={() => setIsOpen(false)}
               >
                 Home
