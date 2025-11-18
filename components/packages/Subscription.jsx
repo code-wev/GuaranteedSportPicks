@@ -182,6 +182,7 @@ const Subscription = () => {
           <TfiReload />
           Cancel Anytime
         </span>
+        <span>Cancel Anytime</span>
         <span className="flex items-center gap-1">
           <SlEarphonesAlt />
           24/7 Support
