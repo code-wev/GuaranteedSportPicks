@@ -4,6 +4,7 @@
 import React from "react";
 import { IoShieldCheckmarkOutline } from "react-icons/io5";
 import { SlEarphonesAlt } from "react-icons/sl";
+import { TfiReload } from "react-icons/tfi";
 
 const Subscription = () => {
   return (
@@ -177,7 +178,10 @@ const Subscription = () => {
           <IoShieldCheckmarkOutline />
           Secure Payment
         </span>
-        <span>Cancel Anytime</span>
+        <span className="flex items-center gap-1">
+          <TfiReload />
+          Cancel Anytime
+        </span>
         <span className="flex items-center gap-1">
           <SlEarphonesAlt />
           24/7 Support
