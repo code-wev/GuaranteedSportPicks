@@ -3,7 +3,8 @@
 
 import React from "react";
 import { IoShieldCheckmarkOutline } from "react-icons/io5";
-
+import { SlEarphonesAlt } from "react-icons/sl";
+import { TfiReload } from "react-icons/tfi";
 
 const Subscription = () => {
   return (
@@ -22,7 +23,8 @@ const Subscription = () => {
           <div className="flex flex-col items-center justify-center">
             <h3 className="text-xl font-medium mb-2">Starter</h3>
             <p className="text-4xl font-bold mb-2 flex items-center gap-1 text-[#B91C1C]">
-              $49 <span className=" text-lg font-bold text-[#4B556C]">/week</span>
+              $49{" "}
+              <span className=" text-lg font-bold text-[#4B556C]">/week</span>
             </p>
             <p className="mb-6 text-sm text-[#4B556C] font-bold">
               Perfect for casual bettors
@@ -172,9 +174,18 @@ const Subscription = () => {
       </p>
 
       <div className="mt-2 flex items-center gap-6 text-[#4B556C] text-sm">
-        <span className="flex items-center gap-1"><IoShieldCheckmarkOutline />Secure Payment</span>
-        <span>Cancel Anytime</span>
-        <span>24/7 Support</span>
+        <span className="flex items-center gap-1">
+          <IoShieldCheckmarkOutline />
+          Secure Payment
+        </span>
+        <span className="flex items-center gap-1">
+          <TfiReload />
+          Cancel Anytime
+        </span>
+        <span className="flex items-center gap-1">
+          <SlEarphonesAlt />
+          24/7 Support
+        </span>
       </div>
     </div>
   );
