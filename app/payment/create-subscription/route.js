@@ -1,7 +1,8 @@
 import Stripe from "stripe";
-import { dbConnect } from "@/utils/dbConnect";
-import { Subscription } from "@/models/subscription";
+
 import { NextResponse } from "next/server";
+import { dbConnect } from "@/lib/dbConnect";
+import { Subscription } from "../SubscriptionModel";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
