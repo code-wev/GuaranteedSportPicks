@@ -7,12 +7,12 @@ import { MdOutlineAccessTime } from "react-icons/md";
 
 const ContactForm = () => {
   return (
-    <section className="w-full py-16 bg-[#F8F9FC]">
+    <section className="w-full py-18 bg-[#F8F9FC]">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* LEFT: FORM */}
         <div className="bg-white rounded-lg shadow-[0_3px_12px_rgba(0,0,0,0.12)] overflow-hidden">
           {/* HEADER */}
-          <div className="bg-[#C62626] px-6 py-4">
+          <div className="bg-[#B91C1C] px-6 py-4">
             <h2 className="text-lg md:text-2xl font-semibold text-white">
               Send us a Message
             </h2>
@@ -28,7 +28,7 @@ const ContactForm = () => {
                 <input
                   type="text"
                   placeholder="Enter your full name"
-                  className="w-full  rounded-md border border-[#D4D4D4] px-3 py-3 bg-[#F5F5F5] text-sm focus:outline-none focus:ring-1 focus:ring-red-400"
+                  className="w-full  rounded-lg border border-[#D4D4D4] px-3 py-3 bg-[#F5F5F5] text-sm focus:outline-none focus:ring-1 focus:ring-red-400"
                 />
               </div>
 
@@ -39,7 +39,7 @@ const ContactForm = () => {
                 <input
                   type="email"
                   placeholder="Enter your email address"
-                  className="w-full   rounded-md border border-[#D4D4D4] bg-[#F5F5F5] px-3 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-red-400"
+                  className="w-full    rounded-lg border border-[#D4D4D4] bg-[#F5F5F5] px-3 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-red-400"
                 />
               </div>
             </div>
@@ -52,7 +52,7 @@ const ContactForm = () => {
                 <input
                   type="text"
                   placeholder="Enter your phone number"
-                  className="w-full rounded-md border border-[#D4D4D4] bg-[#F5F5F5] px-3 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-red-400"
+                  className="w-full  rounded-lg border border-[#D4D4D4] bg-[#F5F5F5] px-3 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-red-400"
                 />
               </div>
 
@@ -60,7 +60,7 @@ const ContactForm = () => {
                 <label className="block text-sm font-medium mb-1 text-[#4B556C]">
                   Subject*
                 </label>
-                <select className="w-full rounded-md border border-[#D4D4D4] bg-[#F5F5F5] px-3 py-3 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-400">
+                <select className="w-full  rounded-lg border border-[#D4D4D4] bg-[#F5F5F5] px-3 py-3 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-400">
                   <option>Select your subject</option>
                 </select>
               </div>
@@ -76,7 +76,7 @@ const ContactForm = () => {
                 maxLength={500}
                 className="w-full h-32 rounded-md border border-[#D4D4D4] bg-[#F5F5F5] px-3 py-3 text-sm resize-none focus:outline-none focus:ring-1 focus:ring-red-400"
               ></textarea>
-              <p className="text-right text-lg text-[#4B556C] font-medium">
+              <p className="text-right text-base text-[#4B556C] font-medium">
                 0/500 characters
               </p>
             </div>
@@ -90,7 +90,7 @@ const ContactForm = () => {
 
         {/* RIGHT SIDEBAR */}
         <div className="bg-white p-7 rounded-xl shadow-[0_3px_12px_rgba(0,0,0,0.12)]">
-          <h3 className="text-2xl font-semibold text-gray-800">
+          <h3 className="text-2xl font-semibold">
             Contact Information
           </h3>
           <p className="text-xl text-gray-600 mt-2 leading-relaxed">
