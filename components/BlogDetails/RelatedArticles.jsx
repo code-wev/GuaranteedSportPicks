@@ -34,18 +34,18 @@ const articles = [
 
 const RelatedArticles = () => {
   return (
-    <section className="py-16">
+    <section className="py-16 bg-[#f9fafb]">
       {/* TITLE */}
       <h2 className="text-center text-4xl font-semibold text-gray-900 mb-10">
         Related Articles
       </h2>
 
       {/* CARDS GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-20 max-w-6xl mx-auto">
         {articles.map((article, index) => (
           <div
             key={index}
-            className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition duration-300"
+            className="rounded-xl  hover:shadow-lg transition duration-300"
           >
             {/* IMAGE */}
             <div className="relative w-full h-56">
@@ -53,13 +53,13 @@ const RelatedArticles = () => {
                 src={article.img}
                 alt={article.title}
                 fill
-                className="object-cover"
+                className="object-cover rounded-t-2xl"
                 priority
               />
             </div>
 
             {/* CONTENT */}
-            <div className="p-5">
+            <div className="p-3 md:w-[350px] bg-white shadow-2xl rounded-b-2xl">
               <div className="flex items-center gap-2 text-sm text-gray-500 mb-1">
                 <span className="bg-[#B91C1C] text-white px-2 py-1 rounded-md text-xs">
                   {article.tag}
