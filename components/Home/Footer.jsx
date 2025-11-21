@@ -1,9 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { FaFacebookF, FaLinkedinIn, FaInstagram } from "react-icons/fa";
 
 export default function Footer() {
+  const pathName = usePathname();
+
+  if (pathName.includes("/dashboard")) {
+    return null;
+  }
   return (
     <footer
       className="relative w-full text-white overflow-hidden"

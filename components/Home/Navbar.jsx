@@ -3,12 +3,17 @@
 import { useState } from "react";
 import Link from "next/link";
 import { FiMenu, FiX } from "react-icons/fi";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathName = usePathname();
 
+  if (pathName.includes("/dashboard")) {
+    return null;
+  }
   return (
-    <nav className="w-full bg-[#FFEEEE] border-b border-[#6b5a59]">
+    <nav className="w-full bg-[#FFEEEE]">
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-[80px]">
         {/* Left - Logo */}
         <div className="flex items-center space-x-1">
