@@ -16,9 +16,9 @@ export default function DashNavbar({ setOpen }) {
       <div className="flex items-center gap-3 ml-auto">
         <span className="font-medium">Tamim</span>
         <Image
-          src="/avatar.png"
+          src="/dashboard/profile.png"
           width={40}
-          height={40}
+          height={40} 
           className="rounded-full"
           alt="profile"
         />
