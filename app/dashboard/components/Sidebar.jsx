@@ -1,16 +1,22 @@
-import { FiGrid, FiShoppingBag, FiHistory, FiUser, FiX } from "react-icons/fi";
-import Image from "next/image";
+"use client";
+
+import { FiGrid, FiShoppingBag, FiUser, FiX } from "react-icons/fi";
 import { RiFileHistoryFill } from "react-icons/ri";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const menu = [
-  { title: "Dashboard", icon: <FiGrid />, active: true },
-  { title: "My Picks", icon: <FiShoppingBag /> },
-  { title: "Purchase Picks", icon: <FiShoppingBag /> },
-  { title: "Purchase history", icon: <RiFileHistoryFill /> },
-  { title: "Profile & Settings", icon: <FiUser /> },
+  { title: "Dashboard", icon: <FiGrid />, url: "/dashboard" },
+  { title: "My Picks", icon: <FiShoppingBag />, url: "/dashboard/my-picks" },
+  { title: "Purchase Picks", icon: <FiShoppingBag />, url: "/dashboard/purchase-history" },
+  { title: "Purchase history", icon: <RiFileHistoryFill />, url: "/purchase-history" },
+  { title: "Profile & Settings", icon: <FiUser />, url: "/profile" },
 ];
 
 export default function Sidebar({ open, setOpen }) {
+  const path = usePathname();
+
   return (
     <>
       {/* Mobile Overlay */}
@@ -36,6 +42,7 @@ export default function Sidebar({ open, setOpen }) {
           />
         </div>
 
+        {/* Desktop Logo */}
         <Image
           src="/dashboard/SportPicks.png"
           width={150}
@@ -44,16 +51,25 @@ export default function Sidebar({ open, setOpen }) {
           className="mb-6 hidden lg:block"
         />
 
-        <ul className="space-y-2">
-          {menu.map((item, index) => (
-            <li
-              key={index}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer 
-              ${item.active ? "bg-red-50 text-red-600 font-semibold" : "hover:bg-gray-100"}`}
-            >
-              <span className="text-xl">{item.icon}</span> {item.title}
-            </li>
-          ))}
+        <ul className="space-y-2 pt-4">
+          {menu.map((item, index) => {
+            const isActive = path === item.url;
+
+            return (
+              <Link key={index} href={item.url} onClick={() => setOpen(false)}>
+                <li
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition
+                    ${isActive
+                      ? "bg-red-50 text-red-600 font-semibold"
+                      : "hover:bg-gray-100"
+                    }`}
+                >
+                  <span className="text-xl">{item.icon}</span>
+                  {item.title}
+                </li>
+              </Link>
+            );
+          })}
         </ul>
       </aside>
     </>
