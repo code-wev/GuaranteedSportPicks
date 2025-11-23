@@ -9,9 +9,9 @@ import { usePathname } from "next/navigation";
 const menu = [
   { title: "Dashboard", icon: <FiGrid />, url: "/dashboard" },
   { title: "My Picks", icon: <FiShoppingBag />, url: "/dashboard/my-picks" },
-  { title: "Purchase Picks", icon: <FiShoppingBag />, url: "/dashboard/purchase-history" },
-  { title: "Purchase history", icon: <RiFileHistoryFill />, url: "/purchase-history" },
-  { title: "Profile & Settings", icon: <FiUser />, url: "/profile" },
+  { title: "Purchase Picks", icon: <FiShoppingBag />, url: "/dashboard/purchase" },
+  { title: "Purchase history", icon: <RiFileHistoryFill />, url: "/dashboard/purchase-history" },
+  { title: "Profile & Settings", icon: <FiUser />, url: "/dashboard/profile" },
 ];
 
 export default function Sidebar({ open, setOpen }) {
@@ -28,7 +28,7 @@ export default function Sidebar({ open, setOpen }) {
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-full w-64 min-h-screen bg-white shadow-xl p-5 z-50 
+        className={`fixed top-0 left-0 w-64 bg-white shadow-xl p-5 z-50 
         transform transition-transform duration-300
         ${open ? "translate-x-0" : "-translate-x-full"} 
         lg:translate-x-0 lg:static`}
@@ -48,7 +48,7 @@ export default function Sidebar({ open, setOpen }) {
           width={150}
           height={40}
           alt="logo"
-          className="mb-6 hidden lg:block"
+          className="mb-6 hidden lg:block" 
         />
 
         <ul className="space-y-2 pt-4">
