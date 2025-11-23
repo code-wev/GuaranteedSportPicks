@@ -58,7 +58,7 @@ export default function PurchaseHistory() {
         <div className="overflow-x-auto">
           <table className="min-w-[700px] w-full text-left">
             <thead className="bg-[#F9FAFB]">
-              <tr className="text-gray-500 text-sm border-b border-gray-200">
+              <tr className="text-gray-500 text-sm border-b border-gray-100">
                 <th className="px-4 py-3">PICK</th>
                 <th className="px-4 py-3">TYPE</th>
                 <th className="px-4 py-3">AMOUNT</th>
@@ -72,14 +72,14 @@ export default function PurchaseHistory() {
               {data.map((row, i) => (
                 <tr
                   key={i}
-                  className="border-b border-gray-200 last:border-b-0 text-sm"
+                  className="border-b border-gray-100 last:border-b-0 text-sm"
                 >
-                  <td className="px-4 py-4 whitespace-nowrap">{row.pick}</td>
-                  <td className="px-4 py-4 text-blue-600">{row.type}</td>
-                  <td className="px-4 py-4">{row.amount}</td>
-                  <td className="px-4 py-4 text-blue-600">{row.model}</td>
-                  <td className="px-4 py-4">{row.date}</td>
-                  <td className="px-4 py-4">
+                  <td className="px-4 py-6 whitespace-nowrap">{row.pick}</td>
+                  <td className="px-4 py-6 text-blue-600">{row.type}</td>
+                  <td className="px-4 py-6">{row.amount}</td>
+                  <td className="px-4 py-6 text-blue-600">{row.model}</td>
+                  <td className="px-4 py-6">{row.date}</td>
+                  <td className="px-4 py-6">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-medium ${row.statusColor}`}
                     >
