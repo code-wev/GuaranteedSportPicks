@@ -5,12 +5,28 @@ import { RiFileHistoryFill } from "react-icons/ri";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { IoDocumentTextOutline } from "react-icons/io5";
+import { GrUserAdmin } from "react-icons/gr";
 
 const menu = [
   { title: "Dashboard", icon: <FiGrid />, url: "/dashboard" },
+  { title: "Admin Dashboard", icon: <GrUserAdmin />, url: "/dashboard/admin" },
+  {
+    title: "Manage picks",
+    icon: <IoDocumentTextOutline />,
+    url: "/dashboard/admin/manage-picks",
+  },
   { title: "My Picks", icon: <FiShoppingBag />, url: "/dashboard/my-picks" },
-  { title: "Purchase Picks", icon: <FiShoppingBag />, url: "/dashboard/purchase" },
-  { title: "Purchase history", icon: <RiFileHistoryFill />, url: "/dashboard/purchase-history" },
+  {
+    title: "Purchase Picks",
+    icon: <FiShoppingBag />,
+    url: "/dashboard/purchase",
+  },
+  {
+    title: "Purchase history",
+    icon: <RiFileHistoryFill />,
+    url: "/dashboard/purchase-history",
+  },
   { title: "Profile & Settings", icon: <FiUser />, url: "/dashboard/profile" },
 ];
 
@@ -48,7 +64,7 @@ export default function Sidebar({ open, setOpen }) {
           width={150}
           height={40}
           alt="logo"
-          className="mb-6 hidden lg:block" 
+          className="mb-6 hidden lg:block"
         />
 
         <ul className="space-y-2 pt-4">
@@ -59,9 +75,10 @@ export default function Sidebar({ open, setOpen }) {
               <Link key={index} href={item.url} onClick={() => setOpen(false)}>
                 <li
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg cursor-pointer transition
-                    ${isActive
-                      ? "bg-red-50 text-red-600 font-semibold"
-                      : "hover:bg-gray-100"
+                    ${
+                      isActive
+                        ? "bg-red-50 text-red-600 font-semibold"
+                        : "hover:bg-gray-100"
                     }`}
                 >
                   <span className="text-xl">{item.icon}</span>
