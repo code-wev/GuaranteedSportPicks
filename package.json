@@ -25,6 +25,7 @@
     "react-icons": "^5.5.0",
     "react-redux": "^9.2.0",
     "react-slick": "^0.31.0",
+    "recharts": "^3.5.0",
     "slick-carousel": "^1.8.1",
     "stripe": "^19.3.1"
   },
