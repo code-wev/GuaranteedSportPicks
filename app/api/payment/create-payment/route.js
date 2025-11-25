@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/dbConnect";
 import { MyPick } from "../../myPick/MyPickModel";
+import { PaymentHistory } from "../history/PaymentHistoyModel";
 
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -43,22 +44,33 @@ export const POST = async (req) => {
       metadata: {
         userId,
         pickId,
+        type: "pick" 
       },
     });
 
     //-----------------------------------------------
     // 2️⃣ SAVE INITIAL PURCHASE (pending) IN DATABASE
     //-----------------------------------------------
-    await MyPick.create({
+    // await MyPick.create({
+    //   userId,
+    //   pickId,
+    //   amount,
+    //   currency,
+    //   status: "pending",
+    //   available: false,
+    //   stripeSessionId: session.id,
+    // });
+
+
+    await PaymentHistory.create({
       userId,
       pickId,
       amount,
       currency,
+      type: "pick",
       status: "pending",
-      available: false,
       stripeSessionId: session.id,
     });
-
     //-----------------------------------------------
     // 3️⃣ RETURN SESSION URL TO FRONTEND
     //-----------------------------------------------

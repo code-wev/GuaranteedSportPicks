@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/dbConnect";
 import User from "../UserModel";
+import bcrypt from 'bcrypt'
 
 
 export const POST = async (req) => {
@@ -8,7 +9,7 @@ export const POST = async (req) => {
 
   try {
     const data = await req.json();
-    console.log(data, "Rakib tui header developer");
+    console.log(data);
 
     // Check existing user
     const isExist = await User.findOne({ email: data?.email });
@@ -19,6 +20,10 @@ export const POST = async (req) => {
         { status: 409 }
       );
     }
+
+
+    const hashPassword = await bcrypt.hash(data.password, 10);
+    data.password = hashPassword;
 
     // Create new user
     const newUser = new User(data);

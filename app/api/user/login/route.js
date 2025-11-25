@@ -9,6 +9,8 @@ export const POST = async(req)=>{
     try {
 
         const data =await req.json();
+
+        console.log(data, "datar sawa")
         const isExist = await User.findOne({email:data?.email});
 
         if(!isExist){
