@@ -2,6 +2,7 @@ import Stripe from "stripe";
 import { NextResponse } from "next/server";
 import { dbConnect } from "@/lib/dbConnect";
 import { Subscription } from "@/app/payment/SubscriptionModel";
+import { PaymentHistory } from "../history/PaymentHistoyModel";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -65,18 +66,29 @@ export const POST = async (req) => {
     else if (packageName.toLowerCase() === "seasonal pick package")
       endDate.setMonth(endDate.getMonth() + 3);
 
-    await Subscription.create({
-      userId,
-      priceId,
-      packageName,
-      amount,
-      currency,
-      startDate,
-      endDate,
-      status: "pending",
-      available: false,
-      stripeSessionId: session.id,
-    });
+    // await Subscription.create({
+    //   userId,
+    //   priceId,
+    //   packageName,
+    //   amount,
+    //   currency,
+    //   startDate,
+    //   endDate,
+    //   status: "pending",
+    //   available: false,
+    //   stripeSessionId: session.id,
+    // });
+
+
+     await PaymentHistory.create({
+          userId,
+          pickId,
+          amount,
+          currency,
+          type: "pick",
+          status: "pending",
+          stripeSessionId: session.id,
+        });
 
     return NextResponse.json(
       { message: "Success", url: session.url },

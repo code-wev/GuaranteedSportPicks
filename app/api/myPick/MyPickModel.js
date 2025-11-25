@@ -5,19 +5,19 @@ const myPickSchema = new Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+
     },
 
     pickId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Pick",
-      required: true,
+
     },
 
     // One-time purchase amount
     amount: {
       type: Number,
-      required: true,
+
     },
 
     currency: {
