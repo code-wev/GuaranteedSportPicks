@@ -21,7 +21,6 @@ const picksData = [
     time: "20:00",
     spread: "Spread -3.5",
     odds: "odds -110",
-    units: 3,
     status: "Active",
   },
   {
@@ -31,7 +30,6 @@ const picksData = [
     time: "20:00",
     spread: "Spread -3.5",
     odds: "odds -110",
-    units: 3,
     status: "Active",
   },
   {
@@ -41,7 +39,6 @@ const picksData = [
     time: "20:00",
     spread: "Spread -3.5",
     odds: "odds -110",
-    units: 3,
     status: "Active",
   },
   {
@@ -51,7 +48,6 @@ const picksData = [
     time: "20:00",
     spread: "Spread -3.5",
     odds: "odds -110",
-    units: 3,
     status: "Active",
   },
   {
@@ -61,7 +57,6 @@ const picksData = [
     time: "20:00",
     spread: "Spread -3.5",
     odds: "odds -110",
-    units: 3,
     status: "Active",
   },
   {
@@ -71,7 +66,6 @@ const picksData = [
     time: "20:00",
     spread: "Spread -3.5",
     odds: "odds -110",
-    units: 3,
     status: "Active",
   },
   {
@@ -81,7 +75,6 @@ const picksData = [
     time: "20:00",
     spread: "Spread -3.5",
     odds: "odds -110",
-    units: 3,
     status: "Active",
   },
   {
@@ -91,7 +84,6 @@ const picksData = [
     time: "20:00",
     spread: "Spread -3.5",
     odds: "odds -110",
-    units: 3,
     status: "Active",
   },
 ];
@@ -114,9 +106,9 @@ export default function PickManagement() {
       </div>
 
       {/* Stats Cards - hidden on mobile */}
-      <div className="hidden md:grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <StatCard
-          title="Active Picks"
+          title="Active Picks" 
           value="01"
           icon={FiCheckCircle}
           iconColor="text-green-500"
@@ -132,12 +124,6 @@ export default function PickManagement() {
           value="68%"
           icon={FiTrendingUp}
           iconColor="text-blue-500"
-        />
-        <StatCard
-          title="Total Units"
-          value="+24.5"
-          icon={FiAward}
-          iconColor="text-pink-500"
         />
       </div>
 
@@ -174,7 +160,7 @@ export default function PickManagement() {
               <th className="p-2 py-4">Game</th>
               <th className="p-2 py-4">Date/Time</th>
               <th className="p-2 py-4">Pick Details</th>
-              <th className="p-2 py-4">Units</th>
+              {/* <th className="p-2 py-4">Units</th> */}
               <th className="p-2 py-4">Status</th>
               <th className="p-2 py-4">Action</th>
             </tr>
@@ -195,11 +181,11 @@ export default function PickManagement() {
                     <span className="text-gray-500">{pick.odds}</span>
                   </div>
                 </td>
-                <td className="p-2 py-4">
+                {/* <td className="p-2 py-4">
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
                     {pick.units}
                   </span>
-                </td>
+                </td> */}
                 <td className="p-2 py-4">
                   <span
                     className={`px-2 py-1 rounded-full text-xs ${
@@ -212,9 +198,9 @@ export default function PickManagement() {
                   </span>
                 </td>
                 <td className="p-2 flex gap-2 py-8">
-                  <button className="text-gray-500 hover:text-gray-700">
+                  {/* <button className="text-gray-500 hover:text-gray-700">
                     <IoIosSend />
-                  </button>
+                  </button> */}
                   <button className="text-gray-500 hover:text-gray-700">
                     <FiEdit />
                   </button>

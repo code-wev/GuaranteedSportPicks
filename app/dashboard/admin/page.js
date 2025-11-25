@@ -3,6 +3,7 @@ import DailySalesChart from "@/components/Dashboard/admin/dailysaleschart";
 import DonutChart from "@/components/Dashboard/admin/donutchart";
 import { GrUserSettings } from "react-icons/gr";
 import { LuCircleDollarSign } from "react-icons/lu";
+import { LuCirclePlus } from "react-icons/lu";
 import Image from "next/image";
 import {
   FiUsers,
@@ -64,19 +65,11 @@ function StatsCardsSection() {
       changeColor: "text-emerald-500",
       Icon: FiTrendingUp,
       iconColor: "text-[#EF4444]",
-    },
-    {
-      label: "Pending Emails",
-      value: "03",
-      change: "Urgent needs attention",
-      changeColor: "text-red-500",
-      Icon: FiMail,
-      iconColor: "text-[#EF4444]",
-    },
+    }
   ];
 
   return (
-    <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+    <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       {cards.map((card) => (
         <div
           key={card.label}
@@ -145,7 +138,7 @@ function MiddleSection() {
   const actions = [
     {
       label: "Create Pick",
-      Icon: FiPlus,
+      Icon: LuCirclePlus,
       bg: "bg-rose-50",
       border: "border-rose-100",
       text: "text-rose-500",
@@ -228,7 +221,7 @@ function MiddleSection() {
           {actions.map((action) => (
             <button
               key={action.label}
-              className={`flex items-center justify-center gap-2 rounded-2xl border ${action.bg} ${action.border} py-4 text-sm font-semibold ${action.text} transition hover:shadow-md`}
+              className={`flex flex-col items-center justify-center gap-2 rounded-lg border ${action.bg} ${action.border} py-4 text-sm font-semibold ${action.text} transition hover:shadow-md`}
             >
               <action.Icon className="h-4 w-4" />
               <span>{action.label}</span>
@@ -269,36 +262,36 @@ function ActivityFeed() {
     },
   ];
 
-  return (
-    <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-      <h2 className="mb-4 text-xl font-semibold text-gray-800">
-        Recent Activity
-      </h2>
+  // return (
+  //   <section className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+  //     <h2 className="mb-4 text-xl font-semibold text-gray-800">
+  //       Recent Activity
+  //     </h2>
 
-      <div className="space-y-2">
-        {activities.map((item) => (
-          <div
-            key={item.id}
-            className="flex items-center justify-between rounded-2xl bg-[#F9FAFB] px-4 py-3"
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full ${item.iconBg}`}
-              >
-                <div
-                  className={`p-2 rounded-full ${item.iconBg}`}
-                >
-                  <item.Icon className={`text-2xl ${item.iconColor} `} />
-                </div>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-800">{item.title}</p>
-                <p className="text-xs text-gray-400">{item.time}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
-  );
+  //     <div className="space-y-2">
+  //       {activities.map((item) => (
+  //         <div
+  //           key={item.id}
+  //           className="flex items-center justify-between rounded-2xl bg-[#F9FAFB] px-4 py-3"
+  //         >
+  //           <div className="flex items-center gap-3">
+  //             <div
+  //               className={`flex h-8 w-8 items-center justify-center rounded-full ${item.iconBg}`}
+  //             >
+  //               <div
+  //                 className={`p-2 rounded-full ${item.iconBg}`}
+  //               >
+  //                 <item.Icon className={`text-2xl ${item.iconColor} `} />
+  //               </div>
+  //             </div>
+  //             <div>
+  //               <p className="text-sm font-medium text-gray-800">{item.title}</p>
+  //               <p className="text-xs text-gray-400">{item.time}</p>
+  //             </div>
+  //           </div>
+  //         </div>
+  //       ))}
+  //     </div>
+  //   </section>
+  // );
 }

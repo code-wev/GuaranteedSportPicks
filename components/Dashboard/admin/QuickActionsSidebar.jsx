@@ -13,12 +13,8 @@ export default function QuickActionsSidebar() {
           + Create Pick
         </button>
 
-        <button className="w-full rounded bg-[#2563EB] py-2.5 text-center text-sm font-semibold text-white hover:bg-blue-700">
+        <button className="w-full rounded bg-white text-[#DC2626] border border-[#DC2626] py-2.5 text-center text-sm font-semibold hover:bg-blue-700">
           Schedule Release
-        </button>
-
-        <button className="w-full rounded bg-[#2563EB] py-2.5 text-center text-sm font-semibold text-white hover:bg-blue-700">
-          Save Draft
         </button>
       </div>
 
@@ -29,7 +25,7 @@ export default function QuickActionsSidebar() {
           type="text"
           disabled
           placeholder="Fill in the form to see preview"
-          className="mt-2 w-full cursor-not-allowed rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-gray-500 outline-none"
+          className="mt-2 w-full cursor-not-allowed rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-gray-500 outline-none"
         />
       </div>
 
@@ -38,7 +34,7 @@ export default function QuickActionsSidebar() {
         <h3 className="mb-3 text-sm font-semibold text-gray-700">Schedule Options</h3>
 
         {/* Release Date */}
-        <label className="text-sm font-medium text-gray-700">Release Date</label>
+        <label className="text-sm font-medium text-gray-700">Release Date</label> 
         <div className="relative mb-4">
           <input
             type="text"

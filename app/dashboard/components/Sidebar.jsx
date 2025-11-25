@@ -16,6 +16,36 @@ const menu = [
     icon: <IoDocumentTextOutline />,
     url: "/dashboard/admin/manage-picks",
   },
+  {
+    title: "Users",
+    icon: <IoDocumentTextOutline />,
+    url: "/dashboard/admin/users",
+  },
+  {
+    title: "Orders",
+    icon: <IoDocumentTextOutline />,
+    url: "/dashboard/admin/orders",
+  },
+  {
+    title: "Blogs",
+    icon: <IoDocumentTextOutline />,
+    url: "/dashboard/admin/blogs",
+  },
+  {
+    title: "Testimonials",
+    icon: <IoDocumentTextOutline />,
+    url: "/dashboard/admin/testimonials",
+  },
+  {
+    title: "Affiliate",
+    icon: <IoDocumentTextOutline />,
+    url: "/dashboard/admin/affiliate",
+  },
+  {
+    title: "Newsletters",
+    icon: <IoDocumentTextOutline />,
+    url: "/dashboard/admin/newsletters",
+  },
   { title: "My Picks", icon: <FiShoppingBag />, url: "/dashboard/my-picks" },
   {
     title: "Purchase Picks",
