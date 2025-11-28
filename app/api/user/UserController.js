@@ -34,11 +34,14 @@ export const updateProfile = async (data) => {
 
   const email = data?.email;
 
+  console.log(data, "rakib tui heda")
+
   const updated = await User.updateOne(
     { email: email },
     {
       $set: {
-        fullName: data?.fullName,
+        firstName: data?.firstName,
+        lastName:data?.lastName,
         phoneNumber: data?.phoneNumber,
         img: data?.img,
         role: data?.role,

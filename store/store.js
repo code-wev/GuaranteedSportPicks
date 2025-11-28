@@ -1,15 +1,18 @@
+import { PaymentApi } from "@/feature/PaymentApi";
 import { UserApi } from "@/feature/UserApi";
 import { configureStore } from "@reduxjs/toolkit";
 
 export const store = configureStore({
     reducer:{
-        [UserApi.reducer]:UserApi.reducer
+        [UserApi.reducerPath]:UserApi.reducer,
+        [PaymentApi.reducerPath]: PaymentApi.reducer
 
     },
 
      middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat([
-        UserApi.middleware
+        UserApi.middleware,
+        PaymentApi.middleware
      
       
     ]),

@@ -1,6 +1,11 @@
 "use client";
 
-export default function PromoCode() {
+export default function PromoCode({ promoCode, onPromoCodeChange }) {
+  const handleApply = () => {
+    console.log("Applied promo code:", promoCode);
+    alert(`Promo code "${promoCode}" applied!`);
+  };
+
   return (
     <div className="bg-white rounded-xl p-5 shadow-sm mb-6">
       <h2 className="text-base font-medium mb-3">Promo Code (Optional)</h2>
@@ -9,6 +14,8 @@ export default function PromoCode() {
         <input
           type="text"
           placeholder="Enter promo code"
+          value={promoCode}
+          onChange={(e) => onPromoCodeChange(e.target.value)}
           className="
             w-full 
             h-[42px]
@@ -22,6 +29,7 @@ export default function PromoCode() {
         />
 
         <button
+          onClick={handleApply}
           className="
             bg-[#B91C1C] 
             text-white 
