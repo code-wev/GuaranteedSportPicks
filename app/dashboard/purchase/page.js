@@ -6,12 +6,15 @@ import SelectPackage from "@/components/Dashboard/Purchase/SelectPackage";
 import SelectSport from "@/components/Dashboard/Purchase/SelectSport";
 import PromoCode from "@/components/packages/PromoCode";
 import { useCreateSubscriptionMutation } from "@/feature/PaymentApi";
+import { useSession } from "next-auth/react";
 
 export default function Purchase() {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [selectedSport, setSelectedSport] = useState(null);
   const [paymentModel, setPaymentModel] = useState(null);
   const [promoCode, setPromoCode] = useState("");
+  const {data} = useSession();
+  console.log(data?.user?.id, "this is user data")
 
 
   const [createSubscription, {isLoading, isError, error}] = useCreateSubscriptionMutation();
@@ -23,7 +26,7 @@ export default function Purchase() {
   const handlePurchase = async() => {
     const purchaseData = {
       packageName: selectedPackage.name,
-      userId:"6925408a8fd14a9ef3d4f461",
+      userId:data?.user?.id,
       priceId:"price_1SYNV7P0aOrzI3fiwBc0carl",
       category: selectedSport.name,
       paymentModel: paymentModel,
