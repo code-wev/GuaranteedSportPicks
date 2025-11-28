@@ -7,23 +7,29 @@ import { Subscription } from "../SubscriptionModel";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const POST = async(req, res) =>{
+
+
+  console.log("HIT")
   await dbConnect();
 
   if (req.method !== "POST") {
     return res.status(405).json({ message: "Method not allowed" });
   }
 
-  const { userId, priceId, packageName, amount, currency, successUrl, cancelUrl } = req.body;
+
+
+  const { userId, priceId, packageName,type, amount, currency, successUrl, cancelUrl, category } =await req.json();
 
   try {
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
+
       line_items: [{ price: priceId, quantity: 1 }],
-      success_url: successUrl + "?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: cancelUrl,
-      metadata: { userId, packageName, type: "subscription"  },
+    success_url: "https://yourdomain.com/dashboard/purchase/success?session_id={CHECKOUT_SESSION_ID}",
+  cancel_url: "https://yourdomain.com/dashboard/purchase/cancel",
+      metadata: { userId, packageName, type: "subscription", category, type  },
     });
 
     // Save a placeholder subscription in DB (optional)
@@ -41,6 +47,7 @@ export const POST = async(req, res) =>{
       amount,
       currency,
       startDate,
+      type,
       endDate,
       status: "active",
       available: true,
@@ -57,6 +64,6 @@ export const POST = async(req, res) =>{
 
 export const GET = async()=>{
     return NextResponse.json({
-        message:"success"
+        message:"success - OP"
     })
 }

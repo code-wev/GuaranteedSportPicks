@@ -41,7 +41,7 @@ export async function POST(req) {
     // ===============================
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
-      const { userId, type, pickId, amount, packageName } = session.metadata || {};
+      const { userId, type, pickId, amount, packageName, category } = session.metadata || {};
 
       console.log("📦 Session Metadata:", { userId, type, pickId, packageName });
 
@@ -55,6 +55,7 @@ export async function POST(req) {
             amount,
             status: "paid",
             stripeSessionId: session.id,
+            category 
           });
           console.log("✅ Pick purchase recorded:", myPick._id);
 
