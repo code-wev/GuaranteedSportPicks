@@ -37,6 +37,7 @@ const myPickSchema = new Schema(
       enum: ["pending", "paid", "failed"],
       default: "pending",
     },
+      category :String,
 
     // User access
     available: {

@@ -4,8 +4,13 @@ import { RiExchangeDollarLine } from "react-icons/ri";
 import { PiShieldCheckBold } from "react-icons/pi";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 
-export default function PaymentModel() {
+export default function PaymentModel({ selectedModel, onSelectModel }) {
   const [activeTab, setActiveTab] = useState("prepaid");
+
+  const handleTabClick = (tabName, modelName) => {
+    setActiveTab(tabName);
+    onSelectModel(modelName);
+  };
 
   return (
     <div className="bg-white rounded-xl p-5 shadow-sm mb-8">
@@ -14,8 +19,8 @@ export default function PaymentModel() {
       <div className="grid md:grid-cols-2 gap-4">
         {/* Prepaid */}
         <div
-          onClick={() => setActiveTab("prepaid")}
-          className={`border rounded-xl space-y-2 p-4 py-8 cursor-pointer 
+          onClick={() => handleTabClick("prepaid", "Prepaid")}
+          className={`border rounded-xl p-4 py-8 cursor-pointer space-y-2 
             ${
               activeTab === "prepaid"
                 ? "bg-red-50 border-red-300"
@@ -38,7 +43,7 @@ export default function PaymentModel() {
 
         {/* Pay After You Win */}
         <div
-          onClick={() => setActiveTab("payafter")}
+          onClick={() => handleTabClick("payafter", "Pay After You Win")}
           className={`border rounded-xl p-4 py-8 cursor-pointer space-y-2 
             ${
               activeTab === "payafter"
