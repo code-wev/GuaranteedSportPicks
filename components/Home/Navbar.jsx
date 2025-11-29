@@ -9,44 +9,91 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathName = usePathname();
 
+  // Hide Navbar in dashboard routes
   if (pathName.includes("/dashboard")) {
     return null;
   }
+
+  const isActive = (path) => pathName === path;
+
   return (
     <nav className="w-full bg-[#FFEEEE]">
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-[80px]">
-        {/* Left - Logo */}
+        {/* Logo */}
         <div className="flex items-center space-x-1">
           <span className="text-2xl font-extrabold text-[#d93732]">Sport</span>
           <span className="text-2xl font-extrabold text-[#bfbfbf]">Picks</span>
         </div>
 
-        {/* Middle - Nav links (Desktop) */}
-        <ul className="hidden md:flex items-center space-x-6 text-[16px] font-[600] text-[#4B556C]">
+        {/* Desktop Links */}
+        <ul className="hidden lg:flex items-center space-x-6 text-[16px] font-[600] text-[#4B556C]">
           <li>
-            <Link href="/" className="text-[#d93732] font-semibold">
+            <Link
+              href="/"
+              className={isActive("/") ? "text-[#d93732] font-semibold" : ""}
+            >
               Home
             </Link>
           </li>
+
           <li>
-            <Link href="/about">About</Link>
+            <Link
+              href="/about"
+              className={
+                isActive("/about") ? "text-[#d93732] font-semibold" : ""
+              }
+            >
+              About
+            </Link>
           </li>
+
           <li>
-            <Link href="/freepicks">Free Picks</Link>
+            <Link
+              href="/freepicks"
+              className={
+                isActive("/freepicks") ? "text-[#d93732] font-semibold" : ""
+              }
+            >
+              Free Picks
+            </Link>
           </li>
+
           <li>
-            <Link href="/packages">Packages</Link>
+            <Link
+              href="/packages"
+              className={
+                isActive("/packages") ? "text-[#d93732] font-semibold" : ""
+              }
+            >
+              Packages
+            </Link>
           </li>
+
           <li>
-            <Link href="/blog">Blog</Link>
+            <Link
+              href="/blog"
+              className={
+                isActive("/blog") ? "text-[#d93732] font-semibold" : ""
+              }
+            >
+              Blog
+            </Link>
           </li>
+
           <li>
-            <Link href="/contact">Contact</Link>
+            <Link
+              href="/contact"
+              className={
+                isActive("/contact") ? "text-[#d93732] font-semibold" : ""
+              }
+            >
+              Contact
+            </Link>
           </li>
         </ul>
 
-        {/* Right - Login/Register + Button (Desktop) */}
-        <div className="hidden md:flex items-center space-x-4 text-[14px]">
+        {/* Desktop Buttons */}
+        <div className="hidden lg:flex items-center space-x-4 text-[14px]">
           <Link href="#" className="text-[#374151] font-medium">
             Login
           </Link>
@@ -57,7 +104,7 @@ export default function Navbar() {
 
           <Link
             href="#"
-            className="ml-4 bg-[#d93732] text-white px-5 py-3 rounded-full text-xs font-semibold hover:bg-[#c22f2b] transition"
+            className="ml-4 bg-[#d93732] text-white  px-3 py-2 lg:px-5 lg:py-3 rounded lg:rounded-full text-xs font-semibold hover:bg-[#c22f2b] transition"
           >
             Get Picks Now
           </Link>
@@ -65,7 +112,7 @@ export default function Navbar() {
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden flex items-center text-[#4B556C]"
+          className="lg:hidden flex items-center text-[#4B556C]"
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle Menu"
         >
@@ -75,39 +122,74 @@ export default function Navbar() {
 
       {/* Mobile Dropdown Menu */}
       {isOpen && (
-        <div className="md:hidden bg-[#FFEEEE] border-t border-[#6b5a59]">
+        <div className="lg:hidden bg-[#FFEEEE] border-t border-[#6b5a59]">
           <ul className="flex flex-col space-y-4 py-4 px-6 text-[16px] font-[600] text-[#4B556C]">
             <li>
               <Link
                 href="/"
-                className=" font-semibold"
+                className={isActive("/") ? "text-[#d93732] font-semibold" : ""}
                 onClick={() => setIsOpen(false)}
               >
                 Home
               </Link>
             </li>
+
             <li>
-              <Link href="#" onClick={() => setIsOpen(false)}>
+              <Link
+                href="/about"
+                className={
+                  isActive("/about") ? "text-[#d93732] font-semibold" : ""
+                }
+                onClick={() => setIsOpen(false)}
+              >
                 About
               </Link>
             </li>
+
             <li>
-              <Link href="#" onClick={() => setIsOpen(false)}>
+              <Link
+                href="/freepicks"
+                className={
+                  isActive("/freepicks") ? "text-[#d93732] font-semibold" : ""
+                }
+                onClick={() => setIsOpen(false)}
+              >
                 Free Picks
               </Link>
             </li>
+
             <li>
-              <Link href="#" onClick={() => setIsOpen(false)}>
+              <Link
+                href="/packages"
+                className={
+                  isActive("/packages") ? "text-[#d93732] font-semibold" : ""
+                }
+                onClick={() => setIsOpen(false)}
+              >
                 Packages
               </Link>
             </li>
+
             <li>
-              <Link href="#" onClick={() => setIsOpen(false)}>
+              <Link
+                href="/blog"
+                className={
+                  isActive("/blog") ? "text-[#d93732] font-semibold" : ""
+                }
+                onClick={() => setIsOpen(false)}
+              >
                 Blog
               </Link>
             </li>
+
             <li>
-              <Link href="#" onClick={() => setIsOpen(false)}>
+              <Link
+                href="/contact"
+                className={
+                  isActive("/contact") ? "text-[#d93732] font-semibold" : ""
+                }
+                onClick={() => setIsOpen(false)}
+              >
                 Contact
               </Link>
             </li>
@@ -124,7 +206,7 @@ export default function Navbar() {
 
             <Link
               href="#"
-              className="bg-[#d93732] text-white w-full text-center px-5 py-3 rounded-full text-xs font-semibold hover:bg-[#c22f2b] transition"
+              className="bg-[#d93732] text-white w-full text-center px-4 py-2 lg:px-5 lg:py-3 rounded-xl lg:rounded-full text-xs font-semibold hover:bg-[#c22f2b] transition"
               onClick={() => setIsOpen(false)}
             >
               Get Picks Now

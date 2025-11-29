@@ -61,7 +61,7 @@ export default function Package() {
   };
 
   return (
-    <section className="relative w-full bg-[url('/home/package/package-bg3.jpg')] bg-center bg-no-repeat py-16 text-center">
+    <section className=" bg-[#fff6f6] relative w-full bg-[url('/home/package/package-bg3.jpg')] bg-center bg-no-repeat py-16 text-center">
       <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2">
         <Image
           src="/home/package/chakti.png"

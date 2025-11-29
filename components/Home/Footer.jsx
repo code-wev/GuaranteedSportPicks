@@ -103,7 +103,7 @@ export default function Footer() {
         </div>
 
         {/* ===== Middle Links ===== */}
-        <div className="flex flex-wrap justify-center gap-x-6 gap-y-3 text-[12.5px] text-[#c9c9c9] mt-6 mb-6">
+        <div className=" flex flex-wrap justify-center gap-x-6 gap-y-3 text-[12.5px] text-[#c9c9c9] mt-6 mb-6">
           {[
             "Home",
             "Free Picks",
@@ -123,16 +123,18 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* ===== Disclaimer ===== */}
-        <p className="text-[#bfbfbf] text-[12px] leading-relaxed text-center mb-3 max-w-[850px] mx-auto">
-          Disclaimer: Sports betting involves risks. Must be 18+ to participate.
-          Please gamble responsibly. If you have a gambling problem, call
-          1-800-GAMBLER or visit ncpgambling.org
-        </p>
+        <div className="flex items-center justify-between  border-t border-[#ffffff1a] pt-6">
+          {/* ===== Disclaimer ===== */}
+          <p className="text-[#bfbfbf] text-[12px] leading-relaxed w-1/2">
+            Disclaimer: Sports betting involves risks. Must be 18+ to
+            participate. Please gamble responsibly. If you have a gambling
+            problem, call 1-800-GAMBLER or visit ncpgambling.org
+          </p>
 
-        {/* ===== Bottom Row ===== */}
-        <div className="flex flex-col md:flex-row justify-between items-center text-[12.5px] text-[#bfbfbf] pt-3 border-t border-[#ffffff10]">
-          <span>© 2025 SportPicks.com. All rights reserved.</span>
+          {/* ===== Bottom Row ===== */}
+          <div className="flex flex-col md:flex-row justify-between items-center text-[12.5px] text-[#bfbfbf] border-t border-[#ffffff10]">
+            <span>© 2025 SportPicks.com. All rights reserved.</span>
+          </div>
         </div>
       </div>
     </footer>

@@ -89,13 +89,15 @@ export default function Sidebar({ open, setOpen }) {
         </div>
 
         {/* Desktop Logo */}
-        <Image
-          src="/dashboard/SportPicks.png"
-          width={150}
-          height={40}
-          alt="logo"
-          className="mb-6 hidden lg:block"
-        />
+        <Link href="/">
+          <Image
+            src="/dashboard/SportPicks.png"
+            width={150}
+            height={40}
+            alt="logo"
+            className="mb-6 hidden lg:block"
+          />
+        </Link>
 
         <ul className="space-y-2 pt-4">
           {menu.map((item, index) => {
