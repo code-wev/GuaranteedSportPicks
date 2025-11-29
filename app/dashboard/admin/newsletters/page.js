@@ -65,7 +65,7 @@ export default function Newsletters() {
 
         <button
           onClick={() => setOpenModal(true)}
-          className="bg-red-500 hover:bg-red-600 transition text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2"
+          className="bg-red-500 hover:bg-red-600 transition text-white px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg font-medium flex items-center gap-2"
         >
           <span className="text-xl">+</span> Compose Newsletter
         </button>
