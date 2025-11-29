@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Home/Navbar";
 import Footer from "@/components/Home/Footer";
 import AllProvider from "@/provider/AllProvider";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,7 +27,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="light">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${poppins.className} antialiased`}
       >
@@ -37,6 +38,7 @@ export default function RootLayout({ children }) {
         {children}
         <Footer/>
        </AllProvider>
+        <Toaster />
       </body>
     </html>
   );

@@ -18,7 +18,6 @@ export default function Page() {
       <LiveOddsPicks />
       <GetFreeDailyPicks />
       <LatestBettingInsights />
-      <WhyChoose />
     </div>
   );
 }
