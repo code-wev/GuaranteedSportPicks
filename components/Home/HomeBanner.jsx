@@ -18,7 +18,7 @@ const HomeBanner = () => {
         <div className="flex flex-col md:flex-row items-center justify-between w-full">
           {/* LEFT SIDE */}
           <div className="text-white w-full md:w-[50%]">
-            <h1 className="text-[44px] md:text-[63.06px] font-extrabold leading-[1.2] mb-5">
+            <h1 className="text-[44px] lg:text-[63.06px] font-extrabold leading-[1.2] mb-5">
               Win Smarter with <br /> Expert Sports Picks
             </h1>
             <p className="text-[#E5E7EB] mb-10 text-[18px] ">

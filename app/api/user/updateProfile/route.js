@@ -2,12 +2,8 @@ import { NextResponse } from "next/server"
 import { updateProfile } from "../UserController";
 import { dbConnect } from "@/lib/dbConnect";
 
-
 export const PUT = async(req)=>{
-
     await dbConnect()
-
-
     try {
 
         const data = await req.json();

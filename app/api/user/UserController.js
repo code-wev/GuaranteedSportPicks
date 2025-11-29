@@ -57,3 +57,11 @@ export const updateProfile = async (data) => {
 
   return updated;
 };
+
+export const deleteUserById = async (id) => {
+  await dbConnect();
+  console.log("Deleting ID:", id);
+  const user = await User.findByIdAndDelete(id);
+  console.log("Deleted result:", user);
+  return user;
+};
