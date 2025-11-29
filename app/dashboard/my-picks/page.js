@@ -22,7 +22,7 @@ export default function MyPicksPage() {
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setTab("active")}
-              className={`px-4 py-2 text-sm rounded-lg border ${
+              className={`whitespace-nowrap px-4 py-2 text-sm rounded-lg border ${
                 tab === "active"
                   ? "bg-[#B91C1C] text-white border-red-600"
                   : "bg-gray-100 text-gray-700 border-gray-200"
@@ -33,7 +33,7 @@ export default function MyPicksPage() {
 
             <button
               onClick={() => setTab("completed")}
-              className={`px-4 py-2 text-sm rounded-lg border ${
+              className={`whitespace-nowrap px-4 py-2 text-sm rounded-lg border mr-2 ${
                 tab === "completed"
                   ? "bg-[#B91C1C] text-white border-red-600"
                   : "bg-gray-100 text-gray-700 border-gray-200"
