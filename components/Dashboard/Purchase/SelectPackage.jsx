@@ -38,7 +38,7 @@ export default function SelectPackage({ selectedPackage, onSelectPackage }) {
           <div 
             key={pkg.id}
             className={`
-              border rounded-xl p-5 h-[326px] hover:shadow-md cursor-pointer
+              border rounded-xl p-5 lg:h-[326px] hover:shadow-md cursor-pointer
               ${selectedPackage?.id === pkg.id 
                 ? "bg-red-50 border-[#B91C1C]" 
                 : "border-gray-100"

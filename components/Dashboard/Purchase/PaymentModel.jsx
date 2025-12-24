@@ -43,7 +43,7 @@ export default function PaymentModel({ selectedModel, onSelectModel }) {
 
         {/* Pay After You Win */}
         <div
-          onClick={() => handleTabClick("payafter", "Pay After You Win")}
+          onClick={() => handleTabClick("payafter", "Pay After Win")}
           className={`border rounded-xl p-4 py-8 cursor-pointer space-y-2 
             ${
               activeTab === "payafter"
@@ -52,11 +52,11 @@ export default function PaymentModel({ selectedModel, onSelectModel }) {
             }`}
         >
           <p
-            className={`font-semibold flex items-center gap-2 text-2xl
+            className={`font-semibold flex items-center gap-2 text-lg md:text-2xl
             ${activeTab === "payafter" ? "text-[#B91C1C]" : "text-black"}`}
           >
-            <PiShieldCheckBold /> Pay After You Win
-            <span className="text-lg bg-[#26AB68] text-white px-4 py-1.5 rounded-full">
+            <PiShieldCheckBold className="text-2xl"/> Pay After Win
+            <span className="text-xs md:text-lg bg-[#26AB68] text-white px-2 md:px-4 py-1.5 rounded-full">
               Popular
             </span>
           </p>

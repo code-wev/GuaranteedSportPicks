@@ -81,7 +81,14 @@ export default function Sidebar({ open, setOpen }) {
       >
         {/* Close button for mobile */}
         <div className="flex justify-between items-center mb-6 lg:hidden">
-          <Image src="/logo.png" width={120} height={40} alt="logo" />
+          <Link href="/">
+            <Image
+              src="/dashboard/SportPicks.png"
+              width={120}
+              height={40}
+              alt="logo"
+            />
+          </Link>
           <FiX
             className="text-2xl cursor-pointer"
             onClick={() => setOpen(false)}

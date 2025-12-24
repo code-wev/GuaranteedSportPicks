@@ -63,7 +63,7 @@ export default function AffiliatedBannerManagement() {
         {/* ADD BANNER BTN */}
         <button
           onClick={() => setOpenModal(true)}
-          className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm shadow-sm"
+          className="flex items-center whitespace-nowrap gap-2 bg-red-500 hover:bg-red-600 text-white px-2 py-1 md:px-4 md:py-2 rounded-lg text-sm shadow-sm"
         >
           <FiPlus className="text-lg" /> Add Banner
         </button>
