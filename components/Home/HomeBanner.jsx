@@ -1,137 +1,121 @@
-import Image from "next/image";
-import React from "react";
+"use client";
 
-const HomeBanner = () => {
+import Image from "next/image";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay } from "swiper/modules";
+import "swiper/css";
+
+const slides = [
+  {
+    title: "FREE\nNBA Picks",
+    description:
+      "Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day. Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day.",
+    image: "/Home/pic1.png",
+  },
+  {
+    title: "10% CASH BACK\nfor purchases",
+    description:
+      "Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day. Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day.",
+    image: "/Home/pic4.png",
+  },
+  {
+    title: "FREE\nSports Picks",
+    description:
+      "Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day. Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day.",
+    image: "/Home/pic3.png",
+  },
+  {
+    title: "$25 BONUS\non signup",
+    description:
+      "Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day. Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day.",
+    image: "/Home/pic2.png",
+  },
+];
+
+export default function HomeBanner() {
   return (
-    <section className="relative w-full min-h-[80vh] overflow-hidden">
-      {/* Background Image */}
+    <section className="relative w-full min-h-[80vh] overflow-hidden [direction:ltr]">
+      {/* BACKGROUND */}
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: "url('/home/homeBannerBg.png')",
-        }}
-      ></div>
+        style={{ backgroundImage: "url('/home/homeBannerBg.png')" }}
+      />
+      <div className="absolute inset-0 bg-black/10" />
 
-      {/* Content */}
-      <div className="relative z-10 max-w-[1280px] mx-auto flex flex-col md:flex-row items-center justify-between px-5 py-24 min-h-[80vh]">
-        {/* ✅ Added flex-grow alignment */}
-        <div className="flex flex-col md:flex-row items-center justify-between w-full">
-          {/* LEFT SIDE */}
-          <div className="text-white w-full md:w-[50%]">
-            <h1 className="text-[44px] lg:text-[63.06px] font-extrabold leading-[1.2] mb-5">
-              Win Smarter with <br /> Expert Sports Picks
-            </h1>
-            <p className="text-[#E5E7EB] mb-10 text-[18px] ">
-              Trusted picks. Verified records. Guaranteed results.
-            </p>
+      <div className="relative z-10 max-w-[1280px] mx-auto px-6 py-24 min-h-[80vh]">
+        {/* ================= SLIDER ================= */}
+        <Swiper
+          modules={[Autoplay]}
+          autoplay={{ delay: 5000, disableOnInteraction: false }}
+          speed={900}
+          loop
+          slidesPerView={1}
+          className="w-full mb-12"
+        >
+          {slides.map((slide, index) => (
+            <SwiperSlide key={index}>
+              <div className="flex flex-col md:flex-row items-center justify-between gap-16">
+                {/* LEFT CONTENT */}
+                <div className="w-full md:w-[50%] text-white">
+                  <h1 className="text-[42px] lg:text-[64px] font-extrabold leading-[1.15] mb-6 whitespace-pre-line">
+                    {slide.title}
+                  </h1>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-wrap items-center gap-4 mb-12">
-              {/* Primary Button */}
-              <button className="flex items-center gap-2 bg-[#E53935] hover:bg-[#d53240] text-white px-7 py-3 rounded-full font-semibold text-sm transition-all shadow-md">
-                <span className="w-3 h-3 bg-[#FFCDD2] rounded-full"></span>
-                Get Today’s Pick
-              </button>
-
-              {/* Secondary Button */}
-              <button className="flex items-center gap-2 border border-[#E53935] text-white px-7 py-3 rounded-full font-semibold text-sm hover:bg-[#E63946]/10 transition-all">
-                <span className="w-3 h-3 bg-[#FFCDD2] rounded-full"></span>
-                See Packages
-              </button>
-            </div>
-
-            {/* Bottom Icons */}
-            <div className="flex flex-wrap items-center gap-10 text-white text-sm font-semibold mt-2">
-              {/* Secure Payments */}
-              <div className="flex items-center gap-2">
-                <div className="relative w-5 h-5">
-                  <Image
-                    src="/home/icon1.png"
-                    alt="Secure Payments"
-                    fill
-                    className="object-contain"
-                    sizes="20px"
-                  />
+                  <p className="text-[#E5E7EB] text-[18px] leading-relaxed max-w-[560px]">
+                    {slide.description}
+                  </p>
                 </div>
-                <span>Secure Payments</span>
-              </div>
 
-              {/* Verified Records */}
-              <div className="flex items-center gap-2">
-                <div className="relative w-5 h-5">
-                  <Image
-                    src="/home/icon2.png"
-                    alt="Verified Records"
-                    fill
-                    className="object-contain"
-                    sizes="20px"
-                  />
+                {/* RIGHT IMAGE */}
+                <div className="w-full md:w-[50%] flex justify-end">
+                  <div className="relative w-full max-w-[620px] h-[360px] md:h-[440px]">
+                    <Image
+                      src={slide.image}
+                      alt="Banner visual"
+                      fill
+                      priority
+                      className="object-contain"
+                    />
+                  </div>
                 </div>
-                <span>Verified Records</span>
               </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
 
-              {/* Affiliate Partners */}
-              <div className="flex items-center gap-2">
-                <div className="relative w-5 h-5">
-                  <Image
-                    src="/home/icon3.png"
-                    alt="Affiliate Partners"
-                    fill
-                    className="object-contain"
-                    sizes="20px"
-                  />
-                </div>
-                <span>Affiliate Partners</span>
-              </div>
-            </div>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+          {/* ================= CTA BUTTONS (STATIC) ================= */}
+        <div className="flex flex-wrap items-center gap-4 mb-10">
+          <button className="flex items-center gap-2 bg-[#E53935] text-white hover:bg-[#d53240] px-8 py-3 rounded-full font-semibold text-sm transition">
+            <span className="w-2.5 h-2.5 bg-[#FFCDD2] rounded-full" />
+            Get Today’s Pick
+          </button>
+
+          <button className="flex items-center gap-2 border border-[#E53935] px-8 py-3 rounded-full font-semibold text-sm text-[#FFCDD2] hover:bg-white/10 transition">
+            <span className="w-2.5 h-2.5 bg-[#FFCDD2] rounded-full" />
+            See Packages
+          </button>
+        </div>
+
+        {/* ================= TRUST ROW (STATIC) ================= */}
+        <div className="flex flex-wrap items-center gap-10 text-white text-sm font-semibold">
+          <div className="flex items-center gap-2">
+            <Image src="/home/icon1.png" alt="" width={18} height={18} />
+            Secure Payments
           </div>
 
-          {/* RIGHT SIDE */}
-          <div className="w-full md:w-[45%] flex justify-end mt-12 md:mt-0">
-            <div className="bg-[#591616] backdrop-blur-md border border-[#cf8d8c] rounded-2xl p-6 md:p-8 w-full max-w-[621px] ">
-              <h3 className="text-white text-[28px] font-semibold mb-5">
-                Live Odds Board
-              </h3>
-              <ul className="space-y-4">
-                {/* Team 1 */}
-                <li className="flex items-center justify-between bg-[#FFFFFF14]/80 rounded-xl px-5 py-5">
-                  <div className="flex items-center gap-3">
-                    <span className="flex items-center justify-center w-7 h-7 bg-[#002244] text-white text-[12px] font-bold rounded-full">
-                      DAL
-                    </span>
-                    <span className="text-white font-medium">Cowboys</span>
-                  </div>
-                  <span className="text-[#28C76F] font-bold">-145</span>
-                </li>
+          <div className="flex items-center gap-2">
+            <Image src="/home/icon2.png" alt="" width={18} height={18} />
+            Verified Records
+          </div>
 
-                {/* Team 2 */}
-                <li className="flex items-center justify-between bg-[#FFFFFF14]/80 rounded-xl px-5 py-5">
-                  <div className="flex items-center gap-3">
-                    <span className="flex items-center justify-center w-7 h-7 bg-[#A71930A6] text-white text-[12px] font-bold rounded-full">
-                      NYG
-                    </span>
-                    <span className="text-white font-medium">Giants</span>
-                  </div>
-                  <span className="text-[#28C76F] font-bold">+135</span>
-                </li>
-
-                {/* Team 3 */}
-                <li className="flex items-center justify-between bg-[#FFFFFF14]/80 rounded-xl px-5 py-5">
-                  <div className="flex items-center gap-3">
-                    <span className="flex items-center justify-center w-7 h-7 bg-[#4F2683] text-white text-[12px] font-bold rounded-full">
-                      KC
-                    </span>
-                    <span className="text-white font-medium">Chiefs</span>
-                  </div>
-                  <span className="text-[#28C76F] font-bold">-210</span>
-                </li>
-              </ul>
-            </div>
+          <div className="flex items-center gap-2">
+            <Image src="/home/icon3.png" alt="" width={18} height={18} />
+            Affiliate Partners
           </div>
         </div>
       </div>
+      </div>
     </section>
   );
-};
-
-export default HomeBanner;
+}
