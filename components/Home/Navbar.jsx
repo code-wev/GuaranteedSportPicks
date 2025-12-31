@@ -43,7 +43,7 @@ export default function Navbar() {
                 isActive("/about") ? "text-[#d93732] font-semibold" : ""
               }
             >
-              About
+              How It Works
             </Link>
           </li>
 
@@ -76,7 +76,7 @@ export default function Navbar() {
                 isActive("/blog") ? "text-[#d93732] font-semibold" : ""
               }
             >
-              Blog
+              Betting News
             </Link>
           </li>
 
