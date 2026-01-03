@@ -20,11 +20,13 @@ export default function Page() {
       <GetSportsPicks />
       <StatsOverview />
       <ExpertPicksHero />
-      <WhyChoose />
       <Package />
-      <Members />
-      <LiveOddsPicks />
       <GetFreeDailyPicks />
+      <WhyChoose />
+
+      <Members />
+      {/* <LiveOddsPicks /> */}
+
       <LatestBettingInsights />
     </div>
   );
