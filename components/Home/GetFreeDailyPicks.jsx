@@ -1,72 +1,78 @@
 "use client";
 
+import Image from "next/image";
 import { FaEnvelope, FaShieldAlt, FaTrophy } from "react-icons/fa";
 
 export default function GetFreeDailyPicks() {
   return (
-    <section className="w-full bg-white py-20">
-      <div className="max-w-[980px] mx-auto px-4 text-center">
+    <section
+      className="relative w-full py-24 text-white bg-cover bg-center"
+      style={{
+        backgroundImage: "url('/home/red-bg.png')",
+      }}
+    >
+    
+
+      <div className="relative z-10 max-w-[1100px] mx-auto px-4 text-center">
         {/* Heading */}
-        <h2 className="text-[28px] md:text-[40px] font-bold text-[#E53935] mb-3">
+        <h2 className="text-[36px] font-extrabold leading-tight">
           Get Free Daily Picks
         </h2>
-        <p className="text-[#555] text-[15px] leading-relaxed mb-8">
-          Join our newsletter and receive 3 expert picks delivered to your inbox every morning.<br />
-          No spam, just winning picks.
+
+        <p className="mt-3 text-[14px] text-white/90 max-w-[620px] mx-auto">
+          Join our newsletter and receive 3 expert picks delivered to your inbox
+          every morning. No spam, just winning picks.
         </p>
 
-        {/* Email Input */}
-        <form className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-14">
+        {/* Input */}
+        <form className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
           <input
             type="email"
             placeholder="Enter your email address"
-            className="w-full sm:w-[360px] h-[46px] px-5 rounded-full border border-[#E5E5E5] text-[14px] placeholder-[#999] focus:outline-none focus:ring-2 focus:ring-[#E63946]/40 transition"
+            className="h-[44px] w-full sm:w-[340px] rounded-full px-5 text-[14px] bg-white text-black placeholder:text-gray-400 focus:outline-none"
           />
           <button
             type="submit"
-            className="h-[46px] px-6 rounded-full bg-black text-white font-semibold text-[14px] hover:bg-[#222] transition"
+            className="h-[44px] px-6 rounded-full bg-black text-white text-[14px] font-semibold hover:bg-[#111] transition"
           >
             Get Free Picks
           </button>
         </form>
 
-        {/* Info Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-8">
-          {/* Card 1 */}
-          <div className="rounded-[20px] bg-[#FFFBFB] border border-[#FFC9C9] p-6 flex flex-col items-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.04)]">
-            <div className="w-12 h-12 flex items-center justify-center bg-[#E63946]/10 rounded-full mb-3">
-              <FaEnvelope className="text-[#E63946] text-[18px]" />
+        {/* privacy text */}
+        <p className="mt-3 text-[11px] text-white/70">
+          For forever. Unsubscribe anytime. We respect your privacy.
+        </p>
+
+        {/* cards */}
+        <div className="mt-14 grid grid-cols-1 sm:grid-cols-3 gap-8">
+          {/* card */}
+          <div className="bg-white text-black rounded-2xl px-6 py-8 shadow-xl">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#ffecec]">
+              <FaEnvelope className="text-[#e53935]" />
             </div>
-            <h4 className="text-[16px] font-semibold text-[#222] mb-1">
-              Daily Delivery
-            </h4>
-            <p className="text-[14px] text-[#666]">
+            <h4 className="font-semibold text-[15px]">Daily Delivery</h4>
+            <p className="mt-1 text-[13px] text-gray-600">
               Fresh picks every morning at 7 AM EST
             </p>
           </div>
 
-          {/* Card 2 */}
-          <div className="rounded-[20px] bg-[#FFFBFB] border border-[#FFC9C9] p-6 flex flex-col items-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.04)]">
-            <div className="w-12 h-12 flex items-center justify-center bg-[#E63946]/10 rounded-full mb-3">
-              <FaShieldAlt className="text-[#E63946] text-[18px]" />
+          <div className="bg-white text-black rounded-2xl px-6 py-8 shadow-xl">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#ffecec]">
+              <FaShieldAlt className="text-[#e53935]" />
             </div>
-            <h4 className="text-[16px] font-semibold text-[#222] mb-1">
-              No Spam
-            </h4>
-            <p className="text-[14px] text-[#666]">
+            <h4 className="font-semibold text-[15px]">No Spam</h4>
+            <p className="mt-1 text-[13px] text-gray-600">
               Only valuable picks, never promotional emails
             </p>
           </div>
 
-          {/* Card 3 */}
-          <div className="rounded-[20px] bg-[#FFFBFB] border border-[#FFC9C9] p-6 flex flex-col items-center text-center shadow-[0_4px_14px_rgba(0,0,0,0.04)]">
-            <div className="w-12 h-12 flex items-center justify-center bg-[#E63946]/10 rounded-full mb-3">
-              <FaTrophy className="text-[#E63946] text-[18px]" />
+          <div className="bg-white text-black rounded-2xl px-6 py-8 shadow-xl">
+            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#ffecec]">
+              <FaTrophy className="text-[#e53935]" />
             </div>
-            <h4 className="text-[16px] font-semibold text-[#222] mb-1">
-              Proven Results
-            </h4>
-            <p className="text-[14px] text-[#666]">
+            <h4 className="font-semibold text-[15px]">Proven Results</h4>
+            <p className="mt-1 text-[13px] text-gray-600">
               Track record of 80%+ accuracy
             </p>
           </div>
