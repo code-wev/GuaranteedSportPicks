@@ -33,6 +33,7 @@ const slides = [
 ];
 
 export default function HomeBanner() {
+  //Hello Buff
   return (
     <section className="relative w-full min-h-[80vh] overflow-hidden [direction:ltr]">
       {/* BACKGROUND */}
