@@ -10,25 +10,25 @@ const slides = [
     title: "FREE\nNBA Picks",
     description:
       "Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day. Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day.",
-    image: "/Home/pic1.png",
+    image: "/home/pic1.png",
   },
   {
     title: "10% CASH BACK\nfor purchases",
     description:
       "Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day. Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day.",
-    image: "/Home/pic4.png",
+    image: "/home/pic4.png",
   },
   {
     title: "FREE\nSports Picks",
     description:
       "Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day. Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day.",
-    image: "/Home/pic3.png",
+    image: "/home/pic3.png",
   },
   {
     title: "$25 BONUS\non signup",
     description:
       "Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day. Unlike most other handicapping services, we offer our clients an opportunity to view which games we have in our card for the day.",
-    image: "/Home/pic2.png",
+    image: "/home/pic2.png",
   },
 ];
 
