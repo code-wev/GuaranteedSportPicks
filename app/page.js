@@ -25,6 +25,7 @@ export default function Page() {
       <WhyChoose />
 
       <Members />
+      
       {/* <LiveOddsPicks /> */}
 
       <LatestBettingInsights />

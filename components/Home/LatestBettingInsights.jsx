@@ -4,10 +4,9 @@ import Image from "next/image";
 
 export default function LatestBettingInsights() {
   return (
-    <section
-      className="relative w-full bg-white bg-cover bg-center bg-no-repeat py-16 md:py-20 overflow-hidden"
-      style={{ backgroundImage: "url('/home/LatestBetting/BgImg.png')" }}
-    >
+    <section className="relative w-full bg-white bg-cover bg-center bg-no-repeat py-16 md:py-20 overflow-hidden"
+      style={{ backgroundImage: "url('/home/LatestBetting/BgImg.png')" }}>
+   
       {/* soft decorative blobs */}
       <div className="pointer-events-none absolute -top-24 -right-24 w-[420px] h-[420px] rounded-full bg-[#fce9e9] blur-3xl opacity-70" />
       <div className="pointer-events-none absolute top-[38%] -left-24 w-[360px] h-[360px] rounded-full bg-[#f7eeee] blur-3xl opacity-80" />
@@ -19,37 +18,45 @@ export default function LatestBettingInsights() {
             Latest Betting Insights
           </h2>
           <p className="mt-2 text-[13px] md:text-[14px] text-[#6f6f6f]">
-            Stay ahead of the game with our expert analysis, strategies, and
-            market insights
+            Stay ahead of the game with our expert analysis, strategies, and market insights
           </p>
         </div>
 
         {/* Cards grid with staggered offsets */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-7">
-          <ArticleCard
-            img="/home/LatestBetting/img1.jpg"
-            title="NBA MVP Race Heats Up: Analyzing the Top Contenders at Mid-Season"
-            excerpt="With the NBA season hitting its stride, we examine the leading MVP candidates and their statistical dominance. From Nikola Jokic to Jayson Tatum, who has the edge?"
-            date="March 15, 2024"
-            read="8 min read"
-          />
+          {/* Card 1 - top aligned */}
+          <div className="">
+            <ArticleCard
+              img="/home/LatestBetting/img1.jpg"
+              title="NBA Playoffs Betting Guide: Expert Strategies for Maximum Profits"
+              excerpt="Discover the insider secrets our analysts use to consistently profit during the most exciting time of the basketball season."
+              date="March 15, 2024"
+              read="8 min read"
+            />
+          </div>
 
-          <ArticleCard
-            img="/home/LatestBetting/img2.jpg"
-            title="NBA Playoffs Betting Guide: Expert Strategies for Maximum Profits"
-            excerpt="With the NBA season hitting its stride, we examine the leading MVP candidates and their statistical dominance. From Nikola Jokic to Jayson Tatum, who has the edge?"
-            date="March 15, 2024"
-            read="8 min read"
-            gradient="from-[#37d1ff] via-[#2fc6ff] to-[#0ea5e9]"
-          />
+          {/* Card 2 - slightly lower */}
+          <div className="">
+            <ArticleCard
+              img="/home/LatestBetting/img2.jpg"
+              title="NBA Playoffs Betting Guide: Expert Strategies for Maximum Profits"
+              excerpt="Discover the insider secrets our analysts use to consistently profit during the most exciting time of the basketball season."
+              date="March 15, 2024"
+              read="8 min read"
+              gradient="from-[#37d1ff] via-[#2fc6ff] to-[#0ea5e9]"
+            />
+          </div>
 
-          <ArticleCard
-            img="/home/LatestBetting/img3.jpg"
-            title="NBA Playoffs Betting Guide: Expert Strategies for Maximum Profits"
-            excerpt="Discover the insider secrets our analysts use to consistently profit during the most exciting time of the basketball season."
-            date="March 15, 2024"
-            read="8 min read"
-          />
+          {/* Card 3 - more lower */}
+          <div className="">
+            <ArticleCard
+              img="/home/LatestBetting/img3.jpg"
+              title="NBA Playoffs Betting Guide: Expert Strategies for Maximum Profits"
+              excerpt="Discover the insider secrets our analysts use to consistently profit during the most exciting time of the basketball season."
+              date="March 15, 2024"
+              read="8 min read"
+            />
+          </div>
         </div>
 
         {/* CTA */}
@@ -105,29 +112,22 @@ function ArticleCard({
           <span>{read}</span>
         </div>
 
-        {/* Figma-style Read More Button */}
-        <a
-          href="#"
+        <button
           className="
-            mt-4
-            inline-flex
-            items-center
-            justify-center
+            mt-4 px-5
             h-[36px]
-            px-5
             rounded-[8px]
             bg-[#B91C1C]
             text-white
             text-[13px]
             font-semibold
-            transition
             hover:bg-[#cf2f3b]
+            transition
           "
         >
           Read more
-        </a>
+        </button>
       </div>
     </article>
   );
 }
-
