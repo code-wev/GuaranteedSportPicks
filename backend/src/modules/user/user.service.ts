@@ -2,13 +2,8 @@
 import mongoose from 'mongoose';
 
 import { IdOrIdsInput, SearchQueryInput } from '../../handlers/common-zod-validator';
-import {
-  CreateUserInput,
-  CreateManyUserInput,
-  UpdateUserInput,
-  UpdateManyUserInput,
-} from './user.validation';
-import User, { IUser } from 'src/model/user/user.schema';
+import User, { IUser } from '../../model/user/user.schema';
+import { CreateUserInput, UpdateManyUserInput, UpdateUserInput } from './user.validation';
 
 /**
  * Service function to create a new user.

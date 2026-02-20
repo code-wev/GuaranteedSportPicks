@@ -3,6 +3,11 @@ import { authServices } from './auth.service';
 import { SearchQueryInput } from '../../handlers/common-zod-validator';
 import ServerResponse from '../../helpers/responses/custom-response';
 import catchAsync from '../../utils/catch-async/catch-async';
+import {
+  ForgotPasswordInput,
+  ResendVerificationEmailInput,
+  VerifyEmailInput,
+} from './auth.validation';
 
 /**
  * Controller function to handle the creation of a single auth.
@@ -12,28 +17,12 @@ import catchAsync from '../../utils/catch-async/catch-async';
  * @returns {Promise<Partial<IAuth>>} - The created auth.
  * @throws {Error} - Throws an error if the auth creation fails.
  */
-export const createAuth = catchAsync(async (req: Request, res: Response) => {
+export const registerUser = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to create a new auth and get the result
-  const result = await authServices.createAuth(req.body);
+  const result = await authServices.registerUser(req.body);
   if (!result) throw new Error('Failed to create auth');
   // Send a success response with the created auth data
   ServerResponse(res, true, 201, 'Auth created successfully', result);
-});
-
-/**
- * Controller function to handle the creation of multiple auths.
- *
- * @param {Request} req - The request object containing an array of auth data in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<IAuth>[]>} - The created auths.
- * @throws {Error} - Throws an error if the auths creation fails.
- */
-export const createManyAuth = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to create multiple auths and get the result
-  const result = await authServices.createManyAuth(req.body);
-  if (!result) throw new Error('Failed to create multiple auths');
-  // Send a success response with the created auths data
-  ServerResponse(res, true, 201, 'Auths created successfully', result);
 });
 
 /**
@@ -51,22 +40,6 @@ export const updateAuth = catchAsync(async (req: Request, res: Response) => {
   if (!result) throw new Error('Failed to update auth');
   // Send a success response with the updated auth data
   ServerResponse(res, true, 200, 'Auth updated successfully', result);
-});
-
-/**
- * Controller function to handle the update operation for multiple auths.
- *
- * @param {Request} req - The request object containing an array of auth data in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<IAuth>[]>} - The updated auths.
- * @throws {Error} - Throws an error if the auths update fails.
- */
-export const updateManyAuth = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to update multiple auths and get the result
-  const result = await authServices.updateManyAuth(req.body);
-  if (!result.length) throw new Error('Failed to update multiple auths');
-  // Send a success response with the updated auths data
-  ServerResponse(res, true, 200, 'Auths updated successfully', result);
 });
 
 /**
@@ -130,7 +103,7 @@ export const getAuthById = catchAsync(async (req: Request, res: Response) => {
  * @throws {Error} - Throws an error if the auths retrieval fails.
  */
 export const getManyAuth = catchAsync(async (req: Request, res: Response) => {
-  // Type assertion for query parameters 
+  // Type assertion for query parameters
   const query = req.query as SearchQueryInput;
   // Call the service method to get multiple auths based on query parameters and get the result
   const { auths, totalData, totalPages } = await authServices.getManyAuth(query);
@@ -138,3 +111,82 @@ export const getManyAuth = catchAsync(async (req: Request, res: Response) => {
   // Send a success response with the retrieved auths data
   ServerResponse(res, true, 200, 'Auths retrieved successfully', { auths, totalData, totalPages });
 });
+
+/**
+ * Controller function to handle the email verification.
+ *
+ * @param {Request} req - The request object containing verification data in the body.
+ * @param {Response} res - The response object used to send the response.
+ * @returns {Promise<void>} - A promise that resolves when the email is verified.
+ * @throws {Error} - Throws an error if the email verification fails.
+ */
+export const verifyEmail = catchAsync(async (req: Request, res: Response) => {
+  // Call the service method to verify email
+  await authServices.verifyEmail(req.body as VerifyEmailInput);
+  // Send a success response indicating email verification
+  ServerResponse(res, true, 200, 'Email verified successfully');
+});
+
+/** Controller function to handle resending the verification email.
+ *
+ * @param {Request} req - The request object containing email data in the body.
+ * @param {Response} res - The response object used to send the response.
+ * @returns {Promise<void>} - A promise that resolves when the verification email is resent.
+ * @throws {Error} - Throws an error if the resend verification email process fails.
+ */
+export const resendVerificationEmail = catchAsync(async (req: Request, res: Response) => {
+  // Call the service method to resend verification email
+  await authServices.resendVerificationEmail(req.body as ResendVerificationEmailInput);
+  // Send a success response indicating email verification
+  ServerResponse(res, true, 200, 'Verification email resent successfully');
+});
+
+/**
+ * Controller function to handle the forget password.
+ *
+ * @param {Request} req - The request object containing forget password data in the body.
+ * @param {Response} res - The response object used to send the response.
+ * @returns {Promise<void>} - A promise that resolves when the forget password process is initiated.
+ * @throws {Error} - Throws an error if the forget password process fails.
+ */
+export const forgetPassword = catchAsync(async (req: Request, res: Response) => {
+  // Call the service method to initiate forget password process
+  await authServices.forgetPassword(req.body as ForgotPasswordInput);
+  // Send a success response indicating forget password initiation
+  ServerResponse(res, true, 200, 'Password reset link sent successfully');
+});
+
+/**
+ * Controller function to handle the reset password.
+ *
+ * @param {Request} req - The request object containing reset password data in the body.
+ * @param {Response} res - The response object used to send the response.
+ * @returns {Promise<void>} - A promise that resolves when the password is reset.
+ * @throws {Error} - Throws an error if the password reset process fails.
+ */
+export const resetPassword = catchAsync(async (req: Request, res: Response) => {
+  // Call the service method to reset the password
+  await authServices.resetPassword(req.body);
+  // Send a success response indicating password reset
+  ServerResponse(res, true, 200, 'Password reset successfully');
+});
+
+/**
+ * Controller function to handle the change password.
+ *
+ * @param {Request} req - The request object containing change password data in the body.
+ * @param {Response} res - The response object used to send the response.
+ * @returns {Promise<void>} - A promise that resolves when the password is changed.
+ * @throws {Error} - Throws an error if the password change process fails.
+ */
+
+// todo: Implement change password controller and service function
+// ! after authanticaiotn done then
+// export const changePassword = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+//   // Call the service method to change the password
+//   const userId = req.user!._id;
+//   await authServices.changePassword({ userId, ...req.body } as IChangePassword);
+//   // Send a success response indicating password change
+//   ServerResponse(res, true, 200, 'Password changed successfully');
+// });
+

@@ -21,6 +21,8 @@ interface Config {
   REQUEST_LIMIT_NUMBER: number;
   WEB_CACHE: boolean;
   EXPRESS_FILE_UPLOAD_CONFIG: object;
+  EMAIL_VERIFICATION_REDIRECT_URI: string;
+  PASSWORD_RESET_REDIRECT_URI: string;
 }
 
 const config: Config = {
@@ -48,6 +50,8 @@ const config: Config = {
       fileSize: parseInt(process.env.MAX_FILE_SIZE as string, 10),
     },
   },
+  EMAIL_VERIFICATION_REDIRECT_URI: process.env.EMAIL_VERIFICATION_REDIRECT_URI as string,
+  PASSWORD_RESET_REDIRECT_URI: process.env.PASSWORD_RESET_REDIRECT_URI as string,
 };
 
 export default config;
