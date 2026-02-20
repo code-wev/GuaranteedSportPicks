@@ -13,6 +13,6 @@ const EncodeToken = async (_id: string, email: string, role: UserRole): Promise<
   const KEY: string = config.JWT_SECRET;
   const EXPIRE = { expiresIn: config.JWT_EXPIRATION_TIME };
   const PAYLOAD = { _id, email, role };
-  return jwt.sign(PAYLOAD, KEY, EXPIRE as jwt.SignOptions);
+  return jwt.sign(PAYLOAD,role, KEY, EXPIRE as jwt.SignOptions);
 };
 export default EncodeToken;

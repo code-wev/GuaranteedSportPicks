@@ -14,6 +14,7 @@ import {
 
 //Import validation from corresponding module
 
+import isAuthorized from '../.../../../../src/middlewares/is-authorized';
 import { validateId } from '../../handlers/common-zod-validator';
 import {
   validateCreateUser,
@@ -55,7 +56,7 @@ router.post('/login', validateLogin, login);
  * @param {function} validation - ['validateId', 'validateUpdateUser']
  * @param {function} controller - ['updateAuth']
  */
-router.put('/update-auth/:id', validateId, validateUpdateUser, updateAuth);
+router.put('/update-auth/:id', validateId, isAuthorized, validateUpdateUser, updateAuth);
 
 /**
  * @route PATCH /api/v1/auth/verify-email

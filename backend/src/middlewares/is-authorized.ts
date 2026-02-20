@@ -36,6 +36,7 @@ const isAuthorized = async (
 
     // Decode the token
     const decoded = await DecodeToken(token);
+    console.log(decoded, 'token decoded');
 
     // If token decoding fails, respond with unauthorized
     if (!decoded) {
@@ -47,6 +48,8 @@ const isAuthorized = async (
 
     // Attach user information to the request object
     req.user = { email, _id };
+
+    console.log(email, _id, 'yeaho kahmaka');
 
     // Proceed to the next middleware or route handler
     next();

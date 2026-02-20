@@ -63,6 +63,12 @@ const UserSchema: Schema<IUser> = new Schema(
       required: true,
       default: false,
     } /* Email verification status */,
+
+    role: {
+      type: String,
+      enum: Object.values(UserRole),
+      default: UserRole.USER,
+    },
     emailVerificationToken: {
       type: String,
     } /* Email verification token */,
