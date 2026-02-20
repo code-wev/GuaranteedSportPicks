@@ -4,6 +4,7 @@ import { Router } from 'express';
 // Import controller from corresponding module
 import {
   forgetPassword,
+  login,
   registerUser,
   resendVerificationEmail,
   resetPassword,
@@ -17,6 +18,7 @@ import { validateId } from '../../handlers/common-zod-validator';
 import {
   validateCreateUser,
   validateForgotPassword,
+  validateLogin,
   validateResendVerificationEmail,
   validateResetPassword,
   validateUpdateUser,
@@ -28,13 +30,22 @@ const router = Router();
 
 // Define route handlers
 /**
- * @route POST /api/v1/auth/create-auth
+ * @route POST /api/v1/auth/register
  * @description Create a new auth
  * @access Public
  * @param {function} validation - ['validateCreateAuth']
  * @param {function} controller - ['createAuth']
  */
 router.post('/register', validateCreateUser, registerUser);
+
+/**
+ * @route POST /api/v1/auth/login
+ * @description Create a new auth
+ * @access Public
+ * @param {function} validation - ['validateCreateAuth']
+ * @param {function} controller - ['createAuth']
+ */
+router.post('/login', validateLogin, login);
 
 /**
  * @route PUT /api/v1/auth/update-auth/:id
@@ -92,4 +103,3 @@ router.post('/reset-password', validateResetPassword, resetPassword);
 // Export the router
 
 module.exports = router;
-

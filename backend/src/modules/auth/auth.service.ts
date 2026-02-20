@@ -7,7 +7,7 @@ import HashInfo from '../../../src/utils/bcrypt/hash-info';
 import SendEmail from '../../../src/utils/email/send-email';
 import { IdOrIdsInput, SearchQueryInput } from '../../handlers/common-zod-validator';
 import User, { IUser } from '../../model/user/user.schema';
-import { IChangePassword, IRegisterResponse } from './auth.interface';
+import { IChangePassword, ILogin, ILoginResponse, IRegisterResponse } from './auth.interface';
 import {
   CreateUserInput,
   ForgotPasswordInput,
@@ -16,6 +16,7 @@ import {
   UpdateUserInput,
   VerifyEmailInput,
 } from './auth.validation';
+import EncodeToken from '../../../src/utils/jwt/encode-token';
 
 /**
  * Service function to create a new auth.
@@ -71,6 +72,48 @@ const registerUser = async (data: CreateUserInput): Promise<IRegisterResponse> =
     fullName: savedUser.firstName + ' ' + savedUser.lastName,
     email: savedUser.email,
     role: savedUser.role,
+  };
+};
+
+/**
+ * Service function to login.
+ *
+ * @param {ILogin} data - The data to login.
+ * @returns {Promise<ILoginResponse|void* >} - The login result.
+ */
+
+const login = async (data: ILogin): Promise<ILoginResponse> => {
+  // Find user by email
+  const user = await User.findOne({ email: data.email });
+
+  // If user not found
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  // Check if email is verified
+  if (!user.isEmailVerified) {
+    throw new Error('Email not verified');
+  }
+
+  // Match user password
+  const isPasswordValid = await compareInfo(data.password, user.password);
+
+  // If password is invalid
+  if (!isPasswordValid) {
+    throw new Error('Invalid password');
+  }
+
+  // const loginAt = new Date();
+
+  // generate access token
+  const accessToken = await EncodeToken(user._id.toString(), user.email, user.role);
+
+  // Save login activity
+
+  // Return the unique user ID as the token
+  return {
+    token: accessToken,
   };
 };
 
@@ -202,8 +245,6 @@ const verifyEmail = async (data: VerifyEmailInput): Promise<void> => {
   user.emailVerificationTokenExpiry = undefined;
 
   await user.save();
-
-  
 };
 
 /**
@@ -392,6 +433,7 @@ const changePassword = async (data: IChangePassword): Promise<void> => {
 };
 export const authServices = {
   registerUser,
+  login,
   updateAuth,
   deleteAuth,
   deleteManyAuth,
@@ -403,4 +445,3 @@ export const authServices = {
   resetPassword,
   changePassword,
 };
-

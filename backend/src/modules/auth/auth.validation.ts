@@ -19,6 +19,13 @@ import { validateBody } from '../../handlers/zod-error-handler';
  *
  * → Add all **required** fields here
  */
+
+export const loginSchema = z.object({
+  email: z.email({ message: 'Invalid email format' }).trim().toLowerCase(),
+  password: z.string({ message: 'Password is required' }).min(1, 'Password is required'),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
 const zodCreateUserSchema = z
   .object({
     firstName: z
@@ -200,4 +207,4 @@ export const validateVerifyEmail = validateBody(verifyEmailSchema);
 export const validateResendVerificationEmail = validateBody(resendVerificationEmailSchema);
 export const validateForgotPassword = validateBody(forgotPasswordSchema);
 export const validateResetPassword = validateBody(resetPasswordSchema);
-
+export const validateLogin = validateBody(loginSchema);

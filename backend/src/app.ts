@@ -29,7 +29,6 @@ const app: Application = express();
 // Define the path to the public directory
 const publicDirPath = path.join(__dirname, '..', 'public');
 
-// Middleware setup
 app.use(express.json({ limit: config.MAX_JSON_SIZE }));
 
 app.use(express.urlencoded({ extended: config.URL_ENCODED }));
@@ -174,6 +173,8 @@ function logRoutesByModule() {
 app.listen(config.PORT, async () => {
   // Connect to MongoDB
   await mongoose.connect(config.DB_CONNECTION_URI);
+  // Connect to Redis
+
   console.log(
     `${GREEN}✔${RESET} ${WHITE}Connected to MongoDB successfully.${RESET}\n`,
     `${GREEN}✔${RESET} ${WHITE}Connected to Redis successfully.${RESET}\n`,

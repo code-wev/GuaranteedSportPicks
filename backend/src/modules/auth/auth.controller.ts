@@ -8,6 +8,7 @@ import {
   ResendVerificationEmailInput,
   VerifyEmailInput,
 } from './auth.validation';
+import { ILogin } from './auth.interface';
 
 /**
  * Controller function to handle the creation of a single auth.
@@ -23,6 +24,16 @@ export const registerUser = catchAsync(async (req: Request, res: Response) => {
   if (!result) throw new Error('Failed to create auth');
   // Send a success response with the created auth data
   ServerResponse(res, true, 201, 'Auth created successfully', result);
+});
+
+export const login = catchAsync(async (req: Request, res: Response) => {
+  // Build the login payload including meta added by `requestMeta` middleware
+
+  // Call the service method to perform login and get the result
+  const result = await authServices.login(req.body as ILogin);
+
+  // Send a success response with the created auth data
+  ServerResponse(res, true, 201, 'Login successful', result);
 });
 
 /**
@@ -189,4 +200,3 @@ export const resetPassword = catchAsync(async (req: Request, res: Response) => {
 //   // Send a success response indicating password change
 //   ServerResponse(res, true, 200, 'Password changed successfully');
 // });
-

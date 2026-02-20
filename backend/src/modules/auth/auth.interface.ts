@@ -28,3 +28,21 @@ export interface IChangePassword {
   newPassword: string;
 }
 
+/**
+ * Type definition for Login.
+ *
+ * This type defines the structure of a single auth object.
+ * @interface ILogin
+ */
+export interface ILogin {
+  email: string;
+  password: string;
+}
+export interface ILoginResponse {
+  token: string;
+}
+export interface IChangePassword {
+  userId: string; // User ID
+  currentPassword: string;
+  newPassword: string;
+}
