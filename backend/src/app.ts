@@ -36,7 +36,13 @@ app.use(cookieParser());
 app.use(fileUpload(config.EXPRESS_FILE_UPLOAD_CONFIG));
 
 // Security middleware initialization
-app.use(cors());
+app.use(
+  cors({
+    origin: 'http://localhost:3000', // frontend origin
+    credentials: true, // if you are using cookies or authorization headers
+  })
+);
+
 app.use(helmet());
 app.use((req: any, res: any, next: any) => {
   const sanitizer = (mongoSanitize as any).sanitize || ((obj: any) => obj);

@@ -89,24 +89,12 @@ const zodUpdateUserSchema = z
       .trim()
       .optional(),
 
-    email: z.string().email('Invalid email format').toLowerCase().trim().optional(),
-
     phoneNumber: z
       .string()
       .min(10, 'Phone number must be at least 10 digits')
       .max(15, 'Phone number cannot exceed 15 digits')
       .regex(/^[0-9+\-\s]+$/, 'Phone number can only contain digits, +, -, and spaces')
       .trim()
-      .optional(),
-
-    password: z
-      .string()
-      .min(6, 'Password must be at least 6 characters')
-      .max(100, 'Password cannot exceed 100 characters')
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        'Password must contain at least one uppercase letter, one lowercase letter, and one number'
-      )
       .optional(),
   })
   .strict()

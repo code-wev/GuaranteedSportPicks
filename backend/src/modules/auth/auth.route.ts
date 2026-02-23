@@ -3,6 +3,7 @@ import { Router } from 'express';
 
 // Import controller from corresponding module
 import {
+  changePassword,
   forgetPassword,
   login,
   registerUser,
@@ -15,8 +16,9 @@ import {
 //Import validation from corresponding module
 
 import isAuthorized from '../.../../../../src/middlewares/is-authorized';
-import { validateId } from '../../handlers/common-zod-validator';
+
 import {
+  validateChangePassword,
   validateCreateUser,
   validateForgotPassword,
   validateLogin,
@@ -34,8 +36,8 @@ const router = Router();
  * @route POST /api/v1/auth/register
  * @description Create a new auth
  * @access Public
- * @param {function} validation - ['validateCreateAuth']
- * @param {function} controller - ['createAuth']
+ * @param {function} validation - ['validateCreateUser']
+ * @param {function} controller - ['registerUser']
  */
 router.post('/register', validateCreateUser, registerUser);
 
@@ -47,16 +49,6 @@ router.post('/register', validateCreateUser, registerUser);
  * @param {function} controller - ['createAuth']
  */
 router.post('/login', validateLogin, login);
-
-/**
- * @route PUT /api/v1/auth/update-auth/:id
- * @description Update auth information
- * @access Public
- * @param {IdOrIdsInput['id']} id - The ID of the auth to update
- * @param {function} validation - ['validateId', 'validateUpdateUser']
- * @param {function} controller - ['updateAuth']
- */
-router.put('/update-auth/:id', validateId, isAuthorized, validateUpdateUser, updateAuth);
 
 /**
  * @route PATCH /api/v1/auth/verify-email
@@ -100,6 +92,17 @@ router.post('/forget-password', validateForgotPassword, forgetPassword);
  * @param {function} controller - ['resetPassword']
  */
 router.post('/reset-password', validateResetPassword, resetPassword);
+
+/**
+ * @route PATCH /api/v1/auth/change-password
+ * @description Change user password
+ * @access Private
+ * @param {middleware} isAuthorized - ['isAuthorized']
+ * @param {function} validation - ['changePasswordAuth']
+ * @param {function} controller - ['changePassword']
+ */
+
+router.patch('/change-password', isAuthorized, validateChangePassword, changePassword);
 
 // Export the router
 

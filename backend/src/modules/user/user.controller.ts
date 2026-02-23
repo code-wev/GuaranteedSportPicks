@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import { userServices } from './user.service';
+import { AuthenticatedRequest } from 'src/middlewares/is-authorized';
 import { SearchQueryInput } from '../../handlers/common-zod-validator';
 import ServerResponse from '../../helpers/responses/custom-response';
 import catchAsync from '../../utils/catch-async/catch-async';
+import { userServices } from './user.service';
 
 /**
  * Controller function to handle the creation of a single user.
@@ -29,29 +30,14 @@ export const createUser = catchAsync(async (req: Request, res: Response) => {
  * @returns {Promise<Partial<IUser>>} - The updated user.
  * @throws {Error} - Throws an error if the user update fails.
  */
-export const updateUser = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
+export const updateUser = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
   // Call the service method to update the user by ID and get the result
+  const id = req.user!._id;
+  console.log(id, 'id get successfully');
   const result = await userServices.updateUser(id as string, req.body);
   if (!result) throw new Error('Failed to update user');
   // Send a success response with the updated user data
   ServerResponse(res, true, 200, 'User updated successfully', result);
-});
-
-/**
- * Controller function to handle the update operation for multiple users.
- *
- * @param {Request} req - The request object containing an array of user data in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<IUser>[]>} - The updated users.
- * @throws {Error} - Throws an error if the users update fails.
- */
-export const updateManyUser = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to update multiple users and get the result
-  const result = await userServices.updateManyUser(req.body);
-  if (!result.length) throw new Error('Failed to update multiple users');
-  // Send a success response with the updated users data
-  ServerResponse(res, true, 200, 'Users updated successfully', result);
 });
 
 /**
@@ -62,31 +48,13 @@ export const updateManyUser = catchAsync(async (req: Request, res: Response) => 
  * @returns {Promise<Partial<IUser>>} - The deleted user.
  * @throws {Error} - Throws an error if the user deletion fails.
  */
-export const deleteUser = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
+export const deleteUser = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const id = req.user!._id;
   // Call the service method to delete the user by ID
   const result = await userServices.deleteUser(id as string);
   if (!result) throw new Error('Failed to delete user');
   // Send a success response confirming the deletion
   ServerResponse(res, true, 200, 'User deleted successfully');
-});
-
-/**
- * Controller function to handle the deletion of multiple users.
- *
- * @param {Request} req - The request object containing an array of IDs of user to delete in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<IUser>[]>} - The deleted users.
- * @throws {Error} - Throws an error if the user deletion fails.
- */
-export const deleteManyUser = catchAsync(async (req: Request, res: Response) => {
-  // Extract ids from request body
-  const { ids } = req.body;
-  // Call the service method to delete multiple users and get the result
-  const result = await userServices.deleteManyUser(ids);
-  if (!result) throw new Error('Failed to delete multiple users');
-  // Send a success response confirming the deletions
-  ServerResponse(res, true, 200, 'Users deleted successfully');
 });
 
 /**
@@ -105,6 +73,17 @@ export const getUserById = catchAsync(async (req: Request, res: Response) => {
   // Send a success response with the retrieved resource data
   ServerResponse(res, true, 200, 'User retrieved successfully', result);
 });
+export const getUserByAutorization = catchAsync(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const id = req.user!._id;
+    console.log(id, 'id get sucessfully');
+    // Call the service method to get the user by ID and get the result
+    const result = await userServices.getUserById(id as string);
+    if (!result) throw new Error('User not found');
+    // Send a success response with the retrieved resource data
+    ServerResponse(res, true, 200, 'User retrieved successfully', result);
+  }
+);
 
 /**
  * Controller function to handle the retrieval of multiple users.

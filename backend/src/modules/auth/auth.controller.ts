@@ -8,7 +8,8 @@ import {
   ResendVerificationEmailInput,
   VerifyEmailInput,
 } from './auth.validation';
-import { ILogin } from './auth.interface';
+import { IChangePassword, ILogin } from './auth.interface';
+import { AuthenticatedRequest } from 'src/middlewares/is-authorized';
 
 /**
  * Controller function to handle the creation of a single auth.
@@ -193,10 +194,10 @@ export const resetPassword = catchAsync(async (req: Request, res: Response) => {
 
 // todo: Implement change password controller and service function
 // ! after authanticaiotn done then
-// export const changePassword = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
-//   // Call the service method to change the password
-//   const userId = req.user!._id;
-//   await authServices.changePassword({ userId, ...req.body } as IChangePassword);
-//   // Send a success response indicating password change
-//   ServerResponse(res, true, 200, 'Password changed successfully');
-// });
+export const changePassword = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  // Call the service method to change the password
+  const userId = req.user!._id;
+  await authServices.changePassword({ userId, ...req.body } as IChangePassword);
+  // Send a success response indicating password change
+  ServerResponse(res, true, 200, 'Password changed successfully');
+});
