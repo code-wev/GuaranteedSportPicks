@@ -1,14 +1,18 @@
 import { NextFunction, Request, Response } from 'express';
 import ServerResponse from '../helpers/responses/custom-response';
 import DecodeToken from '../utils/jwt/decode-token';
+import { UserRole } from '../../src/model/user/user.schema';
 
 // Extend the Request interface to include a user property
-interface AuthenticatedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
   user?: {
-    email: string;
     _id: string;
+    email: string;
+    role: UserRole;
   };
 }
+
+// Extend the Request interface to include a user
 
 /**
  * Middleware to authenticate requests using Bearer tokens.
@@ -36,6 +40,7 @@ const isAuthorized = async (
 
     // Decode the token
     const decoded = await DecodeToken(token);
+    console.log(decoded, 'token decoded');
 
     // If token decoding fails, respond with unauthorized
     if (!decoded) {
@@ -43,10 +48,10 @@ const isAuthorized = async (
     }
 
     // Extract user information from the decoded token
-    const { email, _id } = decoded as { email: string; _id: string };
+    const { email, _id, role } = decoded as { email: string; _id: string; role: UserRole };
 
     // Attach user information to the request object
-    req.user = { email, _id };
+    req.user = { email, _id, role };
 
     // Proceed to the next middleware or route handler
     next();

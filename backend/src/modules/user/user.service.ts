@@ -1,9 +1,8 @@
 // Import the model
-import mongoose from 'mongoose';
 
 import { IdOrIdsInput, SearchQueryInput } from '../../handlers/common-zod-validator';
 import User, { IUser } from '../../model/user/user.schema';
-import { CreateUserInput, UpdateManyUserInput, UpdateUserInput } from './user.validation';
+import { CreateUserInput, UpdateUserInput } from './user.validation';
 
 /**
  * Service function to create a new user.
@@ -29,75 +28,14 @@ const updateUser = async (
   data: UpdateUserInput
 ): Promise<Partial<IUser | null>> => {
   // Check for duplicate (filed) combination
-  const existingUser = await User.findOne({
-    _id: { $ne: id }, // Exclude the current document
-    $or: [
-      {
-        /* filedName: data.filedName, */
-      },
-    ],
-  }).lean();
+  const existingUser = await User.findOne({ _id: id });
   // Prevent duplicate updates
-  if (existingUser) {
-    throw new Error('Duplicate detected: Another user with the same fieldName already exists.');
+  if (!existingUser) {
+    throw new Error('User Not Found!');
   }
   // Proceed to update the user
   const updatedUser = await User.findByIdAndUpdate(id, data, { new: true });
   return updatedUser;
-};
-
-/**
- * Service function to update multiple user.
- *
- * @param {UpdateManyUserInput} data - An array of data to update multiple user.
- * @returns {Promise<Partial<IUser>[]>} - The updated user.
- */
-const updateManyUser = async (data: UpdateManyUserInput): Promise<Partial<IUser>[]> => {
-  // Early return if no data provided
-  if (data.length === 0) {
-    return [];
-  }
-  // Convert string ids to ObjectId (for safety)
-  const objectIds = data.map((item) => new mongoose.Types.ObjectId(item.id));
-  // Check for duplicates (filedName) excluding the documents being updated
-  const existingUser = await User.find({
-    _id: { $nin: objectIds }, // Exclude documents being updated
-    $or: data.flatMap((item) => [
-      // { filedName: item.filedName },
-    ]),
-  }).lean();
-  // If any duplicates found, throw error
-  if (existingUser.length > 0) {
-    throw new Error('Duplicate detected: One or more user with the same fieldName already exist.');
-  }
-  // Prepare bulk operations
-  const operations = data.map((item) => ({
-    updateOne: {
-      filter: { _id: new mongoose.Types.ObjectId(item.id) },
-      update: { $set: item },
-      upsert: false,
-    },
-  }));
-  // Execute bulk update
-  const bulkResult = await User.bulkWrite(operations, {
-    ordered: true, // keep order of operations
-  });
-  // check if all succeeded
-  if (bulkResult.matchedCount !== data.length) {
-    throw new Error('Some documents were not found or updated');
-  }
-  // Fetch the freshly updated documents
-  const updatedDocs = await User.find({ _id: { $in: objectIds } })
-    .lean()
-    .exec();
-  // Map back to original input order
-  const resultMap = new Map<string, any>(updatedDocs.map((doc) => [doc._id.toString(), doc]));
-  // Ensure the result array matches the input order
-  const orderedResults = data.map((item) => {
-    const updated = resultMap.get(item.id);
-    return updated || { _id: item.id };
-  });
-  return orderedResults as Partial<IUser>[];
 };
 
 /**
@@ -109,19 +47,6 @@ const updateManyUser = async (data: UpdateManyUserInput): Promise<Partial<IUser>
 const deleteUser = async (id: IdOrIdsInput['id']): Promise<Partial<IUser | null>> => {
   const deletedUser = await User.findByIdAndDelete(id);
   return deletedUser;
-};
-
-/**
- * Service function to delete multiple user.
- *
- * @param {IdOrIdsInput['ids']} ids - An array of IDs of user to delete.
- * @returns {Promise<Partial<IUser>[]>} - The deleted user.
- */
-const deleteManyUser = async (ids: IdOrIdsInput['ids']): Promise<Partial<IUser>[]> => {
-  const userToDelete = await User.find({ _id: { $in: ids } });
-  if (!userToDelete.length) throw new Error('No user found to delete');
-  await User.deleteMany({ _id: { $in: ids } });
-  return userToDelete;
 };
 
 /**
@@ -166,9 +91,7 @@ const getManyUser = async (
 export const userServices = {
   createUser,
   updateUser,
-  updateManyUser,
   deleteUser,
-  deleteManyUser,
   getUserById,
   getManyUser,
 };
