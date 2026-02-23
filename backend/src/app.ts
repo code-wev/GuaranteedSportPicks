@@ -35,7 +35,7 @@ app.use(express.urlencoded({ extended: config.URL_ENCODED }));
 app.use(cookieParser());
 app.use(fileUpload(config.EXPRESS_FILE_UPLOAD_CONFIG));
 
-// Security middleware initialization
+// Security middleware initialization with CORS configuration
 app.use(
   cors({
     origin: 'http://localhost:3000', // frontend origin
