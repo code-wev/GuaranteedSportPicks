@@ -68,8 +68,8 @@ export default function RegisterPage() {
   const getAxiosErrorMessage = (error) => {
     // backend might send: { message: "..." } or { error: "..." } etc.
     const serverMsg =
-      error?.response?.data?.message ||
       error?.response?.data?.error ||
+      error?.response?.data?.message ||
       error?.response?.data?.msg;
 
     if (serverMsg) return serverMsg;

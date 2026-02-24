@@ -17,8 +17,8 @@ export default function LoginPage() {
 
   const getAxiosErrorMessage = (error) => {
     const serverMsg =
-      error?.response?.data?.message ||
       error?.response?.data?.error ||
+      error?.response?.data?.message ||
       error?.response?.data?.msg;
 
     if (serverMsg) return serverMsg;
@@ -63,6 +63,14 @@ export default function LoginPage() {
       // }
 
       console.log("LOGIN ERROR:", error?.response?.data || error);
+      if (error?.response?.data.error === "Email not verified") {
+        // Email is not verified, redirect to resend verification page
+        toast.error("Email not verified. Please verify your email.");
+        setTimeout(() => {
+          window.location.href = `/resend-verification?email=${encodeURIComponent(email.trim().toLowerCase())}`;
+        }, 1500);
+        return;
+      }
     } finally {
       setLoading(false);
     }
