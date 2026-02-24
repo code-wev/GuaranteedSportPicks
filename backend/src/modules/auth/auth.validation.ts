@@ -191,6 +191,21 @@ export const resetPasswordSchema = z
 
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string({ message: 'Current password is required' }),
+    newPassword: z
+      .string({ message: 'New password is required' })
+      .min(8, 'New password must be at least 8 characters')
+      .max(128, 'New password is too long'),
+    confirmNewPassword: z.string({ message: 'Confirm new password is required' }),
+  })
+  .refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "New passwords don't match",
+  });
+
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
 /**
  * Named validators — use these directly in your Express routes
  */
@@ -208,3 +223,4 @@ export const validateResendVerificationEmail = validateBody(resendVerificationEm
 export const validateForgotPassword = validateBody(forgotPasswordSchema);
 export const validateResetPassword = validateBody(resetPasswordSchema);
 export const validateLogin = validateBody(loginSchema);
+export const validateChangePassword = validateBody(changePasswordSchema);

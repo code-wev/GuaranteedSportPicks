@@ -60,11 +60,75 @@ const registerUser = async (data: CreateUserInput): Promise<IRegisterResponse> =
     subject: 'Verify your email address',
     text: `Click the link to verify your email: ${verificationLink}`,
     html: `
-      <p>Hello ${data.firstName + ' ' + data.lastName || 'there'},</p>
-      <p>Please verify your email by clicking the link below:</p>
-      <a href="${verificationLink}">Verify Email</a>
-      <p>This link expires in 12 hours.</p>
-    `,
+  <div style="margin:0;padding:0;background-color:#f3f4f6;font-family:Arial,Helvetica,sans-serif;">
+    
+    <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:40px auto;">
+      <tr>
+        <td>
+          
+          <!-- Card Container -->
+          <div style="background:#ffffff;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.08);padding:40px 30px;">
+            
+            <!-- Header -->
+            <h2 style="margin:0 0 10px 0;color:#111827;font-size:22px;font-weight:600;">
+              Email Verification
+            </h2>
+            
+            <p style="margin:0 0 20px 0;color:#6b7280;font-size:14px;">
+              Secure your account by verifying your email address.
+            </p>
+
+            <!-- Divider -->
+            <div style="height:1px;background:#e5e7eb;margin:20px 0;"></div>
+
+            <!-- Greeting -->
+            <p style="margin:0 0 15px 0;color:#374151;font-size:15px;">
+              Hello ${
+                data.firstName && data.lastName ? data.firstName + ' ' + data.lastName : 'there'
+              },
+            </p>
+
+            <p style="margin:0 0 25px 0;color:#4b5563;font-size:14px;line-height:1.6;">
+              Please confirm your email address by clicking the button below.
+              This helps us keep your account secure.
+            </p>
+
+            <!-- Button -->
+            <div style="text-align:center;margin-bottom:30px;">
+              <a href="${verificationLink}" 
+                 style="
+                    display:inline-block;
+                    padding:12px 28px;
+                    background-color:#ef4444;
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:8px;
+                    font-size:14px;
+                    font-weight:600;
+                    box-shadow:0 6px 15px rgba(239,68,68,0.3);
+                 ">
+                 Verify Email
+              </a>
+            </div>
+
+            <!-- Expiry Notice -->
+            <p style="margin:0;color:#9ca3af;font-size:12px;text-align:center;">
+              This verification link will expire in 12 hours.
+            </p>
+
+          </div>
+
+          <!-- Footer -->
+          <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:20px;">
+            If you did not create this account, you can safely ignore this email.
+          </p>
+
+        </td>
+      </tr>
+    </table>
+
+  </div>
+`,
   });
 
   return {
@@ -291,11 +355,73 @@ const resendVerificationEmail = async (data: ResendVerificationEmailInput): Prom
     subject: 'Verify your email address',
     text: `Click the link to verify your email: ${verificationLink}`,
     html: `
-      <p>Hello ${user.firstName + ' ' + user.lastName || 'there'},</p>
-      <p>Please verify your email by clicking the link below:</p>
-      <a href="${verificationLink}">Verify Email</a>
-      <p>This link expires in 12 hours.</p>
-    `,
+  <div style="margin:0;padding:0;background-color:#f3f4f6;font-family:Arial,Helvetica,sans-serif;">
+    
+    <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:40px auto;">
+      <tr>
+        <td>
+          
+          <!-- Card Container -->
+          <div style="background:#ffffff;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.08);padding:40px 30px;">
+            
+            <!-- Header -->
+            <h2 style="margin:0 0 10px 0;color:#111827;font-size:22px;font-weight:600;">
+              Email Verification
+            </h2>
+            
+            <p style="margin:0 0 20px 0;color:#6b7280;font-size:14px;">
+              Secure your account by verifying your email address.
+            </p>
+
+            <!-- Divider -->
+            <div style="height:1px;background:#e5e7eb;margin:20px 0;"></div>
+
+            <!-- Greeting -->
+            <p style="margin:0 0 15px 0;color:#374151;font-size:15px;">
+              Hello ${'there'},
+            </p>
+
+            <p style="margin:0 0 25px 0;color:#4b5563;font-size:14px;line-height:1.6;">
+              Please confirm your email address by clicking the button below.
+              This helps us keep your account secure.
+            </p>
+
+            <!-- Button -->
+            <div style="text-align:center;margin-bottom:30px;">
+              <a href="${verificationLink}" 
+                 style="
+                    display:inline-block;
+                    padding:12px 28px;
+                    background-color:#ef4444;
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:8px;
+                    font-size:14px;
+                    font-weight:600;
+                    box-shadow:0 6px 15px rgba(239,68,68,0.3);
+                 ">
+                 Verify Email
+              </a>
+            </div>
+
+            <!-- Expiry Notice -->
+            <p style="margin:0;color:#9ca3af;font-size:12px;text-align:center;">
+              This verification link will expire in 12 hours.
+            </p>
+
+          </div>
+
+          <!-- Footer -->
+          <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:20px;">
+            If you did not create this account, you can safely ignore this email.
+          </p>
+
+        </td>
+      </tr>
+    </table>
+
+  </div>
+`,
   });
 
   return;
@@ -336,11 +462,76 @@ const forgetPassword = async (data: ForgotPasswordInput): Promise<void> => {
     subject: 'Reset your password',
     text: `Click the link to reset your password: ${resetLink}`,
     html: `
-      <p>Hello ${user.firstName + ' ' + user.lastName || 'there'},</p>
-      <p>You can reset your password by clicking the link below:</p>
-      <a href="${resetLink}">Reset Password</a>
-      <p>This link expires in 1 hour.</p>
-    `,
+  <div style="margin:0;padding:0;background-color:#f3f4f6;font-family:Arial,Helvetica,sans-serif;">
+    
+    <table align="center" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:40px auto;">
+      <tr>
+        <td>
+          
+          <!-- Card Container -->
+          <div style="background:#ffffff;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.08);padding:40px 30px;">
+            
+            <!-- Header -->
+            <h2 style="margin:0 0 10px 0;color:#111827;font-size:22px;font-weight:600;">
+              Password Reset Request
+            </h2>
+            
+            <p style="margin:0 0 20px 0;color:#6b7280;font-size:14px;">
+              We received a request to reset your account password.
+            </p>
+
+            <!-- Divider -->
+            <div style="height:1px;background:#e5e7eb;margin:20px 0;"></div>
+
+            <!-- Greeting -->
+            <p style="margin:0 0 15px 0;color:#374151;font-size:15px;">
+              Hello ${
+                user.firstName && user.lastName ? user.firstName + ' ' + user.lastName : 'there'
+              },
+            </p>
+
+            <p style="margin:0 0 25px 0;color:#4b5563;font-size:14px;line-height:1.6;">
+              You can reset your password by clicking the button below. 
+              For security reasons, this link will expire shortly.
+            </p>
+
+            <!-- Button -->
+            <div style="text-align:center;margin-bottom:30px;">
+              <a href="${resetLink}" 
+                 style="
+                    display:inline-block;
+                    padding:12px 28px;
+                    background-color:#dc2626;
+                    color:#ffffff;
+                    text-decoration:none;
+                    border-radius:8px;
+                    font-size:14px;
+                    font-weight:600;
+                    box-shadow:0 6px 15px rgba(220,38,38,0.3);
+                 ">
+                 Reset Password
+              </a>
+            </div>
+
+            <!-- Expiry Notice -->
+            <p style="margin:0;color:#b91c1c;font-size:12px;text-align:center;font-weight:500;">
+              This password reset link will expire in 1 hour.
+            </p>
+
+          </div>
+
+          <!-- Footer -->
+          <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:20px;">
+            If you did not request a password reset, please ignore this email 
+            or contact support if you have concerns.
+          </p>
+
+        </td>
+      </tr>
+    </table>
+
+  </div>
+`,
   });
 
   return;
