@@ -58,6 +58,7 @@ const zodAdminPickSchema = z.object({
   premium: z.boolean({ message: 'premium flag is required' }),
   release_time: z.string({ message: 'release_time is required' }),
   result: z.enum(['win', 'loss', 'void']).optional(),
+  pickBanner: z.string().optional(),
 });
 
 /**
@@ -121,6 +122,7 @@ const zodUpdatePicksSchema = z
     premium: z.boolean().optional(),
     release_time: z.string().optional(),
     result: z.enum(['win', 'loss', 'void']).optional(),
+    status: z.enum(['pending', 'active', 'close']).optional(),
   })
   .strict();
 

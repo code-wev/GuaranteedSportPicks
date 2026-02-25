@@ -14,6 +14,18 @@ import catchAsync from '../../utils/catch-async/catch-async';
  */
 export const createPicks = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to create a new picks and get the result
+
+  /**
+   * Note: The service method is expected to return the created picks data. If the creation fails, it should return null or undefined, which will trigger the error handling in this controller.
+   * The controller then sends a success response with the created picks data if the creation is successful.
+   * This pattern of error handling and response sending is consistent across all controller functions in this module, ensuring a standardized API response structure.
+   *
+   */
+
+  // Call the service method to create a new picks and get the result
+
+  // if
+
   const result = await picksServices.createPicks(req.body);
   if (!result) throw new Error('Failed to create picks');
   // Send a success response with the created picks data
@@ -28,13 +40,13 @@ export const createPicks = catchAsync(async (req: Request, res: Response) => {
  * @returns {Promise<Partial<IPicks>[]>} - The created pickss.
  * @throws {Error} - Throws an error if the pickss creation fails.
  */
-export const createManyPicks = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to create multiple pickss and get the result
-  const result = await picksServices.createManyPicks(req.body);
-  if (!result) throw new Error('Failed to create multiple pickss');
-  // Send a success response with the created pickss data
-  ServerResponse(res, true, 201, 'Pickss created successfully', result);
-});
+// export const createManyPicks = catchAsync(async (req: Request, res: Response) => {
+//   // Call the service method to create multiple pickss and get the result
+//   const result = await picksServices.createManyPicks(req.body);
+//   if (!result) throw new Error('Failed to create multiple pickss');
+//   // Send a success response with the created pickss data
+//   ServerResponse(res, true, 201, 'Pickss created successfully', result);
+// });
 
 /**
  * Controller function to handle the update operation for a single picks.
@@ -51,22 +63,6 @@ export const updatePicks = catchAsync(async (req: Request, res: Response) => {
   if (!result) throw new Error('Failed to update picks');
   // Send a success response with the updated picks data
   ServerResponse(res, true, 200, 'Picks updated successfully', result);
-});
-
-/**
- * Controller function to handle the update operation for multiple pickss.
- *
- * @param {Request} req - The request object containing an array of picks data in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<IPicks>[]>} - The updated pickss.
- * @throws {Error} - Throws an error if the pickss update fails.
- */
-export const updateManyPicks = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to update multiple pickss and get the result
-  const result = await picksServices.updateManyPicks(req.body);
-  if (!result.length) throw new Error('Failed to update multiple pickss');
-  // Send a success response with the updated pickss data
-  ServerResponse(res, true, 200, 'Pickss updated successfully', result);
 });
 
 /**
@@ -130,11 +126,15 @@ export const getPicksById = catchAsync(async (req: Request, res: Response) => {
  * @throws {Error} - Throws an error if the pickss retrieval fails.
  */
 export const getManyPicks = catchAsync(async (req: Request, res: Response) => {
-  // Type assertion for query parameters 
+  // Type assertion for query parameters
   const query = req.query as SearchQueryInput;
   // Call the service method to get multiple pickss based on query parameters and get the result
   const { pickss, totalData, totalPages } = await picksServices.getManyPicks(query);
   if (!pickss) throw new Error('Failed to retrieve pickss');
   // Send a success response with the retrieved pickss data
-  ServerResponse(res, true, 200, 'Pickss retrieved successfully', { pickss, totalData, totalPages });
+  ServerResponse(res, true, 200, 'Pickss retrieved successfully', {
+    pickss,
+    totalData,
+    totalPages,
+  });
 });

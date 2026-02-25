@@ -1,12 +1,7 @@
 // Import the model
 import mongoose from 'mongoose';
 import { IdOrIdsInput, SearchQueryInput } from '../../handlers/common-zod-validator';
-import {
-  CreatePicksInput,
-  CreateManyPicksInput,
-  UpdatePicksInput,
-  UpdateManyPicksInput,
-} from './picks.validation';
+import { CreatePicksInput, UpdatePicksInput } from './picks.validation';
 import Picks, { IPicks } from '../../../src/model/pick/picks.model';
 
 /**
@@ -16,20 +11,29 @@ import Picks, { IPicks } from '../../../src/model/pick/picks.model';
  * @returns {Promise<Partial<IPicks>>} - The created picks.
  */
 const createPicks = async (data: CreatePicksInput): Promise<Partial<IPicks>> => {
+  /**
+   * Business Rule Validation:
+   * Ensure that the selected_team is one of the two participating teams.
+   * The user is only allowed to pick either the home_team or the away_team.
+   * If selected_team does not match any of them, the request is invalid.
+   */
+  if (data.selected_team !== data.home_team && data.selected_team !== data.away_team) {
+    throw new Error('selected_team must be either home_team or away_team');
+  }
+
+  /**
+   * Data Integrity Validation:
+   * Ensure that betting odds are provided for both teams.
+   * Odds must be valid finite numbers (not undefined, null, NaN, Infinity, or non-numeric values).
+   * If either team's odds is missing or invalid, reject the request.
+   */
+  if (!Number.isFinite(data.odds.home_team) || !Number.isFinite(data.odds.away_team)) {
+    throw new Error('odds for both home_team and away_team are required');
+  }
+
   const newPicks = new Picks(data);
   const savedPicks = await newPicks.save();
   return savedPicks;
-};
-
-/**
- * Service function to create multiple picks.
- *
- * @param {CreateManyPicksInput} data - An array of data to create multiple picks.
- * @returns {Promise<Partial<IPicks>[]>} - The created picks.
- */
-const createManyPicks = async (data: CreateManyPicksInput): Promise<Partial<IPicks>[]> => {
-  const createdPicks = await Picks.insertMany(data);
-  return createdPicks;
 };
 
 /**
@@ -44,75 +48,21 @@ const updatePicks = async (
   data: UpdatePicksInput
 ): Promise<Partial<IPicks | null>> => {
   // Check for duplicate (filed) combination
-  const existingPicks = await Picks.findOne({
-    _id: { $ne: id }, // Exclude the current document
-    $or: [
-      {
-        /* filedName: data.filedName, */
-      },
-    ],
-  }).lean();
-  // Prevent duplicate updates
-  if (existingPicks) {
-    throw new Error('Duplicate detected: Another picks with the same fieldName already exists.');
-  }
+  // const existingPicks = await Picks.findOne({
+  //   _id: { $ne: id }, // Exclude the current document
+  //   $or: [
+  //     {
+  //       /* filedName: data.filedName, */
+  //     },
+  //   ],
+  // }).lean();
+  // // Prevent duplicate updates
+  // if (existingPicks) {
+  //   throw new Error('Duplicate detected: Another picks with the same fieldName already exists.');
+  // }
   // Proceed to update the picks
   const updatedPicks = await Picks.findByIdAndUpdate(id, data, { new: true });
   return updatedPicks;
-};
-
-/**
- * Service function to update multiple picks.
- *
- * @param {UpdateManyPicksInput} data - An array of data to update multiple picks.
- * @returns {Promise<Partial<IPicks>[]>} - The updated picks.
- */
-const updateManyPicks = async (data: UpdateManyPicksInput): Promise<Partial<IPicks>[]> => {
-  // Early return if no data provided
-  if (data.length === 0) {
-    return [];
-  }
-  // Convert string ids to ObjectId (for safety)
-  const objectIds = data.map((item) => new mongoose.Types.ObjectId(item.id));
-  // Check for duplicates (filedName) excluding the documents being updated
-  const existingPicks = await Picks.find({
-    _id: { $nin: objectIds }, // Exclude documents being updated
-    $or: data.flatMap((item) => [
-      // { filedName: item.filedName },
-    ]),
-  }).lean();
-  // If any duplicates found, throw error
-  if (existingPicks.length > 0) {
-    throw new Error('Duplicate detected: One or more picks with the same fieldName already exist.');
-  }
-  // Prepare bulk operations
-  const operations = data.map((item) => ({
-    updateOne: {
-      filter: { _id: new mongoose.Types.ObjectId(item.id) },
-      update: { $set: item },
-      upsert: false,
-    },
-  }));
-  // Execute bulk update
-  const bulkResult = await Picks.bulkWrite(operations, {
-    ordered: true, // keep order of operations
-  });
-  // check if all succeeded
-  if (bulkResult.matchedCount !== data.length) {
-    throw new Error('Some documents were not found or updated');
-  }
-  // Fetch the freshly updated documents
-  const updatedDocs = await Picks.find({ _id: { $in: objectIds } })
-    .lean()
-    .exec();
-  // Map back to original input order
-  const resultMap = new Map<string, any>(updatedDocs.map((doc) => [doc._id.toString(), doc]));
-  // Ensure the result array matches the input order
-  const orderedResults = data.map((item) => {
-    const updated = resultMap.get(item.id);
-    return updated || { _id: item.id };
-  });
-  return orderedResults as Partial<IPicks>[];
 };
 
 /**
@@ -161,6 +111,7 @@ const getManyPicks = async (
 ): Promise<{ pickss: Partial<IPicks>[]; totalData: number; totalPages: number }> => {
   const { searchKey = '', showPerPage = 10, pageNo = 1 } = query;
   // Build the search filter based on the search key
+
   const searchFilter = {
     $or: [
       // { fieldName: { $regex: searchKey, $options: 'i' } },
@@ -180,12 +131,9 @@ const getManyPicks = async (
 
 export const picksServices = {
   createPicks,
-  createManyPicks,
   updatePicks,
-  updateManyPicks,
   deletePicks,
   deleteManyPicks,
   getPicksById,
   getManyPicks,
 };
-
