@@ -2,10 +2,10 @@
 import { base_url } from "@/utils/utils";
 import axios from "axios";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
-const EmailVerificationPage = () => {
+const EmailVerification = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const searchParams = useSearchParams();
@@ -88,6 +88,19 @@ const EmailVerificationPage = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const EmailVerificationPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className='min-h-screen flex items-center justify-center bg-[#f5f5f5]'>
+          <p className='text-gray-500'>Loading...</p>
+        </div>
+      }>
+      <EmailVerification />
+    </Suspense>
   );
 };
 

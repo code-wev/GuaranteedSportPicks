@@ -1,5 +1,35 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Model, Schema } from 'mongoose';
 
+// ========================
+// Admin-provided enums
+// ========================
+export enum PicksStatus {
+  PENDING = 'pending',
+  ACTIVE = 'active',
+  CLOSE = 'close',
+}
+
+export enum MarketType {
+  MONEYLINE = 'moneyline',
+  SPREAD = 'spread',
+  TOTALS = 'totals',
+}
+
+export enum ConfidenceLevel {
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+}
+
+export enum ResultType {
+  WIN = 'win',
+  LOSS = 'loss',
+  VOID = 'void',
+}
+
+// ========================
+// Interface for Picks
+// ========================
 export interface IPicks extends Document {
   // API-provided
   sportId: string;
@@ -26,17 +56,23 @@ export interface IPicks extends Document {
 
   // Admin-provided
   selected_team: string;
-  market_type: 'moneyline' | 'spread' | 'totals';
+  market_type: MarketType;
   units: number;
-  confidence: 'low' | 'medium' | 'high';
+  confidence: ConfidenceLevel;
   writeup: string;
   premium: boolean;
   release_time: string;
-  result?: 'win' | 'loss' | 'void';
+  result?: ResultType;
+  status?: PicksStatus;
+  pickBanner?: string;
 }
 
+// ========================
+// Mongoose Schema
+// ========================
 const PicksSchema = new Schema<IPicks>(
   {
+    // API-provided fields
     sportId: { type: String, required: true },
     sportKey: { type: String, required: true },
     sport_title: { type: String, required: true },
@@ -67,15 +103,21 @@ const PicksSchema = new Schema<IPicks>(
 
     // Admin fields
     selected_team: { type: String, required: true },
-    market_type: { type: String, enum: ['moneyline', 'spread', 'totals'], required: true },
+    market_type: { type: String, enum: Object.values(MarketType), required: true },
     units: { type: Number, required: true },
-    confidence: { type: String, enum: ['low', 'medium', 'high'], required: true },
+    confidence: { type: String, enum: Object.values(ConfidenceLevel), required: true },
     writeup: { type: String, required: true },
     premium: { type: Boolean, required: true },
     release_time: { type: String, required: true },
-    result: { type: String, enum: ['win', 'loss', 'void'] },
+    result: { type: String, enum: Object.values(ResultType) },
+    status: { type: String, enum: Object.values(PicksStatus), default: PicksStatus.PENDING },
+    pickBanner: { type: String },
   },
   { timestamps: true }
 );
 
-export default mongoose.model<IPicks>('Picks', PicksSchema);
+// ========================
+// Model Export
+// ========================
+const PicksModel: Model<IPicks> = mongoose.model<IPicks>('Picks', PicksSchema);
+export default PicksModel;
