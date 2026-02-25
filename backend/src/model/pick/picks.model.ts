@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema, Model } from 'mongoose';
+import mongoose, { Document, Model, Schema } from 'mongoose';
 
 // ========================
 // Admin-provided enums
@@ -64,6 +64,7 @@ export interface IPicks extends Document {
   release_time: string;
   result?: ResultType;
   status?: PicksStatus;
+  pickBanner?: string;
 }
 
 // ========================
@@ -110,6 +111,7 @@ const PicksSchema = new Schema<IPicks>(
     release_time: { type: String, required: true },
     result: { type: String, enum: Object.values(ResultType) },
     status: { type: String, enum: Object.values(PicksStatus), default: PicksStatus.PENDING },
+    pickBanner: { type: String },
   },
   { timestamps: true }
 );

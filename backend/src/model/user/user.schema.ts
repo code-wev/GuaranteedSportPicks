@@ -19,6 +19,7 @@ export interface IUser extends Document {
   role: UserRole; // User's role (e.g./ Admin/ User)
   resetToken?: string; // Token used for password reset (optional)
   resetTokenExpiry?: Date; // Expiry date for the password reset token (optional)
+  affiliateCode?: string; // Optional affiliate code for tracking referrals
 }
 
 // Define the user schema
@@ -69,6 +70,11 @@ const UserSchema: Schema<IUser> = new Schema(
       enum: Object.values(UserRole),
       default: UserRole.USER,
     },
+    affiliateCode: {
+      type: String,
+      required: false,
+      ref: 'Affiliate',
+    } /* Optional affiliate code for tracking referrals */,
     emailVerificationToken: {
       type: String,
     } /* Email verification token */,

@@ -48,18 +48,18 @@ const updatePicks = async (
   data: UpdatePicksInput
 ): Promise<Partial<IPicks | null>> => {
   // Check for duplicate (filed) combination
-  const existingPicks = await Picks.findOne({
-    _id: { $ne: id }, // Exclude the current document
-    $or: [
-      {
-        /* filedName: data.filedName, */
-      },
-    ],
-  }).lean();
-  // Prevent duplicate updates
-  if (existingPicks) {
-    throw new Error('Duplicate detected: Another picks with the same fieldName already exists.');
-  }
+  // const existingPicks = await Picks.findOne({
+  //   _id: { $ne: id }, // Exclude the current document
+  //   $or: [
+  //     {
+  //       /* filedName: data.filedName, */
+  //     },
+  //   ],
+  // }).lean();
+  // // Prevent duplicate updates
+  // if (existingPicks) {
+  //   throw new Error('Duplicate detected: Another picks with the same fieldName already exists.');
+  // }
   // Proceed to update the picks
   const updatedPicks = await Picks.findByIdAndUpdate(id, data, { new: true });
   return updatedPicks;
@@ -111,6 +111,7 @@ const getManyPicks = async (
 ): Promise<{ pickss: Partial<IPicks>[]; totalData: number; totalPages: number }> => {
   const { searchKey = '', showPerPage = 10, pageNo = 1 } = query;
   // Build the search filter based on the search key
+
   const searchFilter = {
     $or: [
       // { fieldName: { $regex: searchKey, $options: 'i' } },
