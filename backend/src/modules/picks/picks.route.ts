@@ -4,9 +4,7 @@ import { Router } from 'express';
 // Import controller from corresponding module
 import {
   createPicks,
-  createManyPicks,
   updatePicks,
-  updateManyPicks,
   deletePicks,
   deleteManyPicks,
   getPicksById,
@@ -14,17 +12,15 @@ import {
 } from './picks.controller';
 
 //Import validation from corresponding module
-import {
-  validateCreatePicks,
-  validateCreateManyPicks,
-  validateUpdatePicks,
-  validateUpdateManyPicks,
-} from './picks.validation';
+import { validateCreatePicks, validateUpdatePicks } from './picks.validation';
 import {
   validateId,
   validateIds,
   validateSearchQueries,
 } from '../../handlers/common-zod-validator';
+import isAuthorized from '../../../src/middlewares/is-authorized';
+import authorizedRoles from '../../../src/middlewares/authorized-roles';
+import { UserRole } from '../../../src/model/user/user.schema';
 
 // Initialize router
 const router = Router();
@@ -37,25 +33,7 @@ const router = Router();
  * @param {function} validation - ['validateCreatePicks']
  * @param {function} controller - ['createPicks']
  */
-router.post('/', validateCreatePicks, createPicks);
-
-/**
- * @route POST /api/v1/picks/create-picks/many
- * @description Create multiple pickss
- * @access Public
- * @param {function} validation - ['validateCreateManyPicks']
- * @param {function} controller - ['createManyPicks']
- */
-router.post('/create-picks/many', validateCreateManyPicks, createManyPicks);
-
-/**
- * @route PUT /api/v1/picks/update-picks/many
- * @description Update multiple pickss information
- * @access Public
- * @param {function} validation - ['validateIds', 'validateUpdateManyPicks']
- * @param {function} controller - ['updateManyPicks']
- */
-router.put('/update-picks/many', validateIds, validateUpdateManyPicks, updateManyPicks);
+router.post('/', isAuthorized, authorizedRoles([UserRole.ADMIN]), validateCreatePicks, createPicks);
 
 /**
  * @route PUT /api/v1/picks/update-picks/:id

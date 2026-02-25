@@ -121,6 +121,8 @@ const zodUpdatePicksSchema = z
     premium: z.boolean().optional(),
     release_time: z.string().optional(),
     result: z.enum(['win', 'loss', 'void']).optional(),
+    status: z.enum(['pending', 'active', 'close']).optional(),
+
   })
   .strict();
 
