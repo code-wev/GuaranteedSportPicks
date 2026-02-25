@@ -38,7 +38,7 @@ app.use(fileUpload(config.EXPRESS_FILE_UPLOAD_CONFIG));
 // Security middleware initialization with CORS configuration
 app.use(
   cors({
-    origin: 'http://localhost:3000', // frontend origin
+    origin: ['http://localhost:3000', 'http://localhost:3000/'], // frontend origin
     credentials: true, // if you are using cookies or authorization headers
   })
 );
@@ -69,7 +69,7 @@ app.use(morgan('dev'));
 // Use Morgan with the custom logger
 app.use(morgan('combined', { stream: loggerStream }));
 
-// Request Rate Limitingdfdfdf
+// Request Rate Limit
 app.use(
   rateLimit({
     windowMs: config.REQUEST_LIMIT_TIME,
