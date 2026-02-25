@@ -9,7 +9,9 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathName = usePathname();
 
-  // Hide Navbar in dashboard routes
+  // Hide Navbar in dashboard routes (assuming all dashboard routes start with "/dashboard")
+  // khalid vaiyer pocha code
+  // aso khelbo kheladhola sesh kore dashboard e jabo
   if (pathName.includes("/dashboard")) {
     return null;
   }
