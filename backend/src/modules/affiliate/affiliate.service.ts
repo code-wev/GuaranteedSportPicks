@@ -17,6 +17,7 @@ import AffiliateModel, { IAffiliate } from '../../../src/model/affiliates/affili
  * @returns {Promise<Partial<IAffiliate>>} - The created affiliate.
  */
 const createAffiliate = async (data: CreateAffiliateInput): Promise<Partial<IAffiliate>> => {
+  console.log(data, 'hi affliate data');
   const newAffiliate = new AffiliateModel(data);
   const savedAffiliate = await newAffiliate.save();
   return savedAffiliate;
@@ -26,7 +27,7 @@ const createAffiliate = async (data: CreateAffiliateInput): Promise<Partial<IAff
  * Service function to create multiple affiliate.
  *
  * @param {CreateManyAffiliateInput} data - An array of data to create multiple affiliate.
- * @returns {Promise<Partial<IAffiliate>[]>} - The created affiliate.
+ * @returns {Promise<Partial<IAffiliate>[]>} - The created affiliate. // Note: insertMany returns the created documents, but they may not have all the Mongoose document methods. Depending on your needs, you might want to fetch them again after insertion to get full document instances.
  */
 const createManyAffiliate = async (
   data: CreateManyAffiliateInput
