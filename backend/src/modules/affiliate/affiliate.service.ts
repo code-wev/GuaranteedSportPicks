@@ -1,6 +1,6 @@
 // Import the model
 import mongoose from 'mongoose';
-import AffiliateModel, { IAffiliate } from './affiliate.model';
+
 import { IdOrIdsInput, SearchQueryInput } from '../../handlers/common-zod-validator';
 import {
   CreateAffiliateInput,
@@ -8,6 +8,7 @@ import {
   UpdateAffiliateInput,
   UpdateManyAffiliateInput,
 } from './affiliate.validation';
+import AffiliateModel, { IAffiliate } from '../../../src/model/affiliates/affiliate.model';
 
 /**
  * Service function to create a new affiliate.
@@ -27,7 +28,9 @@ const createAffiliate = async (data: CreateAffiliateInput): Promise<Partial<IAff
  * @param {CreateManyAffiliateInput} data - An array of data to create multiple affiliate.
  * @returns {Promise<Partial<IAffiliate>[]>} - The created affiliate.
  */
-const createManyAffiliate = async (data: CreateManyAffiliateInput): Promise<Partial<IAffiliate>[]> => {
+const createManyAffiliate = async (
+  data: CreateManyAffiliateInput
+): Promise<Partial<IAffiliate>[]> => {
   const createdAffiliate = await AffiliateModel.insertMany(data);
   return createdAffiliate;
 };
@@ -39,15 +42,24 @@ const createManyAffiliate = async (data: CreateManyAffiliateInput): Promise<Part
  * @param {UpdateAffiliateInput} data - The updated data for the affiliate.
  * @returns {Promise<Partial<IAffiliate>>} - The updated affiliate.
  */
-const updateAffiliate = async (id: IdOrIdsInput['id'], data: UpdateAffiliateInput): Promise<Partial<IAffiliate | null>> => {
+const updateAffiliate = async (
+  id: IdOrIdsInput['id'],
+  data: UpdateAffiliateInput
+): Promise<Partial<IAffiliate | null>> => {
   // Check for duplicate (filed) combination
   const existingAffiliate = await AffiliateModel.findOne({
     _id: { $ne: id }, // Exclude the current document
-    $or: [{ /* filedName: data.filedName, */ }],
+    $or: [
+      {
+        /* filedName: data.filedName, */
+      },
+    ],
   }).lean();
   // Prevent duplicate updates
   if (existingAffiliate) {
-    throw new Error('Duplicate detected: Another affiliate with the same fieldName already exists.');
+    throw new Error(
+      'Duplicate detected: Another affiliate with the same fieldName already exists.'
+    );
   }
   // Proceed to update the affiliate
   const updatedAffiliate = await AffiliateModel.findByIdAndUpdate(id, data, { new: true });
@@ -60,8 +72,10 @@ const updateAffiliate = async (id: IdOrIdsInput['id'], data: UpdateAffiliateInpu
  * @param {UpdateManyAffiliateInput} data - An array of data to update multiple affiliate.
  * @returns {Promise<Partial<IAffiliate>[]>} - The updated affiliate.
  */
-const updateManyAffiliate = async (data: UpdateManyAffiliateInput): Promise<Partial<IAffiliate>[]> => {
-// Early return if no data provided
+const updateManyAffiliate = async (
+  data: UpdateManyAffiliateInput
+): Promise<Partial<IAffiliate>[]> => {
+  // Early return if no data provided
   if (data.length === 0) {
     return [];
   }
@@ -131,7 +145,7 @@ const deleteManyAffiliate = async (ids: IdOrIdsInput['ids']): Promise<Partial<IA
   const affiliateToDelete = await AffiliateModel.find({ _id: { $in: ids } });
   if (!affiliateToDelete.length) throw new Error('No affiliate found to delete');
   await AffiliateModel.deleteMany({ _id: { $in: ids } });
-  return affiliateToDelete; 
+  return affiliateToDelete;
 };
 
 /**
@@ -151,7 +165,9 @@ const getAffiliateById = async (id: IdOrIdsInput['id']): Promise<Partial<IAffili
  * @param {SearchQueryInput} query - The query parameters for filtering affiliate.
  * @returns {Promise<Partial<IAffiliate>[]>} - The retrieved affiliate
  */
-const getManyAffiliate = async (query: SearchQueryInput): Promise<{ affiliates: Partial<IAffiliate>[]; totalData: number; totalPages: number }> => {
+const getManyAffiliate = async (
+  query: SearchQueryInput
+): Promise<{ affiliates: Partial<IAffiliate>[]; totalData: number; totalPages: number }> => {
   const { searchKey = '', showPerPage = 10, pageNo = 1 } = query;
   // Build the search filter based on the search key
   const searchFilter = {
@@ -184,3 +200,4 @@ export const affiliateServices = {
   getAffiliateById,
   getManyAffiliate,
 };
+
