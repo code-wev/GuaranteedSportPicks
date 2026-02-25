@@ -1,6 +1,7 @@
 "use client";
 import { base_url } from "@/utils/utils";
 import axios from "axios";
+import Link from "next/link";
 import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -27,6 +28,13 @@ export default function LoginPage() {
     return error?.message || "Something went wrong";
   };
 
+  const setCookie = (name, value, days = 7) => {
+    const maxAge = days * 24 * 60 * 60;
+    document.cookie = `${name}=${encodeURIComponent(
+      value,
+    )}; Max-Age=${maxAge}; Path=/; SameSite=Lax`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -50,6 +58,17 @@ export default function LoginPage() {
       console.log("LOGIN RESPONSE:", response?.data);
 
       toast.success("Login Success");
+
+      const token =
+        response?.data?.data?.token || response?.data?.token || null;
+
+      if (!token) {
+        console.log("TOKEN NOT FOUND. Full response:", response?.data);
+        toast.error("Token not found in response");
+        return;
+      }
+
+      setCookie("token", token, 7);
 
       // cookie stored by browser, now go dashboard
       window.location.href = "/dashboard";
@@ -166,9 +185,11 @@ export default function LoginPage() {
               </label>
 
               {/* IMPORTANT: type="button" না হলে form submit trigger হতে পারে */}
-              <button type='button' className='text-rose-500'>
-                Forgot Password?
-              </button>
+              <Link href='/forgot-password'>
+                <button type='button' className='text-rose-500 cursor-pointer'>
+                  Forgot Password?
+                </button>
+              </Link>
             </div>
 
             {/* Submit */}

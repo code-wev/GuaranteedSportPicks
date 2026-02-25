@@ -22,10 +22,16 @@ export default function Navbar() {
     <nav className='w-full bg-[#FFEEEE]'>
       <div className='max-w-7xl mx-auto px-6 flex items-center justify-between h-[80px]'>
         {/* Logo */}
-        <div className='flex items-center space-x-1'>
-          <span className='text-2xl font-extrabold text-[#d93732]'>Sport</span>
-          <span className='text-2xl font-extrabold text-[#bfbfbf]'>Picks</span>
-        </div>
+        <Link href='/'>
+          <div className='flex items-center space-x-1'>
+            <span className='text-2xl font-extrabold text-[#d93732]'>
+              Sport
+            </span>
+            <span className='text-2xl font-extrabold text-[#bfbfbf]'>
+              Picks
+            </span>
+          </div>
+        </Link>
 
         {/* Desktop Links */}
         <ul className='hidden lg:flex items-center space-x-6 text-[16px] font-[600] text-[#4B556C]'>
