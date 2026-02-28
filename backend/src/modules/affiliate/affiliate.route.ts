@@ -2,20 +2,25 @@
 import { Router } from 'express';
 
 // Import controller from corresponding module
-import { 
+import {
   createAffiliate,
-  createManyAffiliate,
-  updateAffiliate,
-  updateManyAffiliate,
   deleteAffiliate,
   deleteManyAffiliate,
   getAffiliateById,
-  getManyAffiliate
+  getManyAffiliate,
+  updateAffiliate,
 } from './affiliate.controller';
 
 //Import validation from corresponding module
-import { validateCreateAffiliate, validateCreateManyAffiliate, validateUpdateAffiliate, validateUpdateManyAffiliate} from './affiliate.validation';
-import { validateId, validateIds, validateSearchQueries } from '../../handlers/common-zod-validator';
+import authorizedRoles from '../../../src/middlewares/authorized-roles';
+import { UserRole } from '../../../src/model/user/user.schema';
+import isAuthorized from '../../../src/middlewares/is-authorized';
+import {
+  validateId,
+  validateIds,
+  validateSearchQueries,
+} from '../../handlers/common-zod-validator';
+import { validateCreateAffiliate, validateUpdateAffiliate } from './affiliate.validation';
 
 // Initialize router
 const router = Router();
@@ -28,25 +33,13 @@ const router = Router();
  * @param {function} validation - ['validateCreateAffiliate']
  * @param {function} controller - ['createAffiliate']
  */
-router.post("/create-affiliate", validateCreateAffiliate, createAffiliate);
-
-/**
- * @route POST /api/v1/affiliate/create-affiliate/many
- * @description Create multiple affiliates
- * @access Public
- * @param {function} validation - ['validateCreateManyAffiliate']
- * @param {function} controller - ['createManyAffiliate']
- */
-router.post("/create-affiliate/many", validateCreateManyAffiliate, createManyAffiliate);
-
-/**
- * @route PUT /api/v1/affiliate/update-affiliate/many
- * @description Update multiple affiliates information
- * @access Public
- * @param {function} validation - ['validateIds', 'validateUpdateManyAffiliate']
- * @param {function} controller - ['updateManyAffiliate']
- */
-router.put("/update-affiliate/many", validateIds, validateUpdateManyAffiliate, updateManyAffiliate);
+router.post(
+  '/',
+  isAuthorized,
+  authorizedRoles([UserRole.USER]),
+  validateCreateAffiliate,
+  createAffiliate
+);
 
 /**
  * @route PUT /api/v1/affiliate/update-affiliate/:id
@@ -56,16 +49,7 @@ router.put("/update-affiliate/many", validateIds, validateUpdateManyAffiliate, u
  * @param {function} validation - ['validateId', 'validateUpdateAffiliate']
  * @param {function} controller - ['updateAffiliate']
  */
-router.put("/update-affiliate/:id", validateId, validateUpdateAffiliate, updateAffiliate);
-
-/**
- * @route DELETE /api/v1/affiliate/delete-affiliate/many
- * @description Delete multiple affiliates
- * @access Public
- * @param {function} validation - ['validateIds']
- * @param {function} controller - ['deleteManyAffiliate']
- */
-router.delete("/delete-affiliate/many", validateIds, deleteManyAffiliate);
+router.put('/:id', isAuthorized, validateId, validateUpdateAffiliate, updateAffiliate);
 
 /**
  * @route DELETE /api/v1/affiliate/delete-affiliate/:id
@@ -75,7 +59,7 @@ router.delete("/delete-affiliate/many", validateIds, deleteManyAffiliate);
  * @param {function} validation - ['validateId']
  * @param {function} controller - ['deleteAffiliate']
  */
-router.delete("/delete-affiliate/:id", validateId, deleteAffiliate);
+router.delete('/:id', isAuthorized, validateId, deleteAffiliate);
 
 /**
  * @route GET /api/v1/affiliate/get-affiliate/many
@@ -84,7 +68,7 @@ router.delete("/delete-affiliate/:id", validateId, deleteAffiliate);
  * @param {function} validation - ['validateSearchQueries']
  * @param {function} controller - ['getManyAffiliate']
  */
-router.get("/get-affiliate/many", validateSearchQueries, getManyAffiliate);
+router.get('/get-affiliate/many', validateSearchQueries, getManyAffiliate);
 
 /**
  * @route GET /api/v1/affiliate/get-affiliate/:id
@@ -94,7 +78,8 @@ router.get("/get-affiliate/many", validateSearchQueries, getManyAffiliate);
  * @param {function} validation - ['validateId']
  * @param {function} controller - ['getAffiliateById']
  */
-router.get("/get-affiliate/:id", validateId, getAffiliateById);
+router.get('/get-affiliate/:id', validateId, getAffiliateById);
 
 // Export the router
 module.exports = router;
+
