@@ -108,7 +108,12 @@ const getPicksById = async (id: IdOrIdsInput['id']): Promise<Partial<IPicks | nu
  */
 const getManyPicks = async (
   query: SearchQueryInput
-): Promise<{ pickss: Partial<IPicks>[]; totalData: number; totalPages: number }> => {
+): Promise<{
+  pickss: Partial<IPicks>[];
+  totalData: number;
+  totalPages: number;
+  totalActivePicks: number;
+}> => {
   const { searchKey = '', showPerPage = 10, pageNo = 1 } = query;
   // Build the search filter based on the search key
 
@@ -126,7 +131,20 @@ const getManyPicks = async (
   const totalPages = Math.ceil(totalData / showPerPage);
   // Find pickss based on the search filter with pagination
   const pickss = await Picks.find(searchFilter).skip(skipItems).limit(showPerPage).select(''); // Keep/Exclude any field if needed
-  return { pickss, totalData, totalPages };
+
+  const activePicksAggregation = await Picks.aggregate<{ _id: null; total: number }>([
+    {
+      $match: { status: 'active' },
+    },
+    {
+      $group: {
+        _id: null,
+        total: { $sum: 1 },
+      },
+    },
+  ]);
+  const totalActivePicks = activePicksAggregation[0]?.total ?? 0;
+  return { pickss, totalData, totalPages, totalActivePicks };
 };
 
 export const picksServices = {

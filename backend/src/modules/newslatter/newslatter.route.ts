@@ -5,7 +5,6 @@ import { Router } from 'express';
 import {
   createNewslatter,
   updateNewslatter,
-  deleteNewslatter,
   getNewslatterById,
   getManyNewslatter,
 } from './newslatter.controller';

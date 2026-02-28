@@ -1,8 +1,8 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 
 export interface Inewslatter {
   email: string;
-  userId: mongoose.Schema.Types.ObjectId;
+  userId: Types.ObjectId;
   isActive: boolean;
 }
 

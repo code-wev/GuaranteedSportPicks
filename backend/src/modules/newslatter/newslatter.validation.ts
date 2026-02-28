@@ -1,5 +1,5 @@
 import { isMongoId } from 'validator';
-import { z } from 'zod';
+import { email, z } from 'zod';
 import { validateBody } from '../../handlers/zod-error-handler';
 
 /**
@@ -16,7 +16,7 @@ import { validateBody } from '../../handlers/zod-error-handler';
 
 /**
  * Zod schema for validating data when **creating** a single newslatter.
- * 
+ *
  * → Add all **required** fields here
  */
 const zodCreateNewslatterSchema = z
@@ -26,23 +26,20 @@ const zodCreateNewslatterSchema = z
     // email: z.string().email({ message: 'Invalid email format' }),
     // age: z.number().int().positive().optional(),
     // status: z.enum(['active', 'inactive', 'pending']).default('pending'),
+
+    email: z.email({ message: 'Invalid email format' }),
+    userId: z
+      .string()
+      .refine(isMongoId, { message: 'Please provide a valid MongoDB ObjectId for userId' }),
+    isActive: z.boolean().optional(),
   })
   .strict();
 
 export type CreateNewslatterInput = z.infer<typeof zodCreateNewslatterSchema>;
 
 /**
- * Zod schema for validating **bulk creation** (array of newslatter objects).
- */
-const zodCreateManyNewslatterSchema = z
-  .array(zodCreateNewslatterSchema)
-  .min(1, { message: 'At least one newslatter must be provided for bulk creation' });
-
-export type CreateManyNewslatterInput = z.infer<typeof zodCreateManyNewslatterSchema>;
-
-/**
  * Zod schema for validating data when **updating** an existing newslatter.
- * 
+ *
  * → All fields should usually be .optional()
  */
 const zodUpdateNewslatterSchema = z
@@ -52,6 +49,13 @@ const zodUpdateNewslatterSchema = z
     // email: z.string().email({ message: 'Invalid email format' }).optional(),
     // age: z.number().int().positive().optional(),
     // status: z.enum(['active', 'inactive', 'pending']).optional(),
+
+    email: z.string().email({ message: 'Invalid email format' }).optional(),
+    userId: z
+      .string()
+      .refine(isMongoId, { message: 'Please provide a valid MongoDB ObjectId for userId' })
+      .optional(),
+    isActive: z.boolean().optional(),
   })
   .strict();
 
@@ -69,18 +73,8 @@ const zodUpdateManyNewslatterForBulkSchema = zodUpdateNewslatterSchema
   });
 
 /**
- * Zod schema for validating an array of multiple newslatter updates.
- */
-const zodUpdateManyNewslatterSchema = z
-  .array(zodUpdateManyNewslatterForBulkSchema)
-  .min(1, { message: 'At least one newslatter update object must be provided' });
-
-export type UpdateManyNewslatterInput = z.infer<typeof zodUpdateManyNewslatterSchema>;
-
-/**
  * Named validators — use these directly in your Express routes
  */
 export const validateCreateNewslatter = validateBody(zodCreateNewslatterSchema);
-export const validateCreateManyNewslatter = validateBody(zodCreateManyNewslatterSchema);
 export const validateUpdateNewslatter = validateBody(zodUpdateNewslatterSchema);
-export const validateUpdateManyNewslatter = validateBody(zodUpdateManyNewslatterSchema);
+

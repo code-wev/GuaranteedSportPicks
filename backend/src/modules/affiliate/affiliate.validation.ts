@@ -1,4 +1,3 @@
-import { isMongoId } from 'validator';
 import { z } from 'zod';
 import { validateBody } from '../../handlers/zod-error-handler';
 
@@ -16,7 +15,7 @@ import { validateBody } from '../../handlers/zod-error-handler';
 
 /**
  * Zod schema for validating data when **creating** a single affiliate.
- * 
+ *
  * → Add all **required** fields here
  */
 const zodCreateAffiliateSchema = z
@@ -26,23 +25,19 @@ const zodCreateAffiliateSchema = z
     // email: z.string().email({ message: 'Invalid email format' }),
     // age: z.number().int().positive().optional(),
     // status: z.enum(['active', 'inactive', 'pending']).default('pending'),
+
+    affiliateCode: z.string().optional(),
+    website: z.string().optional(),
+    socialLinks: z.array(z.string()).optional(),
+    notes: z.string().optional(),
   })
   .strict();
 
 export type CreateAffiliateInput = z.infer<typeof zodCreateAffiliateSchema>;
 
 /**
- * Zod schema for validating **bulk creation** (array of affiliate objects).
- */
-const zodCreateManyAffiliateSchema = z
-  .array(zodCreateAffiliateSchema)
-  .min(1, { message: 'At least one affiliate must be provided for bulk creation' });
-
-export type CreateManyAffiliateInput = z.infer<typeof zodCreateManyAffiliateSchema>;
-
-/**
  * Zod schema for validating data when **updating** an existing affiliate.
- * 
+ *
  * → All fields should usually be .optional()
  */
 const zodUpdateAffiliateSchema = z
@@ -52,35 +47,19 @@ const zodUpdateAffiliateSchema = z
     // email: z.string().email({ message: 'Invalid email format' }).optional(),
     // age: z.number().int().positive().optional(),
     // status: z.enum(['active', 'inactive', 'pending']).optional(),
+    status: z.enum(['pending', 'approved', 'declined']).optional(),
+    affiliateCode: z.string().optional(),
+    website: z.string().optional(),
+    socialLinks: z.array(z.string()).optional(),
+    notes: z.string().optional(),
   })
   .strict();
 
 export type UpdateAffiliateInput = z.infer<typeof zodUpdateAffiliateSchema>;
 
 /**
- * Zod schema for validating bulk updates (array of partial affiliate objects).
- */
-const zodUpdateManyAffiliateForBulkSchema = zodUpdateAffiliateSchema
-  .extend({
-    id: z.string().refine(isMongoId, { message: 'Please provide a valid MongoDB ObjectId' }),
-  })
-  .refine((data) => Object.keys(data).length > 1, {
-    message: 'At least one field to update must be provided',
-  });
-
-/**
- * Zod schema for validating an array of multiple affiliate updates.
- */
-const zodUpdateManyAffiliateSchema = z
-  .array(zodUpdateManyAffiliateForBulkSchema)
-  .min(1, { message: 'At least one affiliate update object must be provided' });
-
-export type UpdateManyAffiliateInput = z.infer<typeof zodUpdateManyAffiliateSchema>;
-
-/**
  * Named validators — use these directly in your Express routes
  */
 export const validateCreateAffiliate = validateBody(zodCreateAffiliateSchema);
-export const validateCreateManyAffiliate = validateBody(zodCreateManyAffiliateSchema);
 export const validateUpdateAffiliate = validateBody(zodUpdateAffiliateSchema);
-export const validateUpdateManyAffiliate = validateBody(zodUpdateManyAffiliateSchema);
+
