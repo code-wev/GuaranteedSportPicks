@@ -19,8 +19,6 @@ export interface IAffiliate extends Document {
   website?: string; // optional affiliate website
   socialLinks?: string[]; // optional social media links
   notes?: string; // admin notes
-  createdAt?: Date;
-  updatedAt?: Date;
 }
 
 // ========================

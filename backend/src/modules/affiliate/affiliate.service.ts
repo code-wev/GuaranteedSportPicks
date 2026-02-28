@@ -2,13 +2,10 @@
 import mongoose from 'mongoose';
 
 import { IdOrIdsInput, SearchQueryInput } from '../../handlers/common-zod-validator';
-import {
-  CreateAffiliateInput,
-  CreateManyAffiliateInput,
-  UpdateAffiliateInput,
-  UpdateManyAffiliateInput,
-} from './affiliate.validation';
+import { CreateAffiliateInput, UpdateAffiliateInput } from './affiliate.validation';
 import AffiliateModel, { IAffiliate } from '../../../src/model/affiliates/affiliate.model';
+import User, { UserRole } from '../../../src/model/user/user.schema';
+import { TCreateAffiliate } from './affiliate.interface';
 
 /**
  * Service function to create a new affiliate.
@@ -16,24 +13,27 @@ import AffiliateModel, { IAffiliate } from '../../../src/model/affiliates/affili
  * @param {CreateAffiliateInput} data - The data to create a new affiliate.
  * @returns {Promise<Partial<IAffiliate>>} - The created affiliate.
  */
-const createAffiliate = async (data: CreateAffiliateInput): Promise<Partial<IAffiliate>> => {
-  console.log(data, 'hi affliate data');
+const createAffiliate = async (data: TCreateAffiliate): Promise<Partial<IAffiliate>> => {
+  // Validate that the user exists
+  const userId = data.userId;
+  console.log(userId, 'recevie user id');
+  const userExists = await User.exists({ _id: userId });
+  if (!userExists) {
+    throw new Error('User not found');
+  }
+
+  // Validate that the user is not already an affiliate
+  const affiliateExists = await AffiliateModel.exists({
+    userId: userId as unknown as mongoose.Schema.Types.ObjectId,
+  });
+  if (affiliateExists) {
+    throw new Error('User is already an affiliate');
+  }
+
+  //
   const newAffiliate = new AffiliateModel(data);
   const savedAffiliate = await newAffiliate.save();
   return savedAffiliate;
-};
-
-/**
- * Service function to create multiple affiliate.
- *
- * @param {CreateManyAffiliateInput} data - An array of data to create multiple affiliate.
- * @returns {Promise<Partial<IAffiliate>[]>} - The created affiliate. // Note: insertMany returns the created documents, but they may not have all the Mongoose document methods. Depending on your needs, you might want to fetch them again after insertion to get full document instances.
- */
-const createManyAffiliate = async (
-  data: CreateManyAffiliateInput
-): Promise<Partial<IAffiliate>[]> => {
-  const createdAffiliate = await AffiliateModel.insertMany(data);
-  return createdAffiliate;
 };
 
 /**
@@ -47,82 +47,18 @@ const updateAffiliate = async (
   id: IdOrIdsInput['id'],
   data: UpdateAffiliateInput
 ): Promise<Partial<IAffiliate | null>> => {
-  // Check for duplicate (filed) combination
-  const existingAffiliate = await AffiliateModel.findOne({
-    _id: { $ne: id }, // Exclude the current document
-    $or: [
-      {
-        /* filedName: data.filedName, */
-      },
-    ],
-  }).lean();
-  // Prevent duplicate updates
-  if (existingAffiliate) {
-    throw new Error(
-      'Duplicate detected: Another affiliate with the same fieldName already exists.'
-    );
+  const payload = data as UpdateAffiliateInput & { userRole?: string; UserRole?: string };
+  const actorRole = payload.userRole;
+  if (actorRole !== UserRole.ADMIN && payload.status !== undefined) {
+    throw new Error('Unauthorized: only admin can change status');
   }
-  // Proceed to update the affiliate
-  const updatedAffiliate = await AffiliateModel.findByIdAndUpdate(id, data, { new: true });
-  return updatedAffiliate;
-};
 
-/**
- * Service function to update multiple affiliate.
- *
- * @param {UpdateManyAffiliateInput} data - An array of data to update multiple affiliate.
- * @returns {Promise<Partial<IAffiliate>[]>} - The updated affiliate.
- */
-const updateManyAffiliate = async (
-  data: UpdateManyAffiliateInput
-): Promise<Partial<IAffiliate>[]> => {
-  // Early return if no data provided
-  if (data.length === 0) {
-    return [];
-  }
-  // Convert string ids to ObjectId (for safety)
-  const objectIds = data.map((item) => new mongoose.Types.ObjectId(item.id));
-  // Check for duplicates (filedName) excluding the documents being updated
-  const existingAffiliate = await AffiliateModel.find({
-    _id: { $nin: objectIds }, // Exclude documents being updated
-    $or: data.flatMap((item) => [
-      // { filedName: item.filedName },
-    ]),
-  }).lean();
-  // If any duplicates found, throw error
-  if (existingAffiliate.length > 0) {
-    throw new Error(
-      'Duplicate detected: One or more affiliate with the same fieldName already exist.'
-    );
-  }
-  // Prepare bulk operations
-  const operations = data.map((item) => ({
-    updateOne: {
-      filter: { _id: new mongoose.Types.ObjectId(item.id) },
-      update: { $set: item },
-      upsert: false,
-    },
-  }));
-  // Execute bulk update
-  const bulkResult = await AffiliateModel.bulkWrite(operations, {
-    ordered: true, // keep order of operations
-  });
-  // check if all succeeded
-  if (bulkResult.matchedCount !== data.length) {
-    throw new Error('Some documents were not found or updated');
-  }
-  // Fetch the freshly updated documents
-  const updatedDocs = await AffiliateModel.find({ _id: { $in: objectIds } })
-    .lean()
-    .exec();
-  // Map back to original input order
-  const resultMap = new Map<string, any>(updatedDocs.map((doc) => [doc._id.toString(), doc]));
-  // Ensure the result array matches the input order
-  const orderedResults = data.map((item) => {
-    const updated = resultMap.get(item.id);
-    return updated || { _id: item.id };
-  });
-  return orderedResults as Partial<IAffiliate>[];
+  // Proceed to update the affiliate
+  const { userRole, UserRole: _userRole, ...updateData } = payload;
+  void userRole;
+  void _userRole;
+  const updatedAffiliate = await AffiliateModel.findByIdAndUpdate(id, updateData, { new: true });
+  return updatedAffiliate;
 };
 
 /**
@@ -132,6 +68,9 @@ const updateManyAffiliate = async (
  * @returns {Promise<Partial<IAffiliate>>} - The deleted affiliate.
  */
 const deleteAffiliate = async (id: IdOrIdsInput['id']): Promise<Partial<IAffiliate | null>> => {
+  // TODO: Admin can delete any affliate
+  // TODO: User only delete there own affiliate
+
   const deletedAffiliate = await AffiliateModel.findByIdAndDelete(id);
   return deletedAffiliate;
 };
@@ -193,9 +132,7 @@ const getManyAffiliate = async (
 
 export const affiliateServices = {
   createAffiliate,
-  createManyAffiliate,
   updateAffiliate,
-  updateManyAffiliate,
   deleteAffiliate,
   deleteManyAffiliate,
   getAffiliateById,
