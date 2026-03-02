@@ -844,7 +844,9 @@ export default function CreatePickForm() {
                 <div
                   className='relative border rounded-lg overflow-hidden'
                   style={{ borderColor: colors.border }}>
-                  <img
+                  <Image
+                  height={200}
+                  width={200}
                     src={bannerPreview}
                     alt='Banner'
                     className='w-full h-48 object-cover'
@@ -1018,6 +1020,8 @@ export default function CreatePickForm() {
                   <Image
                     src={formData.pickBanner}
                     alt=''
+                    height={200}
+                    width={200}
                     className='w-full h-full object-cover'
                   />
                 </div>
