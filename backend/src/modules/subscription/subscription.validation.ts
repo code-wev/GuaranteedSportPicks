@@ -2,63 +2,101 @@ import { isMongoId } from 'validator';
 import { z } from 'zod';
 import { validateBody } from '../../handlers/zod-error-handler';
 
-/**
- * Subscription Validation Schemas and Types
- *
- * This module defines Zod schemas for validating subscription related
- * requests such as creation (single + bulk) and updates (single + bulk).
- * It also exports corresponding TypeScript types inferred from these schemas.
- * Each schema includes detailed validation rules and custom error messages
- * to ensure data integrity and provide clear feedback to API consumers.
- *
- * Named validator middleware functions are exported for direct use in Express routes.
- */
+export const SelectedSportEnum = ['NFL', 'NBA', 'MLB', 'NHL'] as const;
+export const PackageNameEnum = ['DAILY', 'WEEKLY', 'MONTHLY', 'SESSION'] as const;
 
 /**
- * Zod schema for validating data when **creating** a single subscription.
- * 
- * → Add all **required** fields here
+ * Create Subscription Validation
  */
 const zodCreateSubscriptionSchema = z
   .object({
-    // Example fields — replace / expand as needed:
-    // name: z.string({ message: 'Subscription name is required' }).min(2, 'Name must be at least 2 characters').max(100),
-    // email: z.string().email({ message: 'Invalid email format' }),
-    // age: z.number().int().positive().optional(),
-    // status: z.enum(['active', 'inactive', 'pending']).default('pending'),
+    userId: z
+      .string()
+      .refine(isMongoId, { message: 'Invalid userId, must be a valid MongoDB ObjectId' }),
+
+    packageName: z.enum(PackageNameEnum, {
+      message: 'Package name must be DAILY, WEEKLY, MONTHLY or SESSION',
+    }),
+
+    selectedSport: z.enum(SelectedSportEnum, {
+      message: 'Selected sport must be NFL, NBA, MLB, or NHL',
+    }),
+
+    customDays: z.number().int().positive().optional(),
+    customPrice: z.number().positive().optional(),
+  })
+  .superRefine((data, ctx) => {
+    /**
+     * SESSION VALIDATION RULES
+     */
+    if (data.packageName === 'SESSION') {
+      if (!data.customDays) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'customDays is required for SESSION package',
+          path: ['customDays'],
+        });
+      }
+      if (data.customDays && data.customDays < 1) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'customDays must be at least 1',
+          path: ['customDays'],
+        });
+      }
+    }
+
+    /**
+     * FIXED PACKAGE RULES
+     */
+    if (data.packageName !== 'SESSION') {
+      if (data.customDays !== undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'customDays is allowed only for SESSION package',
+          path: ['customDays'],
+        });
+      }
+      if (data.customPrice !== undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'customPrice is allowed only for SESSION package',
+          path: ['customPrice'],
+        });
+      }
+    }
   })
   .strict();
 
 export type CreateSubscriptionInput = z.infer<typeof zodCreateSubscriptionSchema>;
 
 /**
- * Zod schema for validating **bulk creation** (array of subscription objects).
+ * Bulk Create Validation
  */
 const zodCreateManySubscriptionSchema = z
   .array(zodCreateSubscriptionSchema)
-  .min(1, { message: 'At least one subscription must be provided for bulk creation' });
+  .min(1, { message: 'At least one subscription object is required' });
 
 export type CreateManySubscriptionInput = z.infer<typeof zodCreateManySubscriptionSchema>;
 
 /**
- * Zod schema for validating data when **updating** an existing subscription.
- * 
- * → All fields should usually be .optional()
+ * Update Subscription Validation
+ * → All fields optional
  */
 const zodUpdateSubscriptionSchema = z
   .object({
-    // Example fields — replace / expand as needed:
-    // name: z.string().min(2, 'Name must be at least 2 characters').max(100).optional(),
-    // email: z.string().email({ message: 'Invalid email format' }).optional(),
-    // age: z.number().int().positive().optional(),
-    // status: z.enum(['active', 'inactive', 'pending']).optional(),
+    packageName: z.enum(PackageNameEnum).optional(),
+    selectedSport: z.enum(SelectedSportEnum).optional(),
+    customDays: z.number().int().positive().optional(),
+    customPrice: z.number().positive().optional(),
+    isSubscribed: z.boolean().optional(),
   })
   .strict();
 
 export type UpdateSubscriptionInput = z.infer<typeof zodUpdateSubscriptionSchema>;
 
 /**
- * Zod schema for validating bulk updates (array of partial subscription objects).
+ * Bulk Update Single Item
  */
 const zodUpdateManySubscriptionForBulkSchema = zodUpdateSubscriptionSchema
   .extend({
@@ -69,16 +107,16 @@ const zodUpdateManySubscriptionForBulkSchema = zodUpdateSubscriptionSchema
   });
 
 /**
- * Zod schema for validating an array of multiple subscription updates.
+ * Bulk Update Validation (Array)
  */
 const zodUpdateManySubscriptionSchema = z
   .array(zodUpdateManySubscriptionForBulkSchema)
-  .min(1, { message: 'At least one subscription update object must be provided' });
+  .min(1, { message: 'At least one subscription update object is required' });
 
 export type UpdateManySubscriptionInput = z.infer<typeof zodUpdateManySubscriptionSchema>;
 
 /**
- * Named validators — use these directly in your Express routes
+ * Express Validators
  */
 export const validateCreateSubscription = validateBody(zodCreateSubscriptionSchema);
 export const validateCreateManySubscription = validateBody(zodCreateManySubscriptionSchema);

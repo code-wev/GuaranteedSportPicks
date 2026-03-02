@@ -4,9 +4,7 @@ import { Router } from 'express';
 // Import controller from corresponding module
 import { 
   createSubscription,
-  createManySubscription,
   updateSubscription,
-  updateManySubscription,
   deleteSubscription,
   deleteManySubscription,
   getSubscriptionById,
@@ -28,25 +26,10 @@ const router = Router();
  * @param {function} validation - ['validateCreateSubscription']
  * @param {function} controller - ['createSubscription']
  */
-router.post("/create-subscription", validateCreateSubscription, createSubscription);
+router.post("/", validateCreateSubscription, createSubscription);
 
-/**
- * @route POST /api/v1/subscription/create-subscription/many
- * @description Create multiple subscriptions
- * @access Public
- * @param {function} validation - ['validateCreateManySubscription']
- * @param {function} controller - ['createManySubscription']
- */
-router.post("/create-subscription/many", validateCreateManySubscription, createManySubscription);
 
-/**
- * @route PUT /api/v1/subscription/update-subscription/many
- * @description Update multiple subscriptions information
- * @access Public
- * @param {function} validation - ['validateIds', 'validateUpdateManySubscription']
- * @param {function} controller - ['updateManySubscription']
- */
-router.put("/update-subscription/many", validateIds, validateUpdateManySubscription, updateManySubscription);
+
 
 /**
  * @route PUT /api/v1/subscription/update-subscription/:id
@@ -56,16 +39,9 @@ router.put("/update-subscription/many", validateIds, validateUpdateManySubscript
  * @param {function} validation - ['validateId', 'validateUpdateSubscription']
  * @param {function} controller - ['updateSubscription']
  */
-router.put("/update-subscription/:id", validateId, validateUpdateSubscription, updateSubscription);
+router.put("/:id", validateId, validateUpdateSubscription, updateSubscription);
 
-/**
- * @route DELETE /api/v1/subscription/delete-subscription/many
- * @description Delete multiple subscriptions
- * @access Public
- * @param {function} validation - ['validateIds']
- * @param {function} controller - ['deleteManySubscription']
- */
-router.delete("/delete-subscription/many", validateIds, deleteManySubscription);
+
 
 /**
  * @route DELETE /api/v1/subscription/delete-subscription/:id
@@ -75,7 +51,7 @@ router.delete("/delete-subscription/many", validateIds, deleteManySubscription);
  * @param {function} validation - ['validateId']
  * @param {function} controller - ['deleteSubscription']
  */
-router.delete("/delete-subscription/:id", validateId, deleteSubscription);
+router.delete("/:id", validateId, deleteSubscription);
 
 /**
  * @route GET /api/v1/subscription/get-subscription/many
@@ -84,7 +60,7 @@ router.delete("/delete-subscription/:id", validateId, deleteSubscription);
  * @param {function} validation - ['validateSearchQueries']
  * @param {function} controller - ['getManySubscription']
  */
-router.get("/get-subscription/many", validateSearchQueries, getManySubscription);
+router.get("/many", validateSearchQueries, getManySubscription);
 
 /**
  * @route GET /api/v1/subscription/get-subscription/:id
@@ -94,7 +70,9 @@ router.get("/get-subscription/many", validateSearchQueries, getManySubscription)
  * @param {function} validation - ['validateId']
  * @param {function} controller - ['getSubscriptionById']
  */
-router.get("/get-subscription/:id", validateId, getSubscriptionById);
+router.get("/me", validateId, getSubscriptionById);
 
+
+// TODO: Single Subscription data get er api lagba
 // Export the router
 module.exports = router;
