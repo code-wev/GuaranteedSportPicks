@@ -6,14 +6,16 @@ import {
   createSubscription,
   updateSubscription,
   deleteSubscription,
-  deleteManySubscription,
   getSubscriptionById,
   getManySubscription
 } from './subscription.controller';
 
 //Import validation from corresponding module
-import { validateCreateSubscription, validateCreateManySubscription, validateUpdateSubscription, validateUpdateManySubscription} from './subscription.validation';
-import { validateId, validateIds, validateSearchQueries } from '../../handlers/common-zod-validator';
+import { validateCreateSubscription, validateUpdateSubscription} from './subscription.validation';
+import { validateId,  validateSearchQueries } from '../../handlers/common-zod-validator';
+import isAuthorized from '../../../src/middlewares/is-authorized';
+import authorizedRoles from '../../../src/middlewares/authorized-roles';
+import { UserRole } from '../../../src/model/user/user.schema';
 
 // Initialize router
 const router = Router();
@@ -26,10 +28,7 @@ const router = Router();
  * @param {function} validation - ['validateCreateSubscription']
  * @param {function} controller - ['createSubscription']
  */
-router.post("/", validateCreateSubscription, createSubscription);
-
-
-
+router.post("/", isAuthorized,authorizedRoles([UserRole.USER]), validateCreateSubscription, createSubscription);
 
 /**
  * @route PUT /api/v1/subscription/update-subscription/:id

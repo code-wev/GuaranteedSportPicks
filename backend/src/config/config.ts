@@ -23,6 +23,7 @@ interface Config {
   EXPRESS_FILE_UPLOAD_CONFIG: object;
   EMAIL_VERIFICATION_REDIRECT_URI: string;
   PASSWORD_RESET_REDIRECT_URI: string;
+  STRIPE_SECRET_KEY: string;
 }
 
 const config: Config = {
@@ -52,6 +53,7 @@ const config: Config = {
   },
   EMAIL_VERIFICATION_REDIRECT_URI: process.env.EMAIL_VERIFICATION_REDIRECT_URI as string,
   PASSWORD_RESET_REDIRECT_URI: process.env.PASSWORD_RESET_REDIRECT_URI as string,
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
 };
 
 export default config;

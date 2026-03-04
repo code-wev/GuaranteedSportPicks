@@ -1,26 +1,74 @@
 // Import the model
 import mongoose from 'mongoose';
+import config from 'src/config/config';
+import Stripe from 'stripe';
+import Subscription, { ISubscription } from '../../../src/model/subscription/subscription.model';
 import { IdOrIdsInput, SearchQueryInput } from '../../handlers/common-zod-validator';
-import {
-  CreateSubscriptionInput,
-  CreateManySubscriptionInput,
-  UpdateSubscriptionInput,
-  UpdateManySubscriptionInput,
-} from './subscription.validation';
-import Subscription, { ISubscription } from 'src/model/subscription/subscription.model';
+import { CreateSubscriptionInput, UpdateSubscriptionInput } from './subscription.validation';
 
 /**
  * Service function to create a new subscription.
  *
- * @param {CreateSubscriptionInput} data - The data to create a new subscription.
+ * @param {CreateSubscriptionInput & { userId: mongoose.Types.ObjectId | string }} data - The data to create a new subscription, including the authenticated user's ID.
  * @returns {Promise<Partial<ISubscription>>} - The created subscription.
  */
-const createSubscription = async (data: CreateSubscriptionInput): Promise<Partial<ISubscription>> => {
+const stripe = new Stripe(config.STRIPE_SECRET_KEY);
+const createSubscription = async (
+  data: CreateSubscriptionInput & { userId: mongoose.Types.ObjectId | string }
+): Promise<Partial<ISubscription>> => {
+  // Call the service method to create a new subscription and get the result
+  const rawUserId = data.userId;
+  const normalizedUserId =
+    rawUserId instanceof mongoose.Types.ObjectId
+      ? rawUserId
+      : typeof rawUserId === 'string' && mongoose.isValidObjectId(rawUserId)
+        ? new mongoose.Types.ObjectId(rawUserId)
+        : null;
+
+  if (normalizedUserId) {
+    const latestSubscription = await Subscription.findOne()
+      .where('userId')
+      .equals(normalizedUserId)
+      .sort({ createdAt: -1 })
+      .select('subscriptionEnd')
+      .lean();
+
+    if (latestSubscription?.subscriptionEnd) {
+      const subscriptionEndTime = new Date(latestSubscription.subscriptionEnd).getTime();
+      if (!Number.isNaN(subscriptionEndTime) && subscriptionEndTime > Date.now()) {
+        throw new Error('User already has an active subscription');
+      }
+    }
+  }
+
+  // const paymentIntent =
+  // await s
+
   const newSubscription = new Subscription(data);
   const savedSubscription = await newSubscription.save();
-  return savedSubscription;
-};
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: data.price * 100,
+    currency: 'usd',
+    automatic_payment_methods: {
+      enabled: true,
+    },
+    metadata: {
+      userId: data.userId.toString(),
+      subscriptionId: savedSubscription._id.toString(),
+      packageName: data.packageName,
+      price: data.price,
+      currency: 'usd',
+      type: 'subscription',
+      selectedSport: data.selectedSport.join(','),
+      isSession: data.isSession.toString(),
+    },
+  });
 
+  return {
+    ...savedSubscription,
+    paymentIntent,
+  };
+};
 
 /**
  * Service function to update a single subscription by ID.
@@ -29,22 +77,29 @@ const createSubscription = async (data: CreateSubscriptionInput): Promise<Partia
  * @param {UpdateSubscriptionInput} data - The updated data for the subscription.
  * @returns {Promise<Partial<ISubscription>>} - The updated subscription.
  */
-const updateSubscription = async (id: IdOrIdsInput['id'], data: UpdateSubscriptionInput): Promise<Partial<ISubscription | null>> => {
+const updateSubscription = async (
+  id: IdOrIdsInput['id'],
+  data: UpdateSubscriptionInput
+): Promise<Partial<ISubscription | null>> => {
   // Check for duplicate (filed) combination
   const existingSubscription = await Subscription.findOne({
     _id: { $ne: id }, // Exclude the current document
-    $or: [{ /* filedName: data.filedName, */ }],
+    $or: [
+      {
+        /* filedName: data.filedName, */
+      },
+    ],
   }).lean();
   // Prevent duplicate updates
   if (existingSubscription) {
-    throw new Error('Duplicate detected: Another subscription with the same fieldName already exists.');
+    throw new Error(
+      'Duplicate detected: Another subscription with the same fieldName already exists.'
+    );
   }
   // Proceed to update the subscription
   const updatedSubscription = await Subscription.findByIdAndUpdate(id, data, { new: true });
   return updatedSubscription;
 };
-
-
 
 /**
  * Service function to delete a single subscription by ID.
@@ -52,7 +107,9 @@ const updateSubscription = async (id: IdOrIdsInput['id'], data: UpdateSubscripti
  * @param {IdOrIdsInput['id']} id - The ID of the subscription to delete.
  * @returns {Promise<Partial<ISubscription>>} - The deleted subscription.
  */
-const deleteSubscription = async (id: IdOrIdsInput['id']): Promise<Partial<ISubscription | null>> => {
+const deleteSubscription = async (
+  id: IdOrIdsInput['id']
+): Promise<Partial<ISubscription | null>> => {
   const deletedSubscription = await Subscription.findByIdAndDelete(id);
   return deletedSubscription;
 };
@@ -63,11 +120,13 @@ const deleteSubscription = async (id: IdOrIdsInput['id']): Promise<Partial<ISubs
  * @param {IdOrIdsInput['ids']} ids - An array of IDs of subscription to delete.
  * @returns {Promise<Partial<ISubscription>[]>} - The deleted subscription.
  */
-const deleteManySubscription = async (ids: IdOrIdsInput['ids']): Promise<Partial<ISubscription>[]> => {
+const deleteManySubscription = async (
+  ids: IdOrIdsInput['ids']
+): Promise<Partial<ISubscription>[]> => {
   const subscriptionToDelete = await Subscription.find({ _id: { $in: ids } });
   if (!subscriptionToDelete.length) throw new Error('No subscription found to delete');
   await Subscription.deleteMany({ _id: { $in: ids } });
-  return subscriptionToDelete; 
+  return subscriptionToDelete;
 };
 
 /**
@@ -76,7 +135,9 @@ const deleteManySubscription = async (ids: IdOrIdsInput['ids']): Promise<Partial
  * @param {IdOrIdsInput['id']} id - The ID of the subscription to retrieve.
  * @returns {Promise<Partial<ISubscription>>} - The retrieved subscription.
  */
-const getSubscriptionById = async (id: IdOrIdsInput['id']): Promise<Partial<ISubscription | null>> => {
+const getSubscriptionById = async (
+  id: IdOrIdsInput['id']
+): Promise<Partial<ISubscription | null>> => {
   const subscription = await Subscription.findById(id);
   return subscription;
 };
@@ -87,7 +148,9 @@ const getSubscriptionById = async (id: IdOrIdsInput['id']): Promise<Partial<ISub
  * @param {SearchQueryInput} query - The query parameters for filtering subscription.
  * @returns {Promise<Partial<ISubscription>[]>} - The retrieved subscription
  */
-const getManySubscription = async (query: SearchQueryInput): Promise<{ subscriptions: Partial<ISubscription>[]; totalData: number; totalPages: number }> => {
+const getManySubscription = async (
+  query: SearchQueryInput
+): Promise<{ subscriptions: Partial<ISubscription>[]; totalData: number; totalPages: number }> => {
   const { searchKey = '', showPerPage = 10, pageNo = 1 } = query;
   // Build the search filter based on the search key
   const searchFilter = {
@@ -118,3 +181,4 @@ export const subscriptionServices = {
   getSubscriptionById,
   getManySubscription,
 };
+

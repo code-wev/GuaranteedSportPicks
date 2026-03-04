@@ -2,28 +2,30 @@ import { isMongoId } from 'validator';
 import { z } from 'zod';
 import { validateBody } from '../../handlers/zod-error-handler';
 
-export const SelectedSportEnum = ['NFL', 'NBA', 'MLB', 'NHL'] as const;
 export const PackageNameEnum = ['DAILY', 'WEEKLY', 'MONTHLY', 'SESSION'] as const;
 
 /**
- * Create Subscription Validation
+ * Base Selected Sport Schema (Array of String)
+ */
+const selectedSportSchema = z
+  .array(z.string())
+  .min(1, { message: 'At least one sport must be selected' });
+
+/**
+ * -----------------------------------------
+ * CREATE SUBSCRIPTION VALIDATION
+ * -----------------------------------------
  */
 const zodCreateSubscriptionSchema = z
   .object({
-    userId: z
-      .string()
-      .refine(isMongoId, { message: 'Invalid userId, must be a valid MongoDB ObjectId' }),
-
     packageName: z.enum(PackageNameEnum, {
       message: 'Package name must be DAILY, WEEKLY, MONTHLY or SESSION',
     }),
-
-    selectedSport: z.enum(SelectedSportEnum, {
-      message: 'Selected sport must be NFL, NBA, MLB, or NHL',
-    }),
-
-    customDays: z.number().int().positive().optional(),
-    customPrice: z.number().positive().optional(),
+  selectedSport: z.array(z.string()).min(1, { message: 'At least one sport must be selected' }),
+  price: z.number({message:"Price must be number"}),
+  isSession:z.boolean({message:"Is Session Required and its must be boolean"}),
+  customDays: z.number().int().positive().optional(),
+  customPrice: z.number().positive().optional(),
   })
   .superRefine((data, ctx) => {
     /**
@@ -37,6 +39,7 @@ const zodCreateSubscriptionSchema = z
           path: ['customDays'],
         });
       }
+
       if (data.customDays && data.customDays < 1) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -57,6 +60,7 @@ const zodCreateSubscriptionSchema = z
           path: ['customDays'],
         });
       }
+
       if (data.customPrice !== undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -71,7 +75,9 @@ const zodCreateSubscriptionSchema = z
 export type CreateSubscriptionInput = z.infer<typeof zodCreateSubscriptionSchema>;
 
 /**
- * Bulk Create Validation
+ * -----------------------------------------
+ * BULK CREATE VALIDATION
+ * -----------------------------------------
  */
 const zodCreateManySubscriptionSchema = z
   .array(zodCreateSubscriptionSchema)
@@ -80,15 +86,20 @@ const zodCreateManySubscriptionSchema = z
 export type CreateManySubscriptionInput = z.infer<typeof zodCreateManySubscriptionSchema>;
 
 /**
- * Update Subscription Validation
+ * -----------------------------------------
+ * UPDATE SUBSCRIPTION VALIDATION
  * → All fields optional
+ * -----------------------------------------
  */
 const zodUpdateSubscriptionSchema = z
   .object({
     packageName: z.enum(PackageNameEnum).optional(),
-    selectedSport: z.enum(SelectedSportEnum).optional(),
+
+    selectedSport: selectedSportSchema.optional(),
+
     customDays: z.number().int().positive().optional(),
     customPrice: z.number().positive().optional(),
+
     isSubscribed: z.boolean().optional(),
   })
   .strict();
@@ -96,29 +107,47 @@ const zodUpdateSubscriptionSchema = z
 export type UpdateSubscriptionInput = z.infer<typeof zodUpdateSubscriptionSchema>;
 
 /**
- * Bulk Update Single Item
+ * -----------------------------------------
+ * BULK UPDATE (Single Item Schema)
+ * -----------------------------------------
  */
-const zodUpdateManySubscriptionForBulkSchema = zodUpdateSubscriptionSchema
-  .extend({
-    id: z.string().refine(isMongoId, { message: 'Please provide a valid MongoDB ObjectId' }),
-  })
-  .refine((data) => Object.keys(data).length > 1, {
-    message: 'At least one field to update must be provided',
-  });
+const zodUpdateManySubscriptionForBulkSchema =
+  zodUpdateSubscriptionSchema
+    .extend({
+      id: z.string().refine(isMongoId, {
+        message: 'Please provide a valid MongoDB ObjectId',
+      }),
+    })
+    .refine((data) => Object.keys(data).length > 1, {
+      message: 'At least one field to update must be provided',
+    });
 
 /**
- * Bulk Update Validation (Array)
+ * -----------------------------------------
+ * BULK UPDATE VALIDATION (Array)
+ * -----------------------------------------
  */
 const zodUpdateManySubscriptionSchema = z
   .array(zodUpdateManySubscriptionForBulkSchema)
-  .min(1, { message: 'At least one subscription update object is required' });
+  .min(1, {
+    message: 'At least one subscription update object is required',
+  });
 
 export type UpdateManySubscriptionInput = z.infer<typeof zodUpdateManySubscriptionSchema>;
 
 /**
- * Express Validators
+ * -----------------------------------------
+ * EXPRESS VALIDATORS
+ * -----------------------------------------
  */
-export const validateCreateSubscription = validateBody(zodCreateSubscriptionSchema);
-export const validateCreateManySubscription = validateBody(zodCreateManySubscriptionSchema);
-export const validateUpdateSubscription = validateBody(zodUpdateSubscriptionSchema);
-export const validateUpdateManySubscription = validateBody(zodUpdateManySubscriptionSchema);
+export const validateCreateSubscription =
+  validateBody(zodCreateSubscriptionSchema);
+
+export const validateCreateManySubscription =
+  validateBody(zodCreateManySubscriptionSchema);
+
+export const validateUpdateSubscription =
+  validateBody(zodUpdateSubscriptionSchema);
+
+export const validateUpdateManySubscription =
+  validateBody(zodUpdateManySubscriptionSchema);

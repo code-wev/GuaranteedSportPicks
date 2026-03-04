@@ -3,6 +3,7 @@ import { subscriptionServices } from './subscription.service';
 import { SearchQueryInput } from '../../handlers/common-zod-validator';
 import ServerResponse from '../../helpers/responses/custom-response';
 import catchAsync from '../../utils/catch-async/catch-async';
+import { AuthenticatedRequest } from 'src/middlewares/is-authorized';
 
 /**
  * Controller function to handle the creation of a single subscription.
@@ -12,8 +13,12 @@ import catchAsync from '../../utils/catch-async/catch-async';
  * @returns {Promise<Partial<ISubscription>>} - The created subscription.
  * @throws {Error} - Throws an error if the subscription creation fails.
  */
-export const createSubscription = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to create a new subscription and get the result
+export const createSubscription = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+
+
+
+  const userId = req.user!._id
+  req.body.userId  = userId
   const result = await subscriptionServices.createSubscription(req.body);
   if (!result) throw new Error('Failed to create subscription');
   // Send a success response with the created subscription data
