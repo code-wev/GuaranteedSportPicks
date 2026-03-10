@@ -3,24 +3,14 @@
 import { MdOutlinePayment } from "react-icons/md";
 
 export default function OrderSummary({ 
-  selectedPackage, 
+  packageName, 
   selectedSport, 
-  paymentModel, 
-  promoCode, 
-  onPurchase 
+  seasonalDays,
+  seasonalPrice,
+  total,
+  onPurchase,
+  isLoading
 }) {
-  const calculateTotal = () => {
-    if (!selectedPackage) return 0;
-    
-    const packagePrices = {
-      "Daily Pick": 25.00,
-      "Weekly Pick": 99.00,
-      "Monthly Pick": 299.00
-    };
-    
-    return packagePrices[selectedPackage.name] || 0;
-  };
-
   return (
     <div className="bg-white rounded-xl p-5 shadow-sm mb-8">
       <h2 className="text-base font-medium mb-4">Order Summary</h2>
@@ -30,45 +20,47 @@ export default function OrderSummary({
         <div className="flex justify-between">
           <span className="text-gray-600">Package:</span>
           <span className="font-medium">
-            {selectedPackage ? selectedPackage.name : "Not selected"}
+            {packageName || "Not selected"}
           </span>
         </div>
 
         <div className="flex justify-between">
           <span className="text-gray-600">Sport:</span>
           <span className="font-medium">
-            {selectedSport ? selectedSport.name : "Not selected"}
+            {selectedSport.length > 0 ? selectedSport.join(", ") : "Not selected"}
           </span>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-gray-600">Payment Model:</span>
-          <span className="font-medium">
-            {paymentModel || "Not selected"}
-          </span>
-        </div>
+        {packageName === "SEASONAL" && (
+          <>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Days:</span>
+              <span className="font-medium">
+                {seasonalDays || "Not set"}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Price:</span>
+              <span className="font-medium">
+                ${seasonalPrice || "0.00"}
+              </span>
+            </div>
+          </>
+        )}
 
-        <div className="flex justify-between">
-          <span className="text-gray-600">Promo Code:</span>
-          <span className="font-medium">
-            {promoCode || "Not applied"}
-          </span>
+        <div className="flex justify-between border-t pt-2 mt-2">
+          <span className="text-gray-800 font-medium">Total:</span>
+          <span className="font-bold text-[#B91C1C]">${total.toFixed(2)}</span>
         </div>
       </div>
 
       {/* Divider */}
       <div className="border-t border-gray-200 mb-4"></div>
 
-      {/* Total */}
-      <div className="flex justify-between font-semibold text-[17px] mb-4">
-        <span>Total</span>
-        <span className="text-[#B91C1C]">${calculateTotal().toFixed(2)}</span>
-      </div>
-
       {/* Payment Button */}
       <button
         onClick={onPurchase}
-        disabled={!selectedPackage || !selectedSport || !paymentModel}
+        disabled={!packageName || selectedSport.length === 0 || (packageName === "SEASONAL" && (!seasonalDays || !seasonalPrice)) || isLoading}
         className={`
           w-full 
           text-white 
@@ -77,14 +69,14 @@ export default function OrderSummary({
           font-medium
           text-sm
           flex items-center justify-center gap-2
-          ${!selectedPackage || !selectedSport || !paymentModel
+          ${!packageName || selectedSport.length === 0 || (packageName === "SEASONAL" && (!seasonalDays || !seasonalPrice)) || isLoading
             ? "bg-gray-400 cursor-not-allowed"
             : "bg-[#B91C1C] hover:bg-red-800"
           }
         `}
       >
-        <MdOutlinePayment />
-        Process to payment
+        <MdOutlinePayment size={18} />
+        {isLoading ? "Processing..." : "Proceed to Payment"}
       </button>
     </div>
   );
