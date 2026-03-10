@@ -53,7 +53,12 @@ const menu = [
     url: "/dashboard/purchase",
   },
   {
-    title: "Purchase history",
+    title: "My Subscription",
+    icon: <RiFileHistoryFill />,
+    url: "/dashboard/my-subscription",
+  },
+  {
+    title: "Payment History",
     icon: <RiFileHistoryFill />,
     url: "/dashboard/purchase-history",
   },

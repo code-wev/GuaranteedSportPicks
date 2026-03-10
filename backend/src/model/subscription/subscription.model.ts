@@ -1,5 +1,4 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import { string } from 'node_modules/zod/index.cjs';
 
 export enum SelectedSport {
   NFL = 'NFL',
@@ -12,9 +11,10 @@ export enum PackageName {
   DAILY = 'DAILY',
   WEEKLY = 'WEEKLY',
   MONTHLY = 'MONTHLY',
-  SESSION = 'SESSION',
+  SEASONAL = 'SEASONAL',
 }
-export enum subscriptionStatus {
+
+export enum SubscriptionStatus {
   PENDING = 'PENDING',
   PAID = 'PAID',
   FAILED = 'FAILED',
@@ -24,23 +24,25 @@ export enum subscriptionStatus {
   REFUNDED = 'REFUNDED',
   SUSPENDED = 'SUSPENDED',
 }
+
 export interface ISubscription extends Document {
   userId: mongoose.Schema.Types.ObjectId;
   subscriptionStart: string;
   subscriptionEnd: string;
   nextBilling: string;
   packageName: PackageName;
-  paymentIntent: {};
-
-  //  UPDATED → Array of enum
+  paymentLink?: string;
+  paymentIntentId?: string;
+  stripeSubscriptionId?: string;
+  stripeSessionId?: string;
   selectedSport: SelectedSport[];
-
   price: number;
-  isSession: boolean;
-  customPrice?: number;
-  customDays?: number;
+  isSeasonal: boolean;
+  seasonalDays?: number;
+  seasonalPrice?: number;
   isSubscribed: boolean;
-  status: subscriptionStatus;
+  status: SubscriptionStatus;
+  cancelledAt?: string;
 }
 
 const SubscriptionSchema = new Schema<ISubscription>(
@@ -54,10 +56,11 @@ const SubscriptionSchema = new Schema<ISubscription>(
     subscriptionStart: {
       type: String,
     },
+
     status: {
       type: String,
-      enum: Object.values(subscriptionStatus),
-      default: subscriptionStatus.PENDING,
+      enum: Object.values(SubscriptionStatus),
+      default: SubscriptionStatus.PENDING,
     },
 
     subscriptionEnd: {
@@ -74,7 +77,22 @@ const SubscriptionSchema = new Schema<ISubscription>(
       required: true,
     },
 
-    //  ARRAY ENUM IMPLEMENTATION
+    paymentLink: {
+      type: String,
+    },
+
+    paymentIntentId: {
+      type: String,
+    },
+
+    stripeSubscriptionId: {
+      type: String,
+    },
+
+    stripeSessionId: {
+      type: String,
+    },
+
     selectedSport: {
       type: [
         {
@@ -96,22 +114,23 @@ const SubscriptionSchema = new Schema<ISubscription>(
       required: true,
     },
 
-    isSession: {
+    isSeasonal: {
       type: Boolean,
       required: true,
+      default: false,
     },
 
-    customPrice: {
+    seasonalPrice: {
       type: Number,
       required: function (this: ISubscription) {
-        return this.packageName === PackageName.SESSION;
+        return this.packageName === PackageName.SEASONAL;
       },
     },
 
-    customDays: {
+    seasonalDays: {
       type: Number,
       required: function (this: ISubscription) {
-        return this.packageName === PackageName.SESSION;
+        return this.packageName === PackageName.SEASONAL;
       },
     },
 
@@ -119,11 +138,20 @@ const SubscriptionSchema = new Schema<ISubscription>(
       type: Boolean,
       default: false,
     },
+
+    cancelledAt: {
+      type: String,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+// Index for faster queries
+SubscriptionSchema.index({ userId: 1, status: 1 });
+SubscriptionSchema.index({ stripeSubscriptionId: 1 });
+SubscriptionSchema.index({ stripeSessionId: 1 });
 
 const Subscription = mongoose.model<ISubscription>('Subscription', SubscriptionSchema);
 

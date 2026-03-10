@@ -2,7 +2,7 @@ import { isMongoId } from 'validator';
 import { z } from 'zod';
 import { validateBody } from '../../handlers/zod-error-handler';
 
-export const PackageNameEnum = ['DAILY', 'WEEKLY', 'MONTHLY', 'SESSION'] as const;
+export const PackageNameEnum = ['DAILY', 'WEEKLY', 'MONTHLY', 'SEASONAL'] as const;
 
 /**
  * Base Selected Sport Schema (Array of String)
@@ -19,58 +19,101 @@ const selectedSportSchema = z
 const zodCreateSubscriptionSchema = z
   .object({
     packageName: z.enum(PackageNameEnum, {
-      message: 'Package name must be DAILY, WEEKLY, MONTHLY or SESSION',
+      message: 'Package name must be DAILY, WEEKLY, MONTHLY or SEASONAL',
     }),
-  selectedSport: z.array(z.string()).min(1, { message: 'At least one sport must be selected' }),
-  price: z.number({message:"Price must be number"}),
-  isSession:z.boolean({message:"Is Session Required and its must be boolean"}),
-  customDays: z.number().int().positive().optional(),
-  customPrice: z.number().positive().optional(),
+    selectedSport: z.array(z.string()).min(1, { message: 'At least one sport must be selected' }),
+    price: z.number().optional(),
+    isSeasonal: z.boolean({ message: 'isSeasonal is required and must be boolean' }).optional(),
+    isSession: z.boolean().optional(), // Backwards compatibility
+    seasonalDays: z.number().int().positive().optional(),
+    seasonalPrice: z.number().positive().optional(),
+    customDays: z.number().int().positive().optional(), // Backwards compatibility
+    customPrice: z.number().positive().optional(), // Backwards compatibility
   })
   .superRefine((data, ctx) => {
+    // Map old field names to new ones for backwards compatibility
+    if (data.isSession !== undefined && data.isSeasonal === undefined) {
+      (data as any).isSeasonal = data.isSession;
+    }
+    if (data.customDays !== undefined && data.seasonalDays === undefined) {
+      (data as any).seasonalDays = data.customDays;
+    }
+    if (data.customPrice !== undefined && data.seasonalPrice === undefined) {
+      (data as any).seasonalPrice = data.customPrice;
+    }
+
     /**
-     * SESSION VALIDATION RULES
+     * SEASONAL VALIDATION RULES
      */
-    if (data.packageName === 'SESSION') {
-      if (!data.customDays) {
+    if (data.packageName === 'SEASONAL') {
+      const seasonalDays = (data as any).seasonalDays;
+      const seasonalPrice = (data as any).seasonalPrice;
+
+      if (!seasonalDays) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'customDays is required for SESSION package',
-          path: ['customDays'],
+          message: 'seasonalDays is required for SEASONAL package',
+          path: ['seasonalDays'],
         });
       }
 
-      if (data.customDays && data.customDays < 1) {
+      if (seasonalDays && seasonalDays < 1) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'customDays must be at least 1',
-          path: ['customDays'],
+          message: 'seasonalDays must be at least 1',
+          path: ['seasonalDays'],
+        });
+      }
+
+      if (!seasonalPrice) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'seasonalPrice is required for SEASONAL package',
+          path: ['seasonalPrice'],
+        });
+      }
+
+      if (seasonalPrice && seasonalPrice < 1) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'seasonalPrice must be at least 1',
+          path: ['seasonalPrice'],
         });
       }
     }
 
     /**
-     * FIXED PACKAGE RULES
+     * FIXED PACKAGE RULES (DAILY, WEEKLY, MONTHLY)
      */
-    if (data.packageName !== 'SESSION') {
-      if (data.customDays !== undefined) {
+    if (data.packageName !== 'SEASONAL') {
+      const seasonalDays = (data as any).seasonalDays;
+      const seasonalPrice = (data as any).seasonalPrice;
+
+      if (seasonalDays !== undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'customDays is allowed only for SESSION package',
-          path: ['customDays'],
+          message: 'seasonalDays is allowed only for SEASONAL package',
+          path: ['seasonalDays'],
         });
       }
 
-      if (data.customPrice !== undefined) {
+      if (seasonalPrice !== undefined) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: 'customPrice is allowed only for SESSION package',
-          path: ['customPrice'],
+          message: 'seasonalPrice is allowed only for SEASONAL package',
+          path: ['seasonalPrice'],
+        });
+      }
+
+      if (data.price === undefined) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Price is required for this package',
+          path: ['price'],
         });
       }
     }
-  })
-  .strict();
+  });
 
 export type CreateSubscriptionInput = z.infer<typeof zodCreateSubscriptionSchema>;
 
@@ -94,15 +137,22 @@ export type CreateManySubscriptionInput = z.infer<typeof zodCreateManySubscripti
 const zodUpdateSubscriptionSchema = z
   .object({
     packageName: z.enum(PackageNameEnum).optional(),
-
     selectedSport: selectedSportSchema.optional(),
-
-    customDays: z.number().int().positive().optional(),
-    customPrice: z.number().positive().optional(),
-
+    seasonalDays: z.number().int().positive().optional(),
+    seasonalPrice: z.number().positive().optional(),
+    customDays: z.number().int().positive().optional(), // Backwards compatibility
+    customPrice: z.number().positive().optional(), // Backwards compatibility
     isSubscribed: z.boolean().optional(),
   })
-  .strict();
+  .superRefine((data, ctx) => {
+    // Map old field names to new ones for backwards compatibility
+    if (data.customDays !== undefined && data.seasonalDays === undefined) {
+      (data as any).seasonalDays = data.customDays;
+    }
+    if (data.customPrice !== undefined && data.seasonalPrice === undefined) {
+      (data as any).seasonalPrice = data.customPrice;
+    }
+  });
 
 export type UpdateSubscriptionInput = z.infer<typeof zodUpdateSubscriptionSchema>;
 

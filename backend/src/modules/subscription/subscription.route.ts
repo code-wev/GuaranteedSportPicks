@@ -1,77 +1,99 @@
-// Import Router from express
 import { Router } from 'express';
-
-// Import controller from corresponding module
-import { 
-  createSubscription,
-  updateSubscription,
-  deleteSubscription,
-  getSubscriptionById,
-  getManySubscription
-} from './subscription.controller';
-
-//Import validation from corresponding module
-import { validateCreateSubscription, validateUpdateSubscription} from './subscription.validation';
-import { validateId,  validateSearchQueries } from '../../handlers/common-zod-validator';
-import isAuthorized from '../../../src/middlewares/is-authorized';
 import authorizedRoles from '../../../src/middlewares/authorized-roles';
+import isAuthorized from '../../../src/middlewares/is-authorized';
 import { UserRole } from '../../../src/model/user/user.schema';
+import { validateId, validateSearchQueries } from '../../handlers/common-zod-validator';
 
-// Initialize router
+import { validateCreateSubscription, validateUpdateSubscription } from './subscription.validation';
+import { cancelSubscription, createSubscription, deleteManySubscription, deleteSubscription, getManySubscription, getSubscriptionById, getUserActiveSubscription, getUserSubscriptionHistory, updateSubscription, webhook } from './subscription.controller';
+
 const router = Router();
 
-// Define route handlers
-/**
- * @route POST /api/v1/subscription/create-subscription
- * @description Create a new subscription
- * @access Public
- * @param {function} validation - ['validateCreateSubscription']
- * @param {function} controller - ['createSubscription']
- */
-router.post("/", isAuthorized,authorizedRoles([UserRole.USER]), validateCreateSubscription, createSubscription);
+// Simple test route
+router.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
 
 /**
- * @route PUT /api/v1/subscription/update-subscription/:id
- * @description Update subscription information
- * @access Public
- * @param {IdOrIdsInput['id']} id - The ID of the subscription to update
- * @param {function} validation - ['validateId', 'validateUpdateSubscription']
- * @param {function} controller - ['updateSubscription']
+ * Webhook route (no auth required)
  */
-router.put("/:id", validateId, validateUpdateSubscription, updateSubscription);
-
-
+router.post('/webhook', webhook);
 
 /**
- * @route DELETE /api/v1/subscription/delete-subscription/:id
- * @description Delete a subscription
- * @access Public
- * @param {IdOrIdsInput['id']} id - The ID of the subscription to delete
- * @param {function} validation - ['validateId']
- * @param {function} controller - ['deleteSubscription']
+ * Authenticated user routes
  */
-router.delete("/:id", validateId, deleteSubscription);
+router.post(
+  '/',
+  isAuthorized,
+  authorizedRoles([UserRole.USER]),
+  validateCreateSubscription,
+  createSubscription
+);
+
+router.get(
+  '/my-active',
+  isAuthorized,
+  authorizedRoles([UserRole.USER]),
+  getUserActiveSubscription
+);
+
+router.get(
+  '/my-history',
+  isAuthorized,
+  authorizedRoles([UserRole.USER]),
+  validateSearchQueries,
+  getUserSubscriptionHistory
+);
+
+router.post(
+  '/:id/cancel',
+  isAuthorized,
+  authorizedRoles([UserRole.USER]),
+  validateId,
+  cancelSubscription
+);
 
 /**
- * @route GET /api/v1/subscription/get-subscription/many
- * @description Get multiple subscriptions
- * @access Public
- * @param {function} validation - ['validateSearchQueries']
- * @param {function} controller - ['getManySubscription']
+ * Admin routes
  */
-router.get("/many", validateSearchQueries, getManySubscription);
+router.get(
+  '/admin/all',
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  validateSearchQueries,
+  getManySubscription
+);
 
-/**
- * @route GET /api/v1/subscription/get-subscription/:id
- * @description Get a subscription by ID
- * @access Public
- * @param {IdOrIdsInput['id']} id - The ID of the subscription to retrieve
- * @param {function} validation - ['validateId']
- * @param {function} controller - ['getSubscriptionById']
- */
-router.get("/me", validateId, getSubscriptionById);
+router.get(
+  '/:id',
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN, UserRole.USER]),
+  validateId,
+  getSubscriptionById
+);
 
+router.put(
+  '/:id',
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  validateId,
+  validateUpdateSubscription,
+  updateSubscription
+);
 
-// TODO: Single Subscription data get er api lagba
-// Export the router
-module.exports = router;
+router.delete(
+  '/:id',
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  validateId,
+  deleteSubscription
+);
+
+router.delete(
+  '/',
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  deleteManySubscription
+);
+
+export default router;

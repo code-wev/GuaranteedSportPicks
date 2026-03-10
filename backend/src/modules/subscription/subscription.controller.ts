@@ -1,116 +1,98 @@
 import { Request, Response } from 'express';
-import { subscriptionServices } from './subscription.service';
-import { SearchQueryInput } from '../../handlers/common-zod-validator';
+import { AuthenticatedRequest } from '../../../src/middlewares/is-authorized';
 import ServerResponse from '../../helpers/responses/custom-response';
 import catchAsync from '../../utils/catch-async/catch-async';
-import { AuthenticatedRequest } from 'src/middlewares/is-authorized';
+import { subscriptionServices } from './subscription.service';
 
 /**
- * Controller function to handle the creation of a single subscription.
- *
- * @param {Request} req - The request object containing subscription data in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<ISubscription>>} - The created subscription.
- * @throws {Error} - Throws an error if the subscription creation fails.
+ * Create a new subscription → returns Stripe paymentLink
  */
 export const createSubscription = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
-
-
-
-  const userId = req.user!._id
-  req.body.userId  = userId
+  const userId = req.user!._id;
+  req.body.userId = userId;
   const result = await subscriptionServices.createSubscription(req.body);
-  if (!result) throw new Error('Failed to create subscription');
-  // Send a success response with the created subscription data
   ServerResponse(res, true, 201, 'Subscription created successfully', result);
 });
 
+/**
+ * Get logged-in user's active subscription
+ */
+export const getUserActiveSubscription = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!._id.toString();
+  const result = await subscriptionServices.getUserActiveSubscription(userId);
+  ServerResponse(res, true, 200, 'Active subscription retrieved successfully', result);
+});
 
 /**
- * Controller function to handle the update operation for a single subscription.
- *
- * @param {Request} req - The request object containing the ID of the subscription to update in URL parameters and the updated data in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<ISubscription>>} - The updated subscription.
- * @throws {Error} - Throws an error if the subscription update fails.
+ * Get logged-in user's subscription history
+ */
+export const getUserSubscriptionHistory = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!._id.toString();
+  const result = await subscriptionServices.getUserSubscriptionHistory(userId, req.query);
+  ServerResponse(res, true, 200, 'Subscription history retrieved successfully', result);
+});
+
+/**
+ * Cancel subscription
+ */
+export const cancelSubscription = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!._id.toString();
+  const id = typeof req.params.id === 'string' ? req.params.id : req.params.id[0];
+  const result = await subscriptionServices.cancelSubscription(id, userId);
+  ServerResponse(res, true, 200, 'Subscription cancelled successfully', result);
+});
+
+/**
+ * Update a subscription by ID
  */
 export const updateSubscription = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  // Call the service method to update the subscription by ID and get the result
-  const result = await subscriptionServices.updateSubscription(id as string, req.body);
+  const id = typeof req.params.id === 'string' ? req.params.id : req.params.id[0];
+  const result = await subscriptionServices.updateSubscription(id, req.body);
   if (!result) throw new Error('Failed to update subscription');
-  // Send a success response with the updated subscription data
   ServerResponse(res, true, 200, 'Subscription updated successfully', result);
 });
 
-
+/**
+ * Stripe webhook handler
+ */
+export const webhook = catchAsync(async (req: Request, res: Response) => {
+  await subscriptionServices.webHook(req);
+  res.status(200).json({ received: true });
+});
 
 /**
- * Controller function to handle the deletion of a single subscription.
- *
- * @param {Request} req - The request object containing the ID of the subscription to delete in URL parameters.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<ISubscription>>} - The deleted subscription.
- * @throws {Error} - Throws an error if the subscription deletion fails.
+ * Delete a single subscription by ID
  */
 export const deleteSubscription = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  // Call the service method to delete the subscription by ID
-  const result = await subscriptionServices.deleteSubscription(id as string);
+  const id = typeof req.params.id === 'string' ? req.params.id : req.params.id[0];
+  const result = await subscriptionServices.deleteSubscription(id);
   if (!result) throw new Error('Failed to delete subscription');
-  // Send a success response confirming the deletion
   ServerResponse(res, true, 200, 'Subscription deleted successfully');
 });
 
 /**
- * Controller function to handle the deletion of multiple subscriptions.
- *
- * @param {Request} req - The request object containing an array of IDs of subscription to delete in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<ISubscription>[]>} - The deleted subscriptions.
- * @throws {Error} - Throws an error if the subscription deletion fails.
+ * Delete multiple subscriptions
  */
 export const deleteManySubscription = catchAsync(async (req: Request, res: Response) => {
-  // Extract ids from request body
   const { ids } = req.body;
-  // Call the service method to delete multiple subscriptions and get the result
   const result = await subscriptionServices.deleteManySubscription(ids);
-  if (!result) throw new Error('Failed to delete multiple subscriptions');
-  // Send a success response confirming the deletions
   ServerResponse(res, true, 200, 'Subscriptions deleted successfully');
 });
 
 /**
- * Controller function to handle the retrieval of a single subscription by ID.
- *
- * @param {Request} req - The request object containing the ID of the subscription to retrieve in URL parameters.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<ISubscription>>} - The retrieved subscription.
- * @throws {Error} - Throws an error if the subscription retrieval fails.
+ * Get a subscription by ID
  */
 export const getSubscriptionById = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  // Call the service method to get the subscription by ID and get the result
-  const result = await subscriptionServices.getSubscriptionById(id as string);
+  const id = typeof req.params.id === 'string' ? req.params.id : req.params.id[0];
+  const result = await subscriptionServices.getSubscriptionById(id);
   if (!result) throw new Error('Subscription not found');
-  // Send a success response with the retrieved resource data
   ServerResponse(res, true, 200, 'Subscription retrieved successfully', result);
 });
 
 /**
- * Controller function to handle the retrieval of multiple subscriptions.
- *
- * @param {Request} req - The request object containing query parameters for filtering.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<ISubscription>[]>} - The retrieved subscriptions.
- * @throws {Error} - Throws an error if the subscriptions retrieval fails.
+ * Get many subscriptions (admin)
  */
 export const getManySubscription = catchAsync(async (req: Request, res: Response) => {
-  // Type assertion for query parameters 
-  const query = req.query as SearchQueryInput;
-  // Call the service method to get multiple subscriptions based on query parameters and get the result
-  const { subscriptions, totalData, totalPages } = await subscriptionServices.getManySubscription(query);
-  if (!subscriptions) throw new Error('Failed to retrieve subscriptions');
-  // Send a success response with the retrieved subscriptions data
-  ServerResponse(res, true, 200, 'Subscriptions retrieved successfully', { subscriptions, totalData, totalPages });
+  const result = await subscriptionServices.getManySubscription(req.query);
+  ServerResponse(res, true, 200, 'Subscriptions retrieved successfully', result);
 });

@@ -24,6 +24,11 @@ interface Config {
   EMAIL_VERIFICATION_REDIRECT_URI: string;
   PASSWORD_RESET_REDIRECT_URI: string;
   STRIPE_SECRET_KEY: string;
+  WEBHOOK_KEY: string;
+  FRONTEND_URL: string;
+  MONTHLY_PRICE_ID: string;
+  WEEKLY_PRICE_ID: string;
+  DAILY_PRICE_ID: string;
 }
 
 const config: Config = {
@@ -54,6 +59,11 @@ const config: Config = {
   EMAIL_VERIFICATION_REDIRECT_URI: process.env.EMAIL_VERIFICATION_REDIRECT_URI as string,
   PASSWORD_RESET_REDIRECT_URI: process.env.PASSWORD_RESET_REDIRECT_URI as string,
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY as string,
+  WEBHOOK_KEY: process.env.WEBHOOK_KEY as string,
+  FRONTEND_URL: process.env.FRONTEND_URL as string,
+  DAILY_PRICE_ID: process.env.DAILY_PRICE_ID as string,
+  WEEKLY_PRICE_ID: process.env.WEEKLY_PRICE_ID as string,
+  MONTHLY_PRICE_ID: process.env.MONTHLY_PRICE_ID as string,
 };
 
 export default config;
