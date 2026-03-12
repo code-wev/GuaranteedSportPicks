@@ -14,6 +14,7 @@ import hpp from 'hpp';
 import mongoose from 'mongoose';
 import morgan from 'morgan';
 import PathNotFound from './helpers/responses/path-not-found';
+import { webhook } from './modules/subscription/subscription.controller';
 import { loggerStream } from './utils/logger/logger';
 
 // Terminal colors
@@ -28,6 +29,19 @@ const app: Application = express();
 
 // Define the path to the public directory
 const publicDirPath = path.join(__dirname, '..', 'public');
+
+// // Stripe webhook needs raw body for signature verification
+// app.use('/api/v1/webhooks/stripe', express.raw({ type: 'application/json' }));
+
+// // Define route handlers
+// /**
+//  * @route POST /api/v1/subscription/create-subscription
+//  * @description Create a new subscription
+//  * @access Public
+//  * @param {function} validation - ['validateCreateSubscription']
+//  * @param {function} controller - ['createSubscription']
+
+app.post('/api/v1/subscription/webhook', express.raw({ type: 'application/json' }), webhook);
 
 app.use(express.json({ limit: config.MAX_JSON_SIZE }));
 
@@ -108,11 +122,12 @@ const loadRoutes = (basePath: string, baseRoute: string) => {
         loadRoutes(itemPath, routePrefix);
       } else if (item.endsWith('.route.ts') || item.endsWith('.route.js')) {
         const routeModule = require(itemPath);
-        app.use(baseRoute, routeModule);
+        const router = routeModule.default || routeModule;
+        app.use(baseRoute, router);
 
         if (config.NODE_ENV !== 'production') {
           const end = performance.now();
-          routeModule.stack.forEach((layer: any) => {
+          router.stack.forEach((layer: any) => {
             if (layer.route) {
               Object.keys(layer.route.methods).forEach((method) => {
                 routes.push({

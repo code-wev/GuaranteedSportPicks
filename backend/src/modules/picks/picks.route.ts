@@ -22,6 +22,9 @@ import {
 } from '../../handlers/common-zod-validator';
 import { validateCreatePicks, validateUpdatePicks } from './picks.validation';
 
+// Import pick purchase routes
+
+
 // Initialize router
 const router = Router();
 
@@ -112,6 +115,9 @@ router.get('/get-picks/many', validateSearchQueries, getManyPicks);
  * @param {function} controller - ['getPicksById']
  */
 router.get('/:id', validateId, getPicksById);
+
+// // Use pick purchase routes
+// router.use('/', pickPurchaseRoutes);
 
 // Export the router
 module.exports = router;

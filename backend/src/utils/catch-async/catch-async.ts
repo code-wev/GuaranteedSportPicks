@@ -1,4 +1,4 @@
-import { NextFunction, Request, RequestHandler, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import ServerResponse from '../../helpers/responses/custom-response';
 
 /**
@@ -9,11 +9,13 @@ import ServerResponse from '../../helpers/responses/custom-response';
  * to the next middleware in the stack using `next()`, ensuring proper error handling
  * in Express applications.
  *
- * @param {RequestHandler} fn - The asynchronous route handler or middleware function to be wrapped.
- * @returns {RequestHandler} A new function that wraps the provided asynchronous handler or middleware.
+ * @param {Function} fn - The asynchronous route handler or middleware function to be wrapped.
+ * @returns {Function} A new function that wraps the provided asynchronous handler or middleware.
  */
-const catchAsync = (fn: RequestHandler) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+const catchAsync = (
+  fn: (req: Request, res: Response, next?: NextFunction) => Promise<void | any>
+): ((req: Request, res: Response, next: NextFunction) => void) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     // Wrap the handler function in a promise to catch any errors
     Promise.resolve(fn(req, res, next)).catch((err) => {
       // Log the error for debugging purposes (optional)
