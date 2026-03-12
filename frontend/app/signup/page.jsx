@@ -65,12 +65,41 @@ export default function RegisterPage() {
     return Object.keys(err).length === 0;
   };
 
+  const getBackendFieldErrors = (data) => {
+    const fieldErrors = {};
+
+    if (!Array.isArray(data?.errors)) return fieldErrors;
+
+    data.errors.forEach((item) => {
+      const field = item?.field;
+      const message = item?.message;
+
+      if (!field || !message) return;
+
+      if (fieldErrors[field]) {
+        fieldErrors[field] = `${fieldErrors[field]}, ${message}`;
+      } else {
+        fieldErrors[field] = message;
+      }
+    });
+
+    return fieldErrors;
+  };
+
   const getAxiosErrorMessage = (error) => {
-    // backend might send: { message: "..." } or { error: "..." } etc.
+    const responseData = error?.response?.data;
+
+    if (Array.isArray(responseData?.errors) && responseData.errors.length > 0) {
+      const detailedMessages = responseData.errors
+        .map((item) => item?.message)
+        .filter(Boolean)
+        .join(", ");
+
+      if (detailedMessages) return detailedMessages;
+    }
+
     const serverMsg =
-      error?.response?.data?.error ||
-      error?.response?.data?.message ||
-      error?.response?.data?.msg;
+      responseData?.error || responseData?.message || responseData?.msg;
 
     if (serverMsg) return serverMsg;
 
@@ -116,6 +145,15 @@ export default function RegisterPage() {
       }, 600);
     } catch (error) {
       const message = getAxiosErrorMessage(error);
+      const backendFieldErrors = getBackendFieldErrors(error?.response?.data);
+
+      if (Object.keys(backendFieldErrors).length > 0) {
+        setErrors((prev) => ({
+          ...prev,
+          ...backendFieldErrors,
+        }));
+      }
+
       toast.error(message);
       console.log("REGISTER ERROR:", error?.response?.data || error);
     } finally {

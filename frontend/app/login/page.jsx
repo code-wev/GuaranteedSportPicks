@@ -1,6 +1,7 @@
 "use client";
 import { base_url } from "@/utils/utils";
 import axios from "axios";
+import Cookies from "js-cookie";
 import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -9,17 +10,61 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Put your real backend login endpoint here
-  // Examples:
-  //  - `${base_url}/auth/login`
-  //  - `${base_url}/api/v1/auth/login`
   const LOGIN_URL = `${base_url}/auth/login`;
 
+  const extractErrorMessage = (value) => {
+    if (!value) return "";
+
+    if (typeof value === "string") return value.trim();
+
+    if (Array.isArray(value)) {
+      return value
+        .map((item) => extractErrorMessage(item))
+        .filter(Boolean)
+        .join(", ");
+    }
+
+    if (typeof value === "object") {
+      if (typeof value.message === "string") return value.message.trim();
+      if (typeof value.msg === "string") return value.msg.trim();
+      if (typeof value.error === "string") return value.error.trim();
+
+      if (Array.isArray(value.message)) {
+        const message = value.message
+          .map((item) => extractErrorMessage(item))
+          .filter(Boolean)
+          .join(", ");
+        if (message) return message;
+      }
+
+      if (Array.isArray(value.errors)) {
+        const errors = value.errors
+          .map((item) => extractErrorMessage(item))
+          .filter(Boolean)
+          .join(", ");
+        if (errors) return errors;
+      }
+
+      const nestedMessages = Object.values(value)
+        .map((item) => extractErrorMessage(item))
+        .filter(Boolean)
+        .join(", ");
+
+      if (nestedMessages) return nestedMessages;
+    }
+
+    return "";
+  };
+
   const getAxiosErrorMessage = (error) => {
+    const responseData = error?.response?.data;
+
     const serverMsg =
-      error?.response?.data?.error ||
-      error?.response?.data?.message ||
-      error?.response?.data?.msg;
+      extractErrorMessage(responseData?.error) ||
+      extractErrorMessage(responseData?.message) ||
+      extractErrorMessage(responseData?.msg) ||
+      extractErrorMessage(responseData?.errors) ||
+      extractErrorMessage(responseData);
 
     if (serverMsg) return serverMsg;
     if (error?.code === "ERR_NETWORK")
@@ -30,7 +75,6 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // prevent double submit
     if (loading) return;
 
     setLoading(true);
@@ -41,7 +85,6 @@ export default function LoginPage() {
         password,
       };
 
-      // IMPORTANT: cookie set হবে only if withCredentials true + backend CORS credentials enabled
       const response = await axios.post(LOGIN_URL, payload, {
         withCredentials: true,
         headers: { "Content-Type": "application/json" },
@@ -49,28 +92,47 @@ export default function LoginPage() {
 
       console.log("LOGIN RESPONSE:", response?.data);
 
+      // backend response structure অনুযায়ী token বের করো
+      const token =
+        response?.data?.token ||
+        response?.data?.accessToken ||
+        response?.data?.data?.token;
+
+      if (!token) {
+        toast.error("Token not found in response");
+        return;
+      }
+
+      // token cookie তে save
+      Cookies.set("token", token, {
+        expires: 7, // 7 days
+        secure: true, // https হলে better
+        sameSite: "Strict",
+      });
+
       toast.success("Login Success");
 
-      // cookie stored by browser, now go dashboard
+      // চাইলে user info ও save করতে পারো
+      // Cookies.set("user", JSON.stringify(response?.data?.user), { expires: 7 });
+
+      // redirect
       window.location.href = "/dashboard";
     } catch (error) {
       const message = getAxiosErrorMessage(error);
-      toast.error(message);
-
-      // optional UX: if email not verified, redirect to verify/resend page (if you have)
-      // if (String(message).toLowerCase().includes("not verified")) {
-      //   window.location.href = `/verify-email?email=${encodeURIComponent(email.trim().toLowerCase())}`;
-      // }
 
       console.log("LOGIN ERROR:", error?.response?.data || error);
-      if (error?.response?.data.error === "Email not verified") {
-        // Email is not verified, redirect to resend verification page
+
+      if (String(message).toLowerCase().includes("email not verified")) {
         toast.error("Email not verified. Please verify your email.");
         setTimeout(() => {
-          window.location.href = `/resend-verification?email=${encodeURIComponent(email.trim().toLowerCase())}`;
+          window.location.href = `/resend-verification?email=${encodeURIComponent(
+            email.trim().toLowerCase(),
+          )}`;
         }, 1500);
         return;
       }
+
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -80,12 +142,10 @@ export default function LoginPage() {
     <div className='min-h-screen flex items-center justify-center bg-[#f5f5f5]'>
       <Toaster />
       <div className='w-[90%] max-w-5xl bg-white grid grid-cols-1 md:grid-cols-2 shadow-lg rounded-lg overflow-hidden'>
-        {/* -------------------- LEFT SIDE -------------------- */}
+        {/* LEFT SIDE */}
         <div className='p-8 flex flex-col justify-between'>
-          {/* Image Placeholder */}
           <div className='h-64 bg-gray-300 rounded-md w-full'></div>
 
-          {/* Welcome Text */}
           <div className='mt-6'>
             <h2 className='text-2xl font-bold'>
               Welcome to <span className='text-rose-500'>SportPicks</span>
@@ -97,9 +157,7 @@ export default function LoginPage() {
               platform for their daily needs.
             </p>
 
-            {/* Feature List */}
             <div className='mt-6 grid grid-cols-2 gap-4'>
-              {/* Feature 1 */}
               <div className='flex items-start space-x-2'>
                 <div className='text-rose-500 text-lg'>🔒</div>
                 <div>
@@ -110,7 +168,6 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {/* Feature 2 */}
               <div className='flex items-start space-x-2'>
                 <div className='text-rose-500 text-lg'>📧</div>
                 <div>
@@ -124,15 +181,14 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* -------------------- RIGHT SIDE -------------------- */}
-        <div className=' p-10 flex flex-col justify-center'>
+        {/* RIGHT SIDE */}
+        <div className='p-10 flex flex-col justify-center'>
           <h2 className='text-2xl font-bold text-center'>Welcome Back</h2>
           <p className='text-center text-gray-600 text-sm'>
             Sign in to your account
           </p>
 
           <form onSubmit={handleSubmit} className='mt-6 space-y-4'>
-            {/* Email */}
             <div className='flex flex-col'>
               <label className='text-sm font-medium'>Email Address</label>
               <input
@@ -145,7 +201,6 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Password */}
             <div className='flex flex-col'>
               <label className='text-sm font-medium'>Password</label>
               <input
@@ -158,20 +213,17 @@ export default function LoginPage() {
               />
             </div>
 
-            {/* Remember + Forgot */}
             <div className='flex justify-between items-center text-sm'>
               <label className='flex items-center space-x-2'>
                 <input type='checkbox' />
                 <span>Remember me</span>
               </label>
 
-              {/* IMPORTANT: type="button" না হলে form submit trigger হতে পারে */}
               <button type='button' className='text-rose-500'>
                 Forgot Password?
               </button>
             </div>
 
-            {/* Submit */}
             <button
               type='submit'
               disabled={loading}
@@ -183,12 +235,11 @@ export default function LoginPage() {
               {loading ? "Loading..." : "Sign in"}
             </button>
 
-            {/* Sign Up */}
             <p className='text-center text-sm mt-2'>
               Don’t have an account?
               <span
                 className='text-[#B91C1C] cursor-pointer'
-                onClick={() => (window.location.href = "/register")}>
+                onClick={() => (window.location.href = "/signup")}>
                 Sign Up
               </span>
             </p>
