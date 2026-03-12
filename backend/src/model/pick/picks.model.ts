@@ -38,6 +38,8 @@ export interface IPicks extends Document {
   home_team: string;
   away_team: string;
   commence_time: string;
+  price:number;
+  banner?:string;
   odds: {
     home_team: number;
     away_team: number;
@@ -77,6 +79,8 @@ const PicksSchema = new Schema<IPicks>(
     sportKey: { type: String, required: true },
     sport_title: { type: String, required: true },
     commence_time: { type: String, required: true },
+    price: { type: Number, required: true },
+    banner: { type: String, required: false },
     home_team: { type: String, required: true },
     away_team: { type: String, required: true },
     odds: {
