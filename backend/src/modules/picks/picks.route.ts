@@ -88,8 +88,7 @@ router.delete('/:id', isAuthorized, authorizedRoles([UserRole.ADMIN]), validateI
  * @param {function} controller - ['getManyPicks']
  */
 
-
-// TODO: Another api create for free picks 
+// TODO: Another api create for free picks
 // TODO: All pick see only the admin
 // TODO: User see only active picks if she susbcriber or free user er der jnno only free picks
 //TODO: Free pick { active pick } - alada api
@@ -97,9 +96,9 @@ router.delete('/:id', isAuthorized, authorizedRoles([UserRole.ADMIN]), validateI
 //TODO: All pick - premium user  -  active picks  — active pick by defualt
 //TODO:  Filter = Pick status ways only admin
 //TODO: Market Type : admin and user all, user only se active status ata sob jaigai implement  korte hobe
-//TODO: Filter by confidenceLavel , 
+//TODO: Filter by confidenceLavel ,
 //TODO: Filter by Result type
-//TODO: Filter by sport Id 
+//TODO: Filter by sport Id
 //TODO: Filter by sport title
 //TODO: Filte rby sporkey
 //TODO: Filter by home_team

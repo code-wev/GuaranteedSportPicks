@@ -1,5 +1,6 @@
 "use client";
 
+import { useCreatePicksMutation } from "@/feature/PicksApi";
 import axios from "axios";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -266,9 +267,60 @@ export default function CreatePickForm() {
     }
   };
 
+  //RTK
+  const [createPicks, { isLoading: isCreating }] = useCreatePicksMutation();
+
   // Handle form submission
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   // Validate required fields
+  //   const required = [
+  //     "sport_title",
+  //     "home_team",
+  //     "away_team",
+  //     "selected_team",
+  //     "market_type",
+  //     "units",
+  //     "confidence",
+  //     "writeup",
+  //   ];
+  //   const missing = required.filter((field) => !formData[field]);
+
+  //   if (missing.length > 0) {
+  //     alert(`Please fill in: ${missing.join(", ")}`);
+  //     return;
+  //   }
+
+  //   // Console output
+  //   console.log("🎯 ===== PICK CREATED =====");
+  //   console.log(formData);
+
+  //   alert(
+  //     `✅ Pick Created Successfully!\n\n${formData.selected_team} - ${formData.units} units`,
+  //   );
+  // };
+  const getRtkErrorMessage = (err) => {
+    // RTK Query error shapes:
+    // - { status, data }
+    // - { error: "FETCH_ERROR" | ... }
+    const data = err?.data;
+
+    return (
+      data?.message ||
+      data?.error ||
+      data?.msg ||
+      (typeof data === "string" ? data : null) ||
+      err?.error ||
+      "Something went wrong"
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Prevent double submit
+    if (isCreating) return;
 
     // Validate required fields
     const required = [
@@ -281,20 +333,82 @@ export default function CreatePickForm() {
       "confidence",
       "writeup",
     ];
-    const missing = required.filter((field) => !formData[field]);
+
+    const missing = required.filter((field) => {
+      const v = formData[field];
+      if (typeof v === "string") return !v.trim();
+      return v === null || v === undefined || v === "";
+    });
 
     if (missing.length > 0) {
       alert(`Please fill in: ${missing.join(", ")}`);
       return;
     }
 
-    // Console output
-    console.log("🎯 ===== PICK CREATED =====");
-    console.log(formData);
+    // Build payload (clean + safe)
+    const payload = {
+      sportId: formData.sportId,
+      sportKey: formData.sportKey,
+      sport_title: formData.sport_title,
+      home_team: formData.home_team,
+      away_team: formData.away_team,
+      commence_time: formData.commence_time,
+      odds: formData.odds,
+      bookmakers: formData.bookmakers,
 
-    alert(
-      `✅ Pick Created Successfully!\n\n${formData.selected_team} - ${formData.units} units`,
-    );
+      selected_team: formData.selected_team,
+      market_type: formData.market_type,
+      units: Number(formData.units),
+      confidence: formData.confidence,
+      writeup: formData.writeup?.trim(),
+      premium: Boolean(formData.premium),
+      release_time: formData.release_time || new Date().toISOString(),
+      pickBanner: formData.pickBanner || "",
+    };
+
+    try {
+      const res = await createPicks(payload).unwrap();
+
+      console.log("✅ PICK CREATE RESPONSE:", res);
+
+      alert(
+        `✅ Pick Created Successfully!\n\n${payload.selected_team} - ${payload.units} units`,
+      );
+
+      // Optional: reset UI after success
+      setShowPreview(false);
+      setSelectedGame(null);
+      setSelectedSport("");
+      setSearchTerm("");
+      setActiveTab("game");
+
+      setFormData({
+        sportId: "",
+        sportKey: "",
+        sport_title: "",
+        home_team: "",
+        away_team: "",
+        commence_time: "",
+        odds: { home_team: 0, away_team: 0, draw: 0 },
+        bookmakers: [],
+        selected_team: "",
+        market_type: "",
+        units: 1,
+        confidence: "medium",
+        writeup: "",
+        premium: false,
+        release_time: "",
+        pickBanner: "",
+      });
+
+      // Optional: clear banner preview
+      if (bannerPreview) URL.revokeObjectURL(bannerPreview);
+      setBannerPreview("");
+      setBannerImage(null);
+    } catch (err) {
+      console.log("❌ CREATE PICK ERROR:", err);
+      alert(getRtkErrorMessage(err));
+    }
   };
 
   if (loading) {
@@ -1023,6 +1137,7 @@ export default function CreatePickForm() {
                     height={200}
                     width={200}
                     className='w-full h-full object-cover'
+                    width='full'
                   />
                 </div>
               )}
