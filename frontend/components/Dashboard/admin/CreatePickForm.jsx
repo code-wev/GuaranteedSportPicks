@@ -51,6 +51,7 @@ export default function CreatePickForm() {
     premium: false,
     release_time: "",
     pickBanner: "",
+    price: 0, // Make sure this is included
   });
 
   // UI state
@@ -155,6 +156,21 @@ export default function CreatePickForm() {
         ?.find((m) => m.key === "h2h")
         ?.outcomes?.find((o) => o.name === "Draw")?.price || 0;
 
+    // Format bookmakers data correctly with exact field names as expected by API
+    const formattedBookmakers = game.bookmakers?.map(bookmaker => ({
+      key: bookmaker.key,
+      title: bookmaker.title,
+      last_update: bookmaker.last_update,
+      markets: bookmaker.markets?.map(market => ({
+        Key: market.key, // Note: Capital K
+        last_update: market.last_update,
+        outComes: market.outcomes?.map(outcome => ({ // Note: Capital C
+          name: outcome.name,
+          price: outcome.price
+        }))
+      }))
+    })) || [];
+
     setFormData({
       ...formData,
       sportId: game.id,
@@ -168,8 +184,10 @@ export default function CreatePickForm() {
         away_team: awayOdds,
         draw: drawOdds,
       },
-      bookmakers: game.bookmakers || [],
+      bookmakers: formattedBookmakers,
       release_time: new Date().toISOString(),
+      // Keep existing price value
+      price: formData.price,
     });
 
     setHomeTeamDropdown(false);
@@ -270,42 +288,11 @@ export default function CreatePickForm() {
   //RTK
   const [createPicks, { isLoading: isCreating }] = useCreatePicksMutation();
 
-  // Handle form submission
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   // Validate required fields
-  //   const required = [
-  //     "sport_title",
-  //     "home_team",
-  //     "away_team",
-  //     "selected_team",
-  //     "market_type",
-  //     "units",
-  //     "confidence",
-  //     "writeup",
-  //   ];
-  //   const missing = required.filter((field) => !formData[field]);
-
-  //   if (missing.length > 0) {
-  //     alert(`Please fill in: ${missing.join(", ")}`);
-  //     return;
-  //   }
-
-  //   // Console output
-  //   console.log("🎯 ===== PICK CREATED =====");
-  //   console.log(formData);
-
-  //   alert(
-  //     `✅ Pick Created Successfully!\n\n${formData.selected_team} - ${formData.units} units`,
-  //   );
-  // };
   const getRtkErrorMessage = (err) => {
-    // RTK Query error shapes:
-    // - { status, data }
-    // - { error: "FETCH_ERROR" | ... }
     const data = err?.data;
-
+    if (data?.errors) {
+      return data.errors.map(e => `${e.field}: ${e.message}`).join('\n');
+    }
     return (
       data?.message ||
       data?.error ||
@@ -345,7 +332,22 @@ export default function CreatePickForm() {
       return;
     }
 
-    // Build payload (clean + safe)
+    // Format bookmakers data with exact field names as expected by API
+    const formattedBookmakers = formData.bookmakers.map(bookmaker => ({
+      key: bookmaker.key,
+      title: bookmaker.title,
+      last_update: bookmaker.last_update,
+      markets: bookmaker.markets.map(market => ({
+        Key: market.Key || market.key, // Use Key with capital K
+        last_update: market.last_update,
+        outComes: market.outComes || market.outcomes?.map(outcome => ({ // Use outComes with capital C
+          name: outcome.name,
+          price: outcome.price
+        }))
+      }))
+    }));
+
+    // Build payload with correct structure
     const payload = {
       sportId: formData.sportId,
       sportKey: formData.sportKey,
@@ -353,8 +355,12 @@ export default function CreatePickForm() {
       home_team: formData.home_team,
       away_team: formData.away_team,
       commence_time: formData.commence_time,
-      odds: formData.odds,
-      bookmakers: formData.bookmakers,
+      odds: {
+        home_team: Number(formData.odds.home_team),
+        away_team: Number(formData.odds.away_team),
+        draw: Number(formData.odds.draw)
+      },
+      bookmakers: formattedBookmakers,
 
       selected_team: formData.selected_team,
       market_type: formData.market_type,
@@ -366,16 +372,33 @@ export default function CreatePickForm() {
       pickBanner: formData.pickBanner || "",
     };
 
+    // CRITICAL FIX: Always include price in payload, even if 0
+    // Convert to number to ensure it's sent correctly
+    payload.price = Number(formData.price);
+    
+    // If you want to only send price for premium picks, use this:
+    // if (formData.premium) {
+    //   payload.price = Number(formData.price);
+    // }
+
+    // Log data before sending to hook
+    console.log("📦 ===== PICK DATA BEFORE SENDING =====");
+    console.log("Form Data:", JSON.stringify(formData, null, 2));
+    console.log("Payload to send:", JSON.stringify(payload, null, 2));
+    console.log("Price value being sent:", payload.price);
+    console.log("Price type:", typeof payload.price);
+    console.log("======================================");
+
     try {
       const res = await createPicks(payload).unwrap();
 
       console.log("✅ PICK CREATE RESPONSE:", res);
 
       alert(
-        `✅ Pick Created Successfully!\n\n${payload.selected_team} - ${payload.units} units`,
+        `✅ Pick Created Successfully!\n\n${payload.selected_team} - ${payload.units} units${payload.price > 0 ? ` - $${payload.price}` : ''}`,
       );
 
-      // Optional: reset UI after success
+      // Reset form after success
       setShowPreview(false);
       setSelectedGame(null);
       setSelectedSport("");
@@ -399,15 +422,17 @@ export default function CreatePickForm() {
         premium: false,
         release_time: "",
         pickBanner: "",
+        price: 0,
       });
 
-      // Optional: clear banner preview
+      // Clear banner preview
       if (bannerPreview) URL.revokeObjectURL(bannerPreview);
       setBannerPreview("");
       setBannerImage(null);
     } catch (err) {
       console.log("❌ CREATE PICK ERROR:", err);
-      alert(getRtkErrorMessage(err));
+      const errorMessage = getRtkErrorMessage(err);
+      alert(errorMessage);
     }
   };
 
@@ -860,6 +885,35 @@ export default function CreatePickForm() {
               </div>
             </div>
 
+            {/* Price Field - Always show but maybe with note */}
+            <div>
+              <label
+                className='text-sm font-medium mb-2 block'
+                style={{ color: colors.text }}>
+                Price ($) {!formData.premium && <span className="text-xs text-gray-500">(Premium picks only)</span>}
+              </label>
+              <input
+                type='number'
+                min='0'
+                step='0.01'
+                value={formData.price}
+                onChange={(e) => handleFieldChange("price", e.target.value)}
+                placeholder='Enter price (e.g., 9.99)'
+                className='w-full px-4 py-3 border rounded-lg bg-white outline-none'
+                style={{ 
+                  borderColor: colors.border, 
+                  color: colors.text,
+                  opacity: !formData.premium ? 0.6 : 1
+                }}
+                disabled={!formData.premium}
+              />
+              <p className='text-xs mt-1' style={{ color: colors.textLight }}>
+                {formData.premium 
+                  ? "Set price for this premium pick" 
+                  : "Enable premium to set price"}
+              </p>
+            </div>
+
             {/* Premium Toggle */}
             <div
               className='flex items-center justify-between p-4 border rounded-lg'
@@ -884,7 +938,13 @@ export default function CreatePickForm() {
               </div>
               <button
                 type='button'
-                onClick={() => handleFieldChange("premium", !formData.premium)}
+                onClick={() => {
+                  handleFieldChange("premium", !formData.premium);
+                  // Don't reset price when turning off premium - keep it
+                  // if (!formData.premium) {
+                  //   handleFieldChange("price", 0);
+                  // }
+                }}
                 className='relative w-12 h-6 rounded-full'
                 style={{
                   backgroundColor: formData.premium
@@ -959,8 +1019,8 @@ export default function CreatePickForm() {
                   className='relative border rounded-lg overflow-hidden'
                   style={{ borderColor: colors.border }}>
                   <Image
-                  height={200}
-                  width={200}
+                    height={200}
+                    width={200}
                     src={bannerPreview}
                     alt='Banner'
                     className='w-full h-48 object-cover'
@@ -1061,6 +1121,17 @@ export default function CreatePickForm() {
                     {formData.confidence}
                   </span>
                 </div>
+                {/* Always show price in summary if > 0 */}
+                {formData.price > 0 && (
+                  <div className='flex justify-between'>
+                    <span style={{ color: colors.textLight }}>Price:</span>
+                    <span
+                      className='font-medium'
+                      style={{ color: colors.primary }}>
+                      ${formData.price}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -1083,10 +1154,14 @@ export default function CreatePickForm() {
                 </button>
                 <button
                   type='submit'
+                  disabled={isCreating}
                   className='px-8 py-3 rounded-lg text-white font-medium flex items-center gap-2'
-                  style={{ backgroundColor: colors.success }}>
+                  style={{ 
+                    backgroundColor: isCreating ? colors.border : colors.success,
+                    cursor: isCreating ? 'not-allowed' : 'pointer'
+                  }}>
                   <FiCheckCircle />
-                  Create Pick
+                  {isCreating ? 'Creating...' : 'Create Pick'}
                 </button>
               </div>
             </div>
@@ -1121,12 +1196,15 @@ export default function CreatePickForm() {
                 style={{ backgroundColor: colors.primary }}>
                 <AiFillLock />
                 <span className='font-medium'>Premium Pick</span>
+                {formData.price > 0 && (
+                  <span className='ml-auto font-bold'>${formData.price}</span>
+                )}
               </div>
             )}
 
             {/* Pick Card */}
             <div
-              className='rounded-xl p-6 text-white'
+              className='rounded-xl p-6 text-white relative'
               style={{ backgroundColor: "#1a1a1a" }}>
               {/* Banner Image */}
               {formData.pickBanner && (
@@ -1137,7 +1215,6 @@ export default function CreatePickForm() {
                     height={200}
                     width={200}
                     className='w-full h-full object-cover'
-                    width='full'
                   />
                 </div>
               )}
@@ -1211,6 +1288,16 @@ export default function CreatePickForm() {
                     ))}
                   </div>
                 </div>
+
+                {/* Price - Always show if > 0 */}
+                {formData.price > 0 && (
+                  <div className='flex items-center justify-between mb-4'>
+                    <span className='opacity-80'>Price</span>
+                    <span className='font-bold' style={{ color: colors.primary }}>
+                      ${formData.price}
+                    </span>
+                  </div>
+                )}
 
                 {/* Game Time */}
                 <div className='flex items-center gap-2 text-sm opacity-60 mb-4'>
