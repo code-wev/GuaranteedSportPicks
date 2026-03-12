@@ -47,6 +47,8 @@ const zodOddsSchema = z.object({
  */
 const zodAdminPickSchema = z.object({
   selected_team: z.string({ message: 'selected_team is required' }),
+  price: z.number({message:"Pick  is requried"}),
+  banner: z.string({message:"Pick  is Must be string"}).optional(),
   market_type: z.enum(['moneyline', 'spread', 'totals'], {
     message: 'market_type must be moneyline, spread or totals',
   }),
