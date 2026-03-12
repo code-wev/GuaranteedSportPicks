@@ -10,7 +10,7 @@ import { useCreateSubscriptionMutation } from "@/feature/PaymentApi";
 export default function Purchase() {
   const [packageName, setPackageName] = useState(null);
   const [selectedSport, setSelectedSport] = useState([]);
-  const [paymentModel, setPaymentModel] = useState(null);
+  const [paymentModel, setPaymentModel] = useState("Prepaid");
   const [promoCode, setPromoCode] = useState("");
   const [seasonalDays, setSeasonalDays] = useState("");
   const [seasonalPrice, setSeasonalPrice] = useState("");
@@ -85,6 +85,7 @@ export default function Purchase() {
     const purchaseData = {
       packageName,
       selectedSport,
+      paymentModel: paymentModel === "Pay After Win" ? "PAY_AFTER_WIN" : "PREPAID",
       ...(packageName === "SEASONAL" && {
         isSeasonal: true,
         seasonalDays: parseInt(seasonalDays),
@@ -99,6 +100,9 @@ export default function Purchase() {
         setTimeout(() => {
           window.location.href = resp.url;
         }, 1000); // Small delay to show success message
+      } else if (resp?.clientSecret) {
+        // For PAY_AFTER_WIN, we have clientSecret for frontend payment processing
+        setSuccessMessage("Payment authorized! You can now access the picks.");
       } else {
         setErrorMessage("Failed to get payment URL. Please try again.");
       }

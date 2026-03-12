@@ -49,6 +49,21 @@ export const PaymentApi = createApi({
       }),
       invalidatesTags: ["Subscription"],
     }),
+
+    // Pick Purchase endpoints
+    createPickPurchase: builder.mutation({
+      query: (data) => ({
+        url: "/picks/purchase",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["PickPurchase"],
+    }),
+
+    getMyPickPurchases: builder.query({
+      query: () => "/picks/my-purchases",
+      providesTags: ["PickPurchase"],
+    }),
   }),
 });
 
@@ -57,4 +72,6 @@ export const {
   useGetMySubscriptionQuery,
   useGetMySubscriptionHistoryQuery,
   useCancelSubscriptionMutation,
+  useCreatePickPurchaseMutation,
+  useGetMyPickPurchasesQuery,
 } = PaymentApi;

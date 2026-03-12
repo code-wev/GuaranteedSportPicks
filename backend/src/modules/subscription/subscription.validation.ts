@@ -21,6 +21,7 @@ const zodCreateSubscriptionSchema = z
     packageName: z.enum(PackageNameEnum, {
       message: 'Package name must be DAILY, WEEKLY, MONTHLY or SEASONAL',
     }),
+    paymentModel: z.enum(['PREPAID', 'PAY_AFTER_WIN']).optional().default('PREPAID'),
     selectedSport: z.array(z.string()).min(1, { message: 'At least one sport must be selected' }),
     price: z.number().optional(),
     isSeasonal: z.boolean({ message: 'isSeasonal is required and must be boolean' }).optional(),
