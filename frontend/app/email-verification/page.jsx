@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability */
 "use client";
 import { base_url } from "@/utils/utils";
 import axios from "axios";
@@ -6,65 +7,106 @@ import { Suspense, useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
 const EmailVerification = () => {
-  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("loading"); // loading | success | error
   const [error, setError] = useState(null);
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    // Get 'email' and 'token' from the search params
     const email = searchParams.get("email");
     const token = searchParams.get("token");
 
-    if (email && token) {
-      const decodedEmail = decodeURIComponent(email); // Decode the email (handling special chars)
-      // Validate email format
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      if (!emailRegex.test(decodedEmail)) {
-        setError("Invalid email format");
-        return;
-      }
-
-      // If email and token are valid, proceed with verification
-      handleVerification(decodedEmail, token);
-    } else {
+    if (!email || !token) {
+      setStatus("error");
       setError("Invalid email or token");
+      return;
     }
-  }, [searchParams]); // Depend on searchParams to trigger effect
 
-  const handleVerification = async (email, token) => {
-    setLoading(true);
-    setError(null); // Reset error message before new request
+    const decodedEmail = decodeURIComponent(email);
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(decodedEmail)) {
+      setStatus("error");
+      setError("Invalid email format");
+      return;
+    }
+
+    const requestKey = `email-verification-${decodedEmail}-${token}`;
+
+    // Strict mode / duplicate effect call prevent
+    if (sessionStorage.getItem(requestKey) === "done") {
+      setStatus("success");
+      return;
+    }
+
+    if (sessionStorage.getItem(requestKey) === "processing") {
+      return;
+    }
+
+    sessionStorage.setItem(requestKey, "processing");
+    handleVerification(decodedEmail, token, requestKey);
+  }, [searchParams]);
+
+  const handleVerification = async (email, token, requestKey) => {
+    setStatus("loading");
+    setError(null);
 
     try {
       console.log("Sending verification request for:", { email, token });
 
-      // Send PATCH request to the backend for email verification
       const response = await axios.patch(`${base_url}/auth/verify-email`, {
         email,
         token,
       });
 
-      // Log the response from the backend for debugging purposes
       console.log("Verification response:", response);
 
-      if (response?.data?.success) {
+      const isSuccess =
+        response?.status >= 200 &&
+        response?.status < 300 &&
+        response?.data?.success !== false;
+
+      if (isSuccess) {
+        sessionStorage.setItem(requestKey, "done");
+        setStatus("success");
         toast.success("Email successfully verified!");
         setTimeout(() => {
-          window.location.href = "/login"; // Redirect to login after successful verification
+          window.location.href = "/login";
         }, 1500);
       } else {
+        sessionStorage.removeItem(requestKey);
+        setStatus("error");
         setError("Verification failed. Please try again.");
         toast.error("Verification failed. Please try again.");
       }
     } catch (err) {
-      // Log any errors and show the appropriate message
       console.error("Error during verification:", err);
+
       const message =
-        err?.response?.data?.error || err?.message || "Something went wrong";
+        err?.response?.data?.error ||
+        err?.response?.data?.message ||
+        err?.message ||
+        "Something went wrong";
+
+      const lowerMessage = String(message).toLowerCase();
+
+      // if backend says already verified, treat as success
+      if (
+        lowerMessage.includes("already verified") ||
+        lowerMessage.includes("email already verified")
+      ) {
+        sessionStorage.setItem(requestKey, "done");
+        setStatus("success");
+        toast.success("Email already verified!");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 1500);
+        return;
+      }
+
+      sessionStorage.removeItem(requestKey);
+      setStatus("error");
       setError(message);
       toast.error(message);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -78,11 +120,13 @@ const EmailVerification = () => {
             We are verifying your email. Please wait a moment.
           </p>
 
-          {loading && <p className='mt-4 text-gray-500'>Loading...</p>}
-          {error && <p className='mt-4 text-red-500'>{error}</p>}
+          {status === "loading" && (
+            <p className='mt-4 text-gray-500'>Loading...</p>
+          )}
 
-          {/* Show success message after verification */}
-          {!loading && !error && (
+          {status === "error" && <p className='mt-4 text-red-500'>{error}</p>}
+
+          {status === "success" && (
             <p className='mt-4 text-green-500'>Verification successful!</p>
           )}
         </div>
