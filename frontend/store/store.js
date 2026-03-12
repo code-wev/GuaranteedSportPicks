@@ -1,5 +1,3 @@
-import { AffiliateApi } from "@/feature/AffiliateApi";
-import { AuthApi } from "@/feature/AuthApi";
 import { NewslatterApi } from "@/feature/NewslatterApi";
 import { PaymentApi } from "@/feature/PaymentApi";
 import { PicksApi } from "@/feature/PicksApi";
@@ -11,6 +9,7 @@ export const store = configureStore({
     [UserApi.reducerPath]: UserApi.reducer,
     [PaymentApi.reducerPath]: PaymentApi.reducer,
     [PicksApi.reducerPath]: PicksApi.reducer,
+    [NewslatterApi.reducerPath]: NewslatterApi.reducer
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -18,5 +17,6 @@ export const store = configureStore({
       UserApi.middleware,
       PaymentApi.middleware,
       PicksApi.middleware,
+      NewslatterApi.middleware
     ]),
 });

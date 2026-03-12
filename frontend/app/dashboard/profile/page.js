@@ -1,36 +1,72 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
-import { FiEye, FiEyeOff, FiTrash2, FiSave } from "react-icons/fi";
-import toast, { Toaster } from "react-hot-toast";
-import axios from "axios";
-import { base_url } from "@/utils/utils";
-import { useSession } from "next-auth/react";
+import {
+  useGetUserNewsletterStatusQuery,
+  useToggleNewsletterMutation
+} from "@/feature/NewslatterApi";
 import { useGetSingleUserQuery } from "@/feature/UserApi";
+import { base_url } from "@/utils/utils";
+import axios from "axios";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { FiEye, FiEyeOff, FiMail, FiSave, FiTrash2 } from "react-icons/fi";
 
 export default function ProfileSettings() {
   const [currentPasswordVisible, setCurrentPasswordVisible] = useState(false);
   const [newPasswordVisible, setNewPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  const [loading, setLoading]  = useState(false)
+  const [loading, setLoading] = useState(false);
+  const [newsletterEnabled, setNewsletterEnabled] = useState(false);
 
   const { data } = useSession();
   console.log(data?.user?.email, "user email");
 
-  const {data:profile, isLoading, error, isError} = useGetSingleUserQuery(data?.user?.id);
-  console.log(profile, "Profile is defined")
+  const {data: profile, isLoading, error, isError} = useGetSingleUserQuery(data?.user?.id);
+  console.log(profile, "Profile is defined");
   
+  // Get user newsletter status
+  const { 
+    data: newsletterStatus, 
+    isLoading: newsletterLoading,
+    refetch: refetchNewsletter 
+  } = useGetUserNewsletterStatusQuery(data?.user?.id, {
+    skip: !data?.user?.id, // Skip if no user id
+  });
+
+  // Toggle newsletter mutation
+  const [toggleNewsletter, { isLoading: togglingNewsletter }] = useToggleNewsletterMutation();
+
+  // Update newsletter state when data is fetched
+  useEffect(() => {
+    if (newsletterStatus) {
+      setNewsletterEnabled(newsletterStatus.isSubscribed);
+    }
+  }, [newsletterStatus]);
+
   // Form state
   const [formData, setFormData] = useState({
-    firstName: "Alex",
-    lastName: "Johnson",
+    firstName: profile?.firstName || "Alex",
+    lastName: profile?.lastName || "Johnson",
     email: data?.user?.email || "",
-    phone: "+1 (555) 123-4567",
+    phone: profile?.phoneNumber || "+1 (555) 123-4567",
     currentPassword: "",
     newPassword: "",
     confirmPassword: ""
   });
+
+  // Update form when profile data loads
+  useEffect(() => {
+    if (profile) {
+      setFormData(prev => ({
+        ...prev,
+        firstName: profile.firstName || prev.firstName,
+        lastName: profile.lastName || prev.lastName,
+        phone: profile.phoneNumber || prev.phone,
+      }));
+    }
+  }, [profile]);
 
   // Handle input changes
   const handleInputChange = (field, value) => {
@@ -40,44 +76,70 @@ export default function ProfileSettings() {
     }));
   };
 
+  // Handle newsletter toggle
+  const handleNewsletterToggle = async () => {
+
+
+    try {
+      const newStatus = !newsletterEnabled;
+      const response = await toggleNewsletter().unwrap();
+
+      if (response.success) {
+        setNewsletterEnabled(newStatus);
+        toast.success(`Newsletter ${newStatus ? 'enabled' : 'disabled'} successfully!`);
+        refetchNewsletter(); // Refresh status
+      }
+    } catch (error) {
+      console.error("Newsletter toggle error:", error);
+      toast.error(error?.data?.message || "Failed to toggle newsletter!");
+    }
+  };
+
   // Handle form submission
   const handleSubmit = async (e) => {
-
-    setLoading(true)
+    setLoading(true);
     e.preventDefault();
     
     // Log the required fields to console
     console.log("📧 Form Submission Data:", {
       email: formData.email,
       oldPassword: formData.currentPassword,
-      newPassword: formData.newPassword
+      newPassword: formData.newPassword,
+      newsletter: newsletterEnabled
     });
 
     // Check if passwords match
     if (formData.newPassword !== formData.confirmPassword) {
       toast.error("New passwords don't match!");
+      setLoading(false);
       return;
     }
 
     // Check if current password is provided
     if (!formData.currentPassword) {
       toast.error("Please enter your current password!");
+      setLoading(false);
       return;
     }
 
     // Create payload with correct variable names
     const payload = {
       email: data?.user?.email,
-      oldPassword: formData.currentPassword, // Use formData.currentPassword
-      newPassword: formData.newPassword // Use formData.newPassword
+      oldPassword: formData.currentPassword,
+      newPassword: formData.newPassword
     };
 
     console.log("🚀 Sending payload:", payload);
 
     try {
-      const response = await axios.put(`${base_url}/changePassword`, payload);
+      const response = await axios.put(`${base_url}/changePassword`, payload, {
+        headers: {
+          'Authorization': `Bearer ${Cookies.get('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
       console.log(response, "this is response");
-              toast.success("Password changed successfully!");
       
       if (response.data.success) {
         toast.success("Password changed successfully!");
@@ -89,15 +151,11 @@ export default function ProfileSettings() {
           confirmPassword: ""
         }));
       }
-
-
-      
     } catch (error) {
       console.log(error.response?.data?.message, "error occurred");
-      // Fix error handling - axios errors are in error.response
       toast.error(error.response?.data?.message || "Something went wrong!");
-    }finally{
-            setLoading(false)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,7 +177,7 @@ export default function ProfileSettings() {
               <div className="flex items-center">
                 <div className="w-20 h-20 rounded-full overflow-hidden border border-gray-200">
                   <Image
-                    src="/dashboard/profile.png" // put your image in /public
+                    src="/dashboard/profile.png"
                     alt="Profile photo"
                     width={80}
                     height={80}
@@ -166,7 +224,7 @@ export default function ProfileSettings() {
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     className="w-full h-11 px-3 rounded-md border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#F97362] focus:border-[#F97362] transition"
-                    readOnly // Make email read-only since it comes from session
+                    readOnly
                   />
                 </div>
 
@@ -183,6 +241,38 @@ export default function ProfileSettings() {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* NEWSLETTER SECTION */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FiMail className="w-5 h-5 text-[#F97362]" />
+                  <div>
+                    <h3 className="font-medium text-gray-900">Newsletter Subscription</h3>
+                    <p className="text-sm text-gray-600">
+                      Receive updates and offers via email
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleNewsletterToggle}
+                  disabled={newsletterLoading || togglingNewsletter}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#F97362] focus:ring-offset-2 ${
+                    newsletterEnabled ? 'bg-[#F97362]' : 'bg-gray-300'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      newsletterEnabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              {newsletterLoading && (
+                <p className="text-xs text-gray-500 mt-2">Loading status...</p>
+              )}
             </div>
 
             {/* DIVIDER */}
@@ -292,16 +382,12 @@ export default function ProfileSettings() {
 
               <button
                 type="submit"
-                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium rounded-md bg-[#EF4444] text-white shadow-sm hover:bg-[#D32F2F] transition self-end sm:self-auto"
+                disabled={loading}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium rounded-md bg-[#EF4444] text-white shadow-sm hover:bg-[#D32F2F] transition self-end sm:self-auto disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FiSave className="w-4 h-4" />
                 <span>
-
-{
-
-loading ? "Loading..." : "Save Changes"
-}
-
+                  {loading ? "Saving..." : "Save Changes"}
                 </span>
               </button>
             </div>

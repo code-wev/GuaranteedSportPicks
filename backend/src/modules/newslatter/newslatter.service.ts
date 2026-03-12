@@ -1,10 +1,10 @@
 // Import the model
 import mongoose from 'mongoose';
 
-import { IdOrIdsInput, SearchQueryInput } from '../../handlers/common-zod-validator';
-import { CreateNewslatterInput, UpdateNewslatterInput } from './newslatter.validation';
 import NewsLatter, { Inewslatter } from '../../../src/model/newslatter/newslatter.model';
 import User from '../../../src/model/user/user.schema';
+import { IdOrIdsInput, SearchQueryInput } from '../../handlers/common-zod-validator';
+import { CreateNewslatterInput, UpdateNewslatterInput } from './newslatter.validation';
 
 /**
  * Service function to create a new newslatter.
@@ -13,13 +13,13 @@ import User from '../../../src/model/user/user.schema';
  * @returns {Promise<Partial<IInewslatter>>} - The created newslatter.
  */
 const createNewslatter = async (data: CreateNewslatterInput): Promise<Partial<Inewslatter>> => {
-  const userObjectId = new mongoose.Types.ObjectId(data.userId);
-  const userExists = await User.exists({ _id: userObjectId });
+console.log(data.userId, 'user id pawa gase');
+  const userExists = await User.findOne({ _id: data.userId });
   if (!userExists) {
     throw new Error('User not found');
   }
 
-  const existingNewslatter = await NewsLatter.findOne({ userId: userObjectId })
+  const existingNewslatter = await NewsLatter.findOne({ userId: data.userId })
     .select('isActive')
     .lean();
   if (existingNewslatter && existingNewslatter.isActive) {
@@ -48,7 +48,7 @@ const createNewslatter = async (data: CreateNewslatterInput): Promise<Partial<In
     existingNewslatter.isActive !== requestedStatus
   ) {
     const updatedNewslatter = await NewsLatter.findOneAndUpdate(
-      { userId: userObjectId },
+      { userId: data.userId },
       { $set: { isActive: requestedStatus } },
       { new: true }
     );
@@ -56,7 +56,7 @@ const createNewslatter = async (data: CreateNewslatterInput): Promise<Partial<In
   }
 
   if (!existingNewslatter) {
-    const newNewslatter = new NewsLatter({ ...data, userId: userObjectId });
+    const newNewslatter = new NewsLatter({ ...data, userId: data.userId });
     const savedNewslatter = await newNewslatter.save();
     return savedNewslatter;
   }
@@ -79,7 +79,7 @@ const updateNewslatter = async (
 
   if (data.userId) {
     const userObjectId = new mongoose.Types.ObjectId(data.userId);
-    const userExists = await User.exists({ _id: userObjectId });
+    const userExists = await User.exists({ _id: data.userId });
     if (!userExists) {
       throw new Error('User not found');
     }

@@ -4,18 +4,18 @@ import { Router } from 'express';
 // Import controller from corresponding module
 import {
   createNewslatter,
-  updateNewslatter,
-  getNewslatterById,
   getManyNewslatter,
+  getNewslatterById,
+  updateNewslatter,
 } from './newslatter.controller';
 
 //Import validation from corresponding module
-import { validateCreateNewslatter, validateUpdateNewslatter } from './newslatter.validation';
+import isAuthorized from '../../../src/middlewares/is-authorized';
 import {
   validateId,
-  validateIds,
-  validateSearchQueries,
+  validateSearchQueries
 } from '../../handlers/common-zod-validator';
+import { validateCreateNewslatter, validateUpdateNewslatter } from './newslatter.validation';
 
 // Initialize router
 const router = Router();
@@ -28,7 +28,7 @@ const router = Router();
  * @param {function} validation - ['validateCreateNewslatter']
  * @param {function} controller - ['createNewslatter']
  */
-router.post('/', validateCreateNewslatter, createNewslatter);
+router.post('/', isAuthorized, validateCreateNewslatter, createNewslatter);
 
 /**
  * @route PUT /api/v1/newslatter/update-newslatter/:id

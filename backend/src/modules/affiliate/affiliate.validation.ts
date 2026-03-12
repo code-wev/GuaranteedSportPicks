@@ -26,7 +26,7 @@ const zodCreateAffiliateSchema = z
     // age: z.number().int().positive().optional(),
     // status: z.enum(['active', 'inactive', 'pending']).default('pending'),
 
-    affiliateCode: z.string().optional(),
+    // affiliateCode: z.string().optional(),
     website: z.string().optional(),
     socialLinks: z.array(z.string()).optional(),
     notes: z.string().optional(),

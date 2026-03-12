@@ -6,6 +6,8 @@ import { CreateAffiliateInput, UpdateAffiliateInput } from './affiliate.validati
 import AffiliateModel, { IAffiliate } from '../../../src/model/affiliates/affiliate.model';
 import User, { UserRole } from '../../../src/model/user/user.schema';
 import { TCreateAffiliate } from './affiliate.interface';
+import { uuidv4 } from 'node_modules/zod/index.cjs';
+
 
 /**
  * Service function to create a new affiliate.
@@ -16,6 +18,7 @@ import { TCreateAffiliate } from './affiliate.interface';
 const createAffiliate = async (data: TCreateAffiliate): Promise<Partial<IAffiliate>> => {
   // Validate that the user exists
   const userId = data.userId;
+  
   console.log(userId, 'recevie user id');
   const userExists = await User.exists({ _id: userId });
   if (!userExists) {
@@ -30,8 +33,16 @@ const createAffiliate = async (data: TCreateAffiliate): Promise<Partial<IAffilia
     throw new Error('User is already an affiliate');
   }
 
-  //
-  const newAffiliate = new AffiliateModel(data);
+  // Generate unique affiliate code using uuid
+  const affiliateCode = 43545
+  
+  // Add the code to data
+  const affiliateData = {
+    ...data,
+    affiliateCode
+  };
+
+  const newAffiliate = new AffiliateModel(affiliateData);
   const savedAffiliate = await newAffiliate.save();
   return savedAffiliate;
 };

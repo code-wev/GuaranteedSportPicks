@@ -1,21 +1,20 @@
 import { base_url } from "@/utils/utils";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import Cookies from "js-cookie";
 
 export const AffiliateApi = createApi({
   reducerPath: "AffiliateApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: base_url,
+baseUrl: base_url,
     prepareHeaders: (headers) => {
-      const token =
-        typeof window !== "undefined" ? localStorage.getItem("token") : null;
+ 
+      const token = typeof window !== "undefined" ? Cookies.get("token") : null;
+      
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
       return headers;
     },
-    credentials: "include",
-  }),
-  tagTypes: ["Affiliate"],
+    credentials: "include", 
   endpoints: (builder) => ({
     createAffiliate: builder.mutation({
       query: (data) => ({

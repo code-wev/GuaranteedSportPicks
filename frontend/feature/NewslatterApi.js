@@ -1,9 +1,34 @@
 import { base_url } from "@/utils/utils";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import Cookies from 'js-cookie';
+
+// Cookie থেকে token নেওয়ার ফাংশন
+const getToken = () => {
+  if (typeof window === "undefined") return null;
+  return Cookies.get("token") || null;
+};
 
 export const NewslatterApi = createApi({
   reducerPath: "NewslatterApi",
-  baseQuery: fetchBaseQuery({ baseUrl: base_url }),
+  baseQuery: fetchBaseQuery({ 
+    baseUrl: base_url,
+    prepareHeaders: (headers) => {
+      // Token cookie 
+      const token = getToken();
+      
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+      
+      // Content-Type set 
+      if (!headers.has("Content-Type")) {
+        headers.set("Content-Type", "application/json");
+      }
+      
+      return headers;
+    },
+    credentials: "include", // cookies 
+  }),
   tagTypes: ["Newslatter"],
   endpoints: (builder) => ({
     createNewslatter: builder.mutation({
@@ -33,6 +58,20 @@ export const NewslatterApi = createApi({
       query: (id) => `/newslatter/${id}`,
       providesTags: ["Newslatter"],
     }),
+    // User এর newsletter status পাওয়ার জন্য
+    getUserNewsletterStatus: builder.query({
+      query: (userId) => `/newslatter/user/${userId}/status`,
+      providesTags: ["Newslatter"],
+    }),
+    // Newsletter on/off টগল করার জন্য
+    toggleNewsletter: builder.mutation({
+      query: () => ({
+        url: `/newslatter/`,
+        method: "POST",
+        body: {  },
+      }),
+      invalidatesTags: ["Newslatter"],
+    }),
   }),
 });
 
@@ -41,4 +80,6 @@ export const {
   useUpdateNewslatterMutation,
   useGetManyNewslatterQuery,
   useGetNewslatterByIdQuery,
+  useGetUserNewsletterStatusQuery,
+  useToggleNewsletterMutation,
 } = NewslatterApi;

@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import { newslatterServices } from './newslatter.service';
+import { AuthenticatedRequest } from 'src/middlewares/is-authorized';
 import { SearchQueryInput } from '../../handlers/common-zod-validator';
 import ServerResponse from '../../helpers/responses/custom-response';
 import catchAsync from '../../utils/catch-async/catch-async';
+import { newslatterServices } from './newslatter.service';
 
 /**
  * Controller function to handle the creation of a single newslatter.
@@ -12,8 +13,12 @@ import catchAsync from '../../utils/catch-async/catch-async';
  * @returns {Promise<Partial<INewslatter>>} - The created newslatter.
  * @throws {Error} - Throws an error if the newslatter creation fails.
  */
-export const createNewslatter = catchAsync(async (req: Request, res: Response) => {
+export const createNewslatter = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+
+  console.log("Hit");
   // Call the service method to create a new newslatter and get the result
+const userId = req.user!._id;
+  req.body.userId = userId;
   const result = await newslatterServices.createNewslatter(req.body);
   if (!result) throw new Error('Failed to create newslatter');
   // Send a success response with the created newslatter data
