@@ -13,7 +13,7 @@ import { CreateNewslatterInput, UpdateNewslatterInput } from './newslatter.valid
  * @returns {Promise<Partial<IInewslatter>>} - The created newslatter.
  */
 const createNewslatter = async (data: CreateNewslatterInput): Promise<Partial<Inewslatter>> => {
-console.log(data.userId, 'user id pawa gase');
+
   const userExists = await User.findOne({ _id: data.userId });
   if (!userExists) {
     throw new Error('User not found');
@@ -22,46 +22,26 @@ console.log(data.userId, 'user id pawa gase');
   const existingNewslatter = await NewsLatter.findOne({ userId: data.userId })
     .select('isActive')
     .lean();
-  if (existingNewslatter && existingNewslatter.isActive) {
-    throw new Error('User is already an active subscriber');
-  }
   const requestedStatus = (data as { status?: boolean }).status;
-  if (requestedStatus !== undefined && requestedStatus !== true) {
-    throw new Error('Status must be true');
+
+  if (existingNewslatter) {
+    // If status provided, update to the requested status
+    if (requestedStatus !== undefined) {
+      const updatedNewslatter = await NewsLatter.findOneAndUpdate(
+        { userId: data.userId },
+        { $set: { isActive: requestedStatus } },
+        { new: true }
+      );
+      return updatedNewslatter as Partial<Inewslatter>;
+    }
+    // If no status provided and already exists, return existing
+    return existingNewslatter;
   }
 
-  if (
-    existingNewslatter &&
-    requestedStatus !== undefined &&
-    existingNewslatter.isActive === requestedStatus
-  ) {
-    throw new Error(
-      existingNewslatter.isActive
-        ? 'You or this user is already a subscriber'
-        : 'You or this user is already an unsubscriber'
-    );
-  }
-
-  if (
-    existingNewslatter &&
-    requestedStatus !== undefined &&
-    existingNewslatter.isActive !== requestedStatus
-  ) {
-    const updatedNewslatter = await NewsLatter.findOneAndUpdate(
-      { userId: data.userId },
-      { $set: { isActive: requestedStatus } },
-      { new: true }
-    );
-    return updatedNewslatter as Partial<Inewslatter>;
-  }
-
-  if (!existingNewslatter) {
-    const newNewslatter = new NewsLatter({ ...data, userId: data.userId });
-    const savedNewslatter = await newNewslatter.save();
-    return savedNewslatter;
-  }
-
-  throw new Error('You or this user is already an unsubscriber');
+  // If not existing, create new
+  const newNewslatter = new NewsLatter({ ...data, userId: data.userId });
+  const savedNewslatter = await newNewslatter.save();
+  return savedNewslatter;
 };
 
 /**
@@ -123,7 +103,7 @@ const deleteNewslatter = async (id: IdOrIdsInput['id']): Promise<Partial<Inewsla
  * @returns {Promise<Partial<INewslatter>>} - The retrieved newslatter.
  */
 const getNewslatterById = async (id: IdOrIdsInput['id']): Promise<Partial<Inewslatter | null>> => {
-  const newslatter = await NewsLatter.findById(id);
+  const newslatter = await NewsLatter.findOne({ userId: id });
   return newslatter;
 };
 

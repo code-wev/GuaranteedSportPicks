@@ -110,10 +110,12 @@ export default function LoginPage() {
         sameSite: "Strict",
       });
 
-      toast.success("Login Success");
+      // user info save
+      if (response?.data?.user) {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+      }
 
-      // চাইলে user info ও save করতে পারো
-      // Cookies.set("user", JSON.stringify(response?.data?.user), { expires: 7 });
+      toast.success("Login Success");
 
       // redirect
       window.location.href = "/dashboard";

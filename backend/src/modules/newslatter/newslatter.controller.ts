@@ -15,10 +15,11 @@ import { newslatterServices } from './newslatter.service';
  */
 export const createNewslatter = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
 
-  console.log("Hit");
+
   // Call the service method to create a new newslatter and get the result
 const userId = req.user!._id;
   req.body.userId = userId;
+  req.body.email = req.user!.email
   const result = await newslatterServices.createNewslatter(req.body);
   if (!result) throw new Error('Failed to create newslatter');
   // Send a success response with the created newslatter data
@@ -50,8 +51,11 @@ export const updateNewslatter = catchAsync(async (req: Request, res: Response) =
  * @returns {Promise<Partial<INewslatter>>} - The retrieved newslatter.
  * @throws {Error} - Throws an error if the newslatter retrieval fails.
  */
-export const getNewslatterById = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
+export const getNewslatterById = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+
+  console.log("Hit");
+const id = req.user!._id;
+
   // Call the service method to get the newslatter by ID and get the result
   const result = await newslatterServices.getNewslatterById(id as string);
   if (!result) throw new Error('Newslatter not found');

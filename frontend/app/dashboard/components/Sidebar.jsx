@@ -1,12 +1,13 @@
 "use client";
 
-import { FiGrid, FiShoppingBag, FiUser, FiX } from "react-icons/fi";
-import { RiFileHistoryFill } from "react-icons/ri";
+import { useMyProfileQuery } from "@/feature/UserApi";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IoDocumentTextOutline } from "react-icons/io5";
+import { FiGrid, FiShoppingBag, FiUser, FiX } from "react-icons/fi";
 import { GrUserAdmin } from "react-icons/gr";
+import { IoDocumentTextOutline } from "react-icons/io5";
+import { RiFileHistoryFill } from "react-icons/ri";
 
 const menu = [
   { title: "Dashboard", icon: <FiGrid />, url: "/dashboard" },
@@ -67,6 +68,9 @@ const menu = [
 
 export default function Sidebar({ open, setOpen }) {
   const path = usePathname();
+  const {data} = useMyProfileQuery();
+
+  const role = data?.data?.role
 
   return (
     <>

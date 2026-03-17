@@ -15,7 +15,7 @@ import {
   validateId,
   validateSearchQueries
 } from '../../handlers/common-zod-validator';
-import { validateCreateNewslatter, validateUpdateNewslatter } from './newslatter.validation';
+import { validateUpdateNewslatter } from './newslatter.validation';
 
 // Initialize router
 const router = Router();
@@ -28,7 +28,17 @@ const router = Router();
  * @param {function} validation - ['validateCreateNewslatter']
  * @param {function} controller - ['createNewslatter']
  */
-router.post('/', isAuthorized, validateCreateNewslatter, createNewslatter);
+router.post('/', isAuthorized,  createNewslatter);
+
+/**
+ * @route GET /api/v1/newslatter/get-newslatter/:id
+ * @description Get a newslatter by ID
+ * @access Public
+ * @param {IdOrIdsInput['id']} id - The ID of the newslatter to retrieve
+ * @param {function} validation - ['validateId']
+ * @param {function} controller - ['getNewslatterById']
+ */
+router.get('/me', isAuthorized, getNewslatterById);
 
 /**
  * @route PUT /api/v1/newslatter/update-newslatter/:id
@@ -49,15 +59,7 @@ router.put('/:id', validateId, validateUpdateNewslatter, updateNewslatter);
  */
 router.get('/get-newslatter/many', validateSearchQueries, getManyNewslatter);
 
-/**
- * @route GET /api/v1/newslatter/get-newslatter/:id
- * @description Get a newslatter by ID
- * @access Public
- * @param {IdOrIdsInput['id']} id - The ID of the newslatter to retrieve
- * @param {function} validation - ['validateId']
- * @param {function} controller - ['getNewslatterById']
- */
-router.get('/get-newslatter/:id', validateId, getNewslatterById);
+
 
 // Export the router
 module.exports = router;

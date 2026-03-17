@@ -7,7 +7,6 @@ import {
 import { useGetSingleUserQuery } from "@/feature/UserApi";
 import { base_url } from "@/utils/utils";
 import axios from "axios";
-import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
@@ -19,37 +18,39 @@ export default function ProfileSettings() {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [newsletterEnabled, setNewsletterEnabled] = useState(false);
+  const {data, isLoading: newsletterLoading, refetch: refetchNewsletter} =   useGetUserNewsletterStatusQuery();
+  console.log(data?.data?.isActive, 'news latter status');
+  const isSubscribedForNewsLatter = data?.data?.isActive;
 
-  const { data } = useSession();
-  console.log(data?.user?.email, "user email");
+  const [user, setUser] = useState(null);
 
-  const {data: profile, isLoading, error, isError} = useGetSingleUserQuery(data?.user?.id);
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  const {data: profile, isLoading, error, isError} = useGetSingleUserQuery(user?.id);
   console.log(profile, "Profile is defined");
   
-  // Get user newsletter status
-  const { 
-    data: newsletterStatus, 
-    isLoading: newsletterLoading,
-    refetch: refetchNewsletter 
-  } = useGetUserNewsletterStatusQuery(data?.user?.id, {
-    skip: !data?.user?.id, // Skip if no user id
-  });
-
   // Toggle newsletter mutation
   const [toggleNewsletter, { isLoading: togglingNewsletter }] = useToggleNewsletterMutation();
 
   // Update newsletter state when data is fetched
   useEffect(() => {
-    if (newsletterStatus) {
-      setNewsletterEnabled(newsletterStatus.isSubscribed);
+    if (isSubscribedForNewsLatter !== undefined) {
+      setNewsletterEnabled(isSubscribedForNewsLatter);
+    } else {
+      setNewsletterEnabled(false); // Default to false if no subscription
     }
-  }, [newsletterStatus]);
+  }, [isSubscribedForNewsLatter]);
 
   // Form state
   const [formData, setFormData] = useState({
     firstName: profile?.firstName || "Alex",
     lastName: profile?.lastName || "Johnson",
-    email: data?.user?.email || "",
+    email: user?.email || "",
     phone: profile?.phoneNumber || "+1 (555) 123-4567",
     currentPassword: "",
     newPassword: "",
@@ -82,16 +83,16 @@ export default function ProfileSettings() {
 
     try {
       const newStatus = !newsletterEnabled;
-      const response = await toggleNewsletter().unwrap();
+      const response = await toggleNewsletter({ status: newStatus }).unwrap();
 
       if (response.success) {
         setNewsletterEnabled(newStatus);
-        toast.success(`Newsletter ${newStatus ? 'enabled' : 'disabled'} successfully!`);
+        alert(`Newsletter ${newStatus ? 'enabled' : 'disabled'} successfully!`);
         refetchNewsletter(); // Refresh status
       }
     } catch (error) {
       console.error("Newsletter toggle error:", error);
-      toast.error(error?.data?.message || "Failed to toggle newsletter!");
+      alert(error?.data?.message || "Failed to toggle newsletter!");
     }
   };
 
@@ -124,7 +125,7 @@ export default function ProfileSettings() {
 
     // Create payload with correct variable names
     const payload = {
-      email: data?.user?.email,
+      email: user?.email,
       oldPassword: formData.currentPassword,
       newPassword: formData.newPassword
     };
@@ -255,24 +256,25 @@ export default function ProfileSettings() {
                     </p>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleNewsletterToggle}
-                  disabled={newsletterLoading || togglingNewsletter}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#F97362] focus:ring-offset-2 ${
-                    newsletterEnabled ? 'bg-[#F97362]' : 'bg-gray-300'
-                  }`}
-                >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      newsletterEnabled ? 'translate-x-6' : 'translate-x-1'
+                {newsletterLoading ? (
+                  <p className="text-xs text-gray-500">Loading status...</p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleNewsletterToggle}
+                    disabled={togglingNewsletter}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#F97362] focus:ring-offset-2 ${
+                      newsletterEnabled ? 'bg-[#F97362]' : 'bg-gray-300'
                     }`}
-                  />
-                </button>
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        newsletterEnabled ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                )}
               </div>
-              {newsletterLoading && (
-                <p className="text-xs text-gray-500 mt-2">Loading status...</p>
-              )}
             </div>
 
             {/* DIVIDER */}

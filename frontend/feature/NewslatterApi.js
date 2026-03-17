@@ -58,17 +58,17 @@ export const NewslatterApi = createApi({
       query: (id) => `/newslatter/${id}`,
       providesTags: ["Newslatter"],
     }),
-    // User এর newsletter status পাওয়ার জন্য
+    // User এর newsletter status 
     getUserNewsletterStatus: builder.query({
-      query: (userId) => `/newslatter/user/${userId}/status`,
+      query: (userId) => `/newslatter/me`,
       providesTags: ["Newslatter"],
     }),
-    // Newsletter on/off টগল করার জন্য
+
     toggleNewsletter: builder.mutation({
-      query: () => ({
+      query: (data) => ({
         url: `/newslatter/`,
         method: "POST",
-        body: {  },
+        body: data,
       }),
       invalidatesTags: ["Newslatter"],
     }),
@@ -82,4 +82,5 @@ export const {
   useGetNewslatterByIdQuery,
   useGetUserNewsletterStatusQuery,
   useToggleNewsletterMutation,
+  
 } = NewslatterApi;
