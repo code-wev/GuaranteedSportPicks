@@ -68,7 +68,7 @@ export default function GetSportsPicks() {
               >
                 <div className="absolute left-0 top-0 h-full w-[4px] bg-[#E11D2E] rounded-r-[14px]" />
 
-                <div className={`px-5 py-4 ${pick.accessLocked ? "blur-[4px]" : ""}`}>
+                <div className="px-5 py-4">
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <p className="text-xs uppercase tracking-[0.18em] text-red-600 font-bold">{pick.sport_title}</p>
@@ -88,7 +88,11 @@ export default function GetSportsPicks() {
                   </div>
 
                   <div className="flex items-center justify-between mt-4">
-                    <ConfidencePill level={pick.confidence} />
+                    {pick.accessLocked ? (
+                      <div className="h-7 w-28 rounded-full bg-gray-200 blur-[2px]" />
+                    ) : (
+                      <ConfidencePill level={pick.confidence} />
+                    )}
                     <span className="text-sm font-bold text-[#B91C1C]">
                       {pick.premium ? `$${Number(pick.price).toFixed(2)}` : "Free"}
                     </span>
@@ -96,7 +100,7 @@ export default function GetSportsPicks() {
                 </div>
 
                 {pick.accessLocked && (
-                  <div className="absolute inset-0 bg-white/40 flex items-center justify-center p-4">
+                  <div className="absolute bottom-4 left-4 right-4 bg-white/90 border border-red-100 rounded-2xl flex items-center justify-center p-4">
                     <Link
                       href="/dashboard/purchase"
                       className="bg-[#B91C1C] hover:bg-[#991B1B] text-white font-semibold text-[12px] px-8 py-3 rounded-[8px] transition"

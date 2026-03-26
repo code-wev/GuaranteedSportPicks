@@ -7,6 +7,7 @@ import Subscription, {
 } from '../../../src/model/subscription/subscription.model';
 import { IdOrIdsInput, SearchQueryInput } from '../../handlers/common-zod-validator';
 import { CreateSubscriptionInput, UpdateSubscriptionInput } from './subscription.validation';
+import { affiliateServices } from '../affiliate/affiliate.service';
 import { processPickPurchaseWebhookEvent } from '../picks/picks.service';
 import { stripe } from '../../utils/stripe/stripe';
 
@@ -258,7 +259,7 @@ const webHook = async (req: any) => {
           endDate = calculateSeasonalEndDate(startDate, days);
         }
 
-        await Subscription.findByIdAndUpdate(subscriptionId, {
+        const activatedSeasonalSubscription = await Subscription.findByIdAndUpdate(subscriptionId, {
           status: SubscriptionStatus.PAID,
           isSubscribed: true,
           subscriptionStart: startDate.toISOString(),
@@ -266,7 +267,15 @@ const webHook = async (req: any) => {
           nextBilling: endDate.toISOString(),
           paymentIntentId: session.payment_intent as string,
           stripeSessionId: session.id,
-        });
+        }, { new: true });
+
+        if (activatedSeasonalSubscription) {
+          await affiliateServices.recordAffiliateCommissionForSubscription(
+            activatedSeasonalSubscription,
+            session.id,
+            'INITIAL'
+          );
+        }
 
         console.log(`✅ Seasonal Plan Activated: ${subscriptionId}, Ends: ${endDate.toISOString()}`);
       }
@@ -337,6 +346,11 @@ const webHook = async (req: any) => {
         );
 
         if (updatedSubscription) {
+          await affiliateServices.recordAffiliateCommissionForSubscription(
+            updatedSubscription,
+            invoice.id,
+            'RENEWAL'
+          );
           console.log(`🔄 Subscription Renewed: ${stripeSubId}, New End Date: ${endDate.toISOString()}`);
         } else {
           console.log(`⚠️ Subscription not found in DB: ${stripeSubId}`);
@@ -558,8 +572,6 @@ export const subscriptionServices = {
   getUserSubscriptionHistory,
   cancelSubscription,
 };
-
-
 
 
 

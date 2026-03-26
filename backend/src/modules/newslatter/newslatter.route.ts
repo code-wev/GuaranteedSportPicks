@@ -4,18 +4,25 @@ import { Router } from 'express';
 // Import controller from corresponding module
 import {
   createNewslatter,
+  getNewsletterCampaigns,
   getManyNewslatter,
   getNewslatterById,
+  sendNewsletterCampaign,
   updateNewslatter,
 } from './newslatter.controller';
 
 //Import validation from corresponding module
 import isAuthorized from '../../../src/middlewares/is-authorized';
+import authorizedRoles from '../../../src/middlewares/authorized-roles';
+import { UserRole } from '../../../src/model/user/user.schema';
 import {
   validateId,
   validateSearchQueries
 } from '../../handlers/common-zod-validator';
-import { validateUpdateNewslatter } from './newslatter.validation';
+import {
+  validateSendNewsletter,
+  validateUpdateNewslatter,
+} from './newslatter.validation';
 
 // Initialize router
 const router = Router();
@@ -28,7 +35,7 @@ const router = Router();
  * @param {function} validation - ['validateCreateNewslatter']
  * @param {function} controller - ['createNewslatter']
  */
-router.post('/', isAuthorized,  createNewslatter);
+router.post(['/','/newslatter','/toggle','/newslatter/toggle'], isAuthorized, createNewslatter);
 
 /**
  * @route GET /api/v1/newslatter/get-newslatter/:id
@@ -38,7 +45,7 @@ router.post('/', isAuthorized,  createNewslatter);
  * @param {function} validation - ['validateId']
  * @param {function} controller - ['getNewslatterById']
  */
-router.get('/me', isAuthorized, getNewslatterById);
+router.get(['/me', '/newslatter/me'], isAuthorized, getNewslatterById);
 
 /**
  * @route PUT /api/v1/newslatter/update-newslatter/:id
@@ -48,7 +55,7 @@ router.get('/me', isAuthorized, getNewslatterById);
  * @param {function} validation - ['validateId', 'validateUpdateNewslatter']
  * @param {function} controller - ['updateNewslatter']
  */
-router.put('/:id', validateId, validateUpdateNewslatter, updateNewslatter);
+router.put(['/:id', '/newslatter/:id'], validateId, validateUpdateNewslatter, updateNewslatter);
 
 /**
  * @route GET /api/v1/newslatter/get-newslatter/many
@@ -57,10 +64,30 @@ router.put('/:id', validateId, validateUpdateNewslatter, updateNewslatter);
  * @param {function} validation - ['validateSearchQueries']
  * @param {function} controller - ['getManyNewslatter']
  */
-router.get('/get-newslatter/many', validateSearchQueries, getManyNewslatter);
+router.get(
+  ['/get-newslatter/many', '/newslatter/get-newslatter/many'],
+  validateSearchQueries,
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  getManyNewslatter
+);
+
+router.get(
+  ['/admin/campaigns', '/newslatter/admin/campaigns'],
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  getNewsletterCampaigns
+);
+
+router.post(
+  ['/admin/send', '/newslatter/admin/send'],
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  validateSendNewsletter,
+  sendNewsletterCampaign
+);
 
 
 
 // Export the router
 module.exports = router;
-

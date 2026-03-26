@@ -57,9 +57,18 @@ const zodUpdateAffiliateSchema = z
 
 export type UpdateAffiliateInput = z.infer<typeof zodUpdateAffiliateSchema>;
 
+export const affiliateApprovalSchema = z
+  .object({
+    status: z.enum(['approved', 'declined']),
+    notes: z.string().trim().max(500, 'Notes are too long').optional(),
+  })
+  .strict();
+
+export type AffiliateApprovalInput = z.infer<typeof affiliateApprovalSchema>;
+
 /**
  * Named validators — use these directly in your Express routes
  */
 export const validateCreateAffiliate = validateBody(zodCreateAffiliateSchema);
 export const validateUpdateAffiliate = validateBody(zodUpdateAffiliateSchema);
-
+export const validateAffiliateApproval = validateBody(affiliateApprovalSchema);

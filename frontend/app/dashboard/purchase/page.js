@@ -207,7 +207,7 @@ export default function Purchase() {
         <div className="bg-white border border-green-200 rounded-xl p-5">
           <h2 className="text-lg font-semibold text-gray-900">Active Subscription</h2>
           <p className="text-sm text-gray-600 mt-1">
-            Your current plan already unlocks: {activeSubscription.selectedSport?.join(", ")}.
+            Your current plan already unlocks all premium picks. You do not need to buy single picks separately.
           </p>
         </div>
       )}
@@ -266,8 +266,7 @@ export default function Purchase() {
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {activePremiumPicks.map((pick) => {
-              const coveredBySubscription =
-                activeSubscription?.selectedSport?.includes(pick.sport_title) || false;
+              const coveredBySubscription = Boolean(activeSubscription);
 
               return (
                 <div key={pick._id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">

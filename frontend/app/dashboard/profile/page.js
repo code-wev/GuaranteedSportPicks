@@ -73,7 +73,7 @@ export default function ProfileSettings() {
   const handleNewsletterToggle = async () => {
     try {
       const newStatus = !newsletterEnabled;
-      await toggleNewsletter({ status: newStatus }).unwrap();
+      await toggleNewsletter({ isActive: newStatus }).unwrap();
       setNewsletterEnabled(newStatus);
       toast.success(`Newsletter ${newStatus ? 'enabled' : 'disabled'} successfully!`);
       refetchNewsletter();
@@ -111,16 +111,17 @@ export default function ProfileSettings() {
       toast.error("New passwords don't match!");
       return;
     }
-    if (formData.newPassword.length < 6) {
-      toast.error("New password must be at least 6 characters long!");
+    if (formData.newPassword.length < 8) {
+      toast.error("New password must be at least 8 characters long!");
       return;
     }
 
     setLoading(true);
     try {
       await changePassword({
-        oldPassword: formData.currentPassword,
-        newPassword: formData.newPassword
+        currentPassword: formData.currentPassword,
+        newPassword: formData.newPassword,
+        confirmNewPassword: formData.confirmPassword
       }).unwrap();
       
       toast.success("Password changed successfully!");
@@ -242,7 +243,7 @@ export default function ProfileSettings() {
               <button
                 type="button"
                 onClick={handleNewsletterToggle}
-                disabled={togglingNewsletter}
+                disabled={togglingNewsletter || newsletterLoading}
                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
                   newsletterEnabled ? 'bg-[#B91C1C]' : 'bg-gray-300'
                 }`}

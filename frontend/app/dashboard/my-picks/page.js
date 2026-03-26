@@ -77,7 +77,7 @@ export default function MyPicksPage() {
 
       {activeSubscription && (
         <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-sm text-green-700 flex items-center justify-between">
-          <span>Active subscription sports: {activeSubscription.selectedSport?.join(", ")}</span>
+          <span>Active subscription detected. All premium picks are unlocked for your account.</span>
           <span className="text-[10px] font-bold uppercase bg-green-200 px-2 py-1 rounded">Subscription Active</span>
         </div>
       )}
@@ -131,7 +131,7 @@ export default function MyPicksPage() {
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             {visiblePicks.map((pick) => {
               const purchase = purchases.find(p => p.pickId?._id === pick._id || p.pickId === pick._id);
-              const isFromSubscription = activeSubscription?.selectedSport?.includes(pick.sport_title);
+              const isFromSubscription = Boolean(activeSubscription);
 
               return (
                 <div key={pick._id} className="border border-gray-200 rounded-2xl p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
@@ -195,7 +195,7 @@ export default function MyPicksPage() {
                     <p className="text-[10px] uppercase font-black text-red-600 mb-2 tracking-widest">
                       Expert Writeup & Analysis
                     </p>
-                    <p className="text-sm text-gray-700 leading-relaxed font-medium italic">"{pick.writeup}"</p>
+                    <p className="text-sm text-gray-700 leading-relaxed font-medium italic">&ldquo;{pick.writeup}&rdquo;</p>
                   </div>
                 </div>
               );

@@ -221,7 +221,11 @@ export default function LoginPage() {
                 <span>Remember me</span>
               </label>
 
-              <button type='button' className='text-rose-500'>
+              <button
+                type='button'
+                className='text-rose-500'
+                onClick={() => (window.location.href = "/forgot-password")}
+              >
                 Forgot Password?
               </button>
             </div>

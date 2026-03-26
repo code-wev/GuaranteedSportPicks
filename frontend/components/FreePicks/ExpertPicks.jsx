@@ -34,7 +34,7 @@ export default function ExpertPicks() {
                 key={pick._id}
                 className="relative bg-white rounded-2xl shadow-sm border border-gray-200 p-6 overflow-hidden"
               >
-                <div className={locked ? "blur-[5px] select-none pointer-events-none" : ""}>
+                <div>
                   <div className="flex items-start justify-between gap-4 mb-4">
                     <div>
                       <p className="text-xs uppercase tracking-[0.18em] text-red-600 font-bold">
@@ -70,7 +70,11 @@ export default function ExpertPicks() {
                     </div>
                     <div className="rounded-xl bg-gray-50 p-3">
                       <p className="text-gray-400">Pick</p>
-                      <p className="font-semibold text-gray-800">{pick.selected_team || "Premium only"}</p>
+                      {locked ? (
+                        <div className="h-5 mt-1 rounded bg-gray-200 blur-[2px]" />
+                      ) : (
+                        <p className="font-semibold text-gray-800">{pick.selected_team}</p>
+                      )}
                     </div>
                     <div className="rounded-xl bg-gray-50 p-3">
                       <p className="text-gray-400">Market</p>
@@ -80,14 +84,20 @@ export default function ExpertPicks() {
 
                   <div className="rounded-xl bg-[#F9FAFB] border border-gray-100 p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-gray-400 font-bold mb-2">Writeup</p>
-                    <p className="text-sm text-gray-600 leading-6">
-                      {pick.writeup || "Premium analysis is hidden until access is unlocked."}
-                    </p>
+                    {locked ? (
+                      <div className="space-y-2">
+                        <div className="h-4 rounded bg-gray-200 blur-[2px]" />
+                        <div className="h-4 rounded bg-gray-200 blur-[2px]" />
+                        <div className="h-4 w-2/3 rounded bg-gray-200 blur-[2px]" />
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600 leading-6">{pick.writeup}</p>
+                    )}
                   </div>
                 </div>
 
                 {locked && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/45 p-6 text-center">
+                  <div className="absolute bottom-6 left-6 right-6 flex flex-col items-center justify-center bg-white/85 border border-red-100 rounded-2xl p-6 text-center shadow-sm">
                     <span className="px-3 py-1 rounded-full bg-[#B91C1C] text-white text-xs font-bold uppercase tracking-[0.2em]">
                       Premium Pick
                     </span>

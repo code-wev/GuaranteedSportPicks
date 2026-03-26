@@ -17,56 +17,57 @@ export const AffiliateApi = createApi({
   }),
   tagTypes: ["Affiliate"],
   endpoints: (builder) => ({
-    createAffiliate: builder.mutation({
+    createAffiliateRequest: builder.mutation({
       query: (data) => ({
-        url: "/affiliate",
+        url: "/affiliate/request",
         method: "POST",
         body: data,
       }),
       invalidatesTags: ["Affiliate"],
     }),
-    updateAffiliate: builder.mutation({
-      query: ({ id, ...data }) => ({
-        url: `/affiliate/${id}`,
+    updateAffiliateRequest: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/affiliate/request/${id}`,
         method: "PUT",
-        body: data,
+        body,
       }),
       invalidatesTags: ["Affiliate"],
     }),
-    deleteAffiliate: builder.mutation({
-      query: (id) => ({
-        url: `/affiliate/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Affiliate"],
-    }),
-    deleteManyAffiliate: builder.mutation({
-      query: (data) => ({
-        url: "/affiliate/delete-many",
-        method: "DELETE",
-        body: data,
+    approveAffiliateRequest: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/affiliate/approve/${id}`,
+        method: "PUT",
+        body,
       }),
       invalidatesTags: ["Affiliate"],
     }),
     getManyAffiliate: builder.query({
       query: (params) => ({
-        url: "/affiliate",
+        url: "/affiliate/many",
         params,
       }),
       providesTags: ["Affiliate"],
     }),
-    getAffiliateById: builder.query({
-      query: (id) => `/affiliate/${id}`,
+    getMyAffiliate: builder.query({
+      query: () => ({
+        url: "/affiliate/me",
+      }),
+      providesTags: ["Affiliate"],
+    }),
+    getAffiliateAdminSummary: builder.query({
+      query: () => ({
+        url: "/affiliate/summary/admin",
+      }),
       providesTags: ["Affiliate"],
     }),
   }),
 });
 
 export const {
-  useCreateAffiliateMutation,
-  useUpdateAffiliateMutation,
-  useDeleteAffiliateMutation,
-  useDeleteManyAffiliateMutation,
+  useCreateAffiliateRequestMutation,
+  useUpdateAffiliateRequestMutation,
+  useApproveAffiliateRequestMutation,
   useGetManyAffiliateQuery,
-  useGetAffiliateByIdQuery,
+  useGetMyAffiliateQuery,
+  useGetAffiliateAdminSummaryQuery,
 } = AffiliateApi;

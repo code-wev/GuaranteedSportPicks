@@ -39,7 +39,7 @@ const userMenu = [
     url: "/dashboard/admin/testimonials",
   },
   {
-    title: "Affiliate",
+    title: "Affiliate Program",
     icon: <IoDocumentTextOutline />,
     url: "/dashboard/admin/affiliate",
   },

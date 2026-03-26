@@ -54,14 +54,47 @@ const buildPickCheckoutSession = async (
   });
 };
 
-const getUserActiveSubscriptionForPick = async (userId: string, pick: IPicks) => {
+const getUserActiveSubscription = async (userId: string) => {
   return Subscription.findOne({
     userId: new mongoose.Types.ObjectId(userId),
     status: SubscriptionStatus.PAID,
     isSubscribed: true,
     subscriptionEnd: { $gt: new Date().toISOString() },
-    selectedSport: pick.sport_title,
   } as any).lean();
+};
+
+const getPurchasedPickIdSet = async (userId?: string) => {
+  if (!userId) {
+    return new Set<string>();
+  }
+
+  const purchases = await PickPurchase.find({
+    userId: new mongoose.Types.ObjectId(userId),
+    status: { $in: [PickPurchaseStatus.AUTHORIZED, PickPurchaseStatus.PAID] },
+  } as any)
+    .select('pickId')
+    .lean();
+
+  return new Set(purchases.map((purchase: any) => purchase.pickId.toString()));
+};
+
+const sanitizePickForAccess = (pick: any, unlocked: boolean) => {
+  const basePick = pick.toObject?.() ?? pick;
+
+  if (!basePick.premium || unlocked) {
+    return {
+      ...basePick,
+      accessLocked: false,
+    };
+  }
+
+  return {
+    ...basePick,
+    selected_team: undefined,
+    units: undefined,
+    writeup: undefined,
+    accessLocked: true,
+  };
 };
 
 const settleAuthorizedPurchasesForPick = async (pick: IPicks) => {
@@ -261,6 +294,30 @@ const getManyPicks = async (
   return { pickss, totalData, totalPages, totalActivePicks };
 };
 
+const getPickBoard = async (
+  query: SearchQueryInput,
+  userId?: string
+): Promise<{
+  pickss: Partial<IPicks>[];
+  totalData: number;
+  totalPages: number;
+  totalActivePicks: number;
+}> => {
+  const result = await getManyPicks(query);
+  const hasActiveSubscription = userId ? Boolean(await getUserActiveSubscription(userId)) : false;
+  const purchasedPickIds = hasActiveSubscription ? new Set<string>() : await getPurchasedPickIdSet(userId);
+
+  return {
+    ...result,
+    pickss: result.pickss.map((pick: any) =>
+      sanitizePickForAccess(
+        pick,
+        hasActiveSubscription || purchasedPickIds.has((pick._id || '').toString())
+      )
+    ),
+  };
+};
+
 const createPickPurchase = async (
   userId: string,
   data: CreatePickPurchaseInput
@@ -279,7 +336,7 @@ const createPickPurchase = async (
     throw new Error('Only active picks can be purchased');
   }
 
-  const activeSubscription = await getUserActiveSubscriptionForPick(userId, pick);
+  const activeSubscription = await getUserActiveSubscription(userId);
   if (activeSubscription) {
     throw new Error('Your active subscription already includes this pick');
   }
@@ -327,14 +384,7 @@ const getMyPickPurchases = async (userId: string): Promise<Partial<IPickPurchase
 };
 
 const getMyAccessiblePicks = async (userId: string): Promise<Partial<IPicks>[]> => {
-  const activeSubscriptions = await Subscription.find({
-    userId: new mongoose.Types.ObjectId(userId),
-    status: SubscriptionStatus.PAID,
-    isSubscribed: true,
-    subscriptionEnd: { $gt: new Date().toISOString() },
-  } as any).lean();
-
-  const subscribedSports = [...new Set(activeSubscriptions.flatMap((sub: any) => sub.selectedSport || []))];
+  const activeSubscription = await getUserActiveSubscription(userId);
 
   const purchases = await PickPurchase.find({
     userId: new mongoose.Types.ObjectId(userId),
@@ -345,10 +395,9 @@ const getMyAccessiblePicks = async (userId: string): Promise<Partial<IPicks>[]> 
 
   const picks = await Picks.find({
     $or: [
-      subscribedSports.length
+      activeSubscription
         ? {
             premium: true,
-            sport_title: { $in: subscribedSports },
           }
         : { _id: { $in: [] } },
       purchasedPickIds.length ? { _id: { $in: purchasedPickIds } } : { _id: { $in: [] } },
@@ -420,6 +469,7 @@ export const picksServices = {
   deleteManyPicks,
   getPicksById,
   getManyPicks,
+  getPickBoard,
   createPickPurchase,
   getMyPickPurchases,
   getMyAccessiblePicks,

@@ -18,6 +18,7 @@ import {
 //Import validation from corresponding module
 import authorizedRoles from '../../../src/middlewares/authorized-roles';
 import isAuthorized from '../../../src/middlewares/is-authorized';
+import optionalUser from '../../middlewares/optional-user';
 import { UserRole } from '../../../src/model/user/user.schema';
 import {
   validateId,
@@ -108,7 +109,7 @@ router.delete(['/:id', '/picks/:id'], isAuthorized, authorizedRoles([UserRole.AD
 //TODO: Filter by home_team
 //TODO: Filter by away team
 
-router.get(['/get-picks/many', '/picks/get-picks/many'], validateSearchQueries, getManyPicks);
+router.get(['/get-picks/many', '/picks/get-picks/many'], optionalUser, validateSearchQueries, getManyPicks);
 
 router.get(
   ['/admin/all'],

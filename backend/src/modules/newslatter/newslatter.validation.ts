@@ -1,5 +1,5 @@
 import { isMongoId } from 'validator';
-import { email, z } from 'zod';
+import { z } from 'zod';
 import { validateBody } from '../../handlers/zod-error-handler';
 
 /**
@@ -61,6 +61,25 @@ const zodUpdateNewslatterSchema = z
 
 export type UpdateNewslatterInput = z.infer<typeof zodUpdateNewslatterSchema>;
 
+export const sendNewsletterSchema = z.object({
+  title: z
+    .string({ message: 'Campaign title is required' })
+    .trim()
+    .min(2, 'Campaign title must be at least 2 characters')
+    .max(120, 'Campaign title is too long'),
+  subject: z
+    .string({ message: 'Email subject is required' })
+    .trim()
+    .min(2, 'Email subject must be at least 2 characters')
+    .max(150, 'Email subject is too long'),
+  content: z
+    .string({ message: 'Newsletter content is required' })
+    .trim()
+    .min(10, 'Newsletter content must be at least 10 characters'),
+});
+
+export type SendNewsletterInput = z.infer<typeof sendNewsletterSchema>;
+
 /**
  * Zod schema for validating bulk updates (array of partial newslatter objects).
  */
@@ -77,4 +96,4 @@ const zodUpdateManyNewslatterForBulkSchema = zodUpdateNewslatterSchema
  */
 export const validateCreateNewslatter = validateBody(zodCreateNewslatterSchema);
 export const validateUpdateNewslatter = validateBody(zodUpdateNewslatterSchema);
-
+export const validateSendNewsletter = validateBody(sendNewsletterSchema);

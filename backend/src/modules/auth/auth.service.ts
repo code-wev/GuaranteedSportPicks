@@ -7,6 +7,7 @@ import HashInfo from '../../../src/utils/bcrypt/hash-info';
 import SendEmail from '../../../src/utils/email/send-email';
 import EncodeToken from '../../../src/utils/jwt/encode-token';
 import { IdOrIdsInput, SearchQueryInput } from '../../handlers/common-zod-validator';
+import { affiliateServices } from '../affiliate/affiliate.service';
 import User, { IUser } from '../../model/user/user.schema';
 import { IChangePassword, ILogin, ILoginResponse, IRegisterResponse } from './auth.interface';
 import {
@@ -39,6 +40,7 @@ const registerUser = async (data: CreateUserInput): Promise<IRegisterResponse> =
 
   // If user exists, throw an error
   if (existingUser) throw new Error('User with this email already exists');
+  const affiliateReferral = await affiliateServices.resolveAffiliateReferral(data.referralCode);
   // Hash password for MongoDB (even if Keycloak also stores it)
   const hashedPassword = await HashInfo(data.password);
   // Genaretae email verificaiton token
@@ -54,6 +56,8 @@ const registerUser = async (data: CreateUserInput): Promise<IRegisterResponse> =
     emailVerificationToken,
     emailVerificationTokenExpiry: emailVerificationExpiry,
     isActive: true, // Set to true by default, can be updated later
+    referredByAffiliateId: affiliateReferral?._id,
+    referredByAffiliateCode: affiliateReferral?.affiliateCode,
   }).save();
 
   // Send verification email

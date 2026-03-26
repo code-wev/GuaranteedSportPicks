@@ -54,19 +54,33 @@ export const NewslatterApi = createApi({
       }),
       providesTags: ["Newslatter"],
     }),
+    getNewsletterCampaigns: builder.query({
+      query: () => ({
+        url: "/newslatter/admin/campaigns",
+      }),
+      providesTags: ["Newslatter"],
+    }),
     getNewslatterById: builder.query({
       query: (id) => `/newslatter/${id}`,
       providesTags: ["Newslatter"],
     }),
     // User এর newsletter status 
     getUserNewsletterStatus: builder.query({
-      query: (userId) => `/newslatter/me`,
+      query: () => `/newslatter/me`,
       providesTags: ["Newslatter"],
     }),
 
     toggleNewsletter: builder.mutation({
       query: (data) => ({
-        url: `/newslatter/`,
+        url: `/newslatter/toggle`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Newslatter"],
+    }),
+    sendNewsletterCampaign: builder.mutation({
+      query: (data) => ({
+        url: `/newslatter/admin/send`,
         method: "POST",
         body: data,
       }),
@@ -79,8 +93,10 @@ export const {
   useCreateNewslatterMutation,
   useUpdateNewslatterMutation,
   useGetManyNewslatterQuery,
+  useGetNewsletterCampaignsQuery,
   useGetNewslatterByIdQuery,
   useGetUserNewsletterStatusQuery,
   useToggleNewsletterMutation,
+  useSendNewsletterCampaignMutation,
   
 } = NewslatterApi;

@@ -129,26 +129,11 @@ export const getPicksById = catchAsync(async (req: Request, res: Response) => {
 export const getManyPicks = catchAsync(async (req: Request, res: Response) => {
   // Type assertion for query parameters
   const query = req.query as SearchQueryInput;
-  // Call the service method to get multiple pickss based on query parameters and get the result
-  const { pickss, totalData, totalPages, totalActivePicks } = await picksServices.getManyPicks(query);
+  const userId = (req as AuthenticatedRequest).user?._id?.toString();
+  const { pickss, totalData, totalPages, totalActivePicks } = await picksServices.getPickBoard(query, userId);
   if (!pickss) throw new Error('Failed to retrieve pickss');
-  // Send a success response with the retrieved pickss data
-  const sanitizedPicks = pickss.map((pick: any) => {
-    if (!pick.premium) {
-      return pick;
-    }
-
-    return {
-      ...pick.toObject?.() ?? pick,
-      selected_team: undefined,
-      units: undefined,
-      writeup: undefined,
-      accessLocked: true,
-    };
-  });
-
   ServerResponse(res, true, 200, 'Pickss retrieved successfully', {
-    pickss: sanitizedPicks,
+    pickss,
     totalData,
     totalPages,
     totalActivePicks,
