@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FiHeadphones } from "react-icons/fi";
 import { GoShieldCheck } from "react-icons/go";
 import { HiChartBar } from "react-icons/hi";
@@ -58,9 +59,9 @@ const WinningPicks = () => {
         {/* CTA Section */}
         <div className="flex flex-col items-center mt-12 space-y-4">
           {/* Premium Button */}
-          <button className="bg-[#B91C1C] text-white px-6 md:px-8 py-3 rounded-md font-medium text-sm md:text-base hover:bg-red-700 transition">
+          <Link href="/dashboard/purchase" className="bg-[#B91C1C] text-white px-6 md:px-8 py-3 rounded-md font-medium text-sm md:text-base hover:bg-red-700 transition">
             Get Premium Access Now
-          </button>
+          </Link>
 
           <p className="text-[#475569] text-xs">
             30-day money-back guarantee • Cancel anytime

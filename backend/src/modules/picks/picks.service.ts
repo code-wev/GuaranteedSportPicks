@@ -65,6 +65,7 @@ const getUserActiveSubscriptionForPick = async (userId: string, pick: IPicks) =>
 };
 
 const settleAuthorizedPurchasesForPick = async (pick: IPicks) => {
+  // We only settle if the pick has a definitive result
   if (![ResultType.WIN, ResultType.LOSS, ResultType.VOID].includes(pick.result as ResultType)) {
     return;
   }
@@ -75,21 +76,34 @@ const settleAuthorizedPurchasesForPick = async (pick: IPicks) => {
     status: PickPurchaseStatus.AUTHORIZED,
   } as any);
 
-  for (const purchase of authorizedPurchases) {
-    if (!purchase.paymentIntentId) continue;
+  console.log(`Settling ${authorizedPurchases.length} authorized purchases for pick ${pick._id} (Result: ${pick.result})`);
 
-    if (pick.result === ResultType.WIN) {
-      await stripe.paymentIntents.capture(purchase.paymentIntentId);
-      purchase.status = PickPurchaseStatus.PAID;
-      purchase.capturedAt = new Date();
-      await purchase.save();
+  for (const purchase of authorizedPurchases) {
+    if (!purchase.paymentIntentId) {
+      console.log(`Purchase ${purchase._id} missing paymentIntentId, skipping.`);
       continue;
     }
 
-    await stripe.paymentIntents.cancel(purchase.paymentIntentId);
-    purchase.status = PickPurchaseStatus.CANCELLED;
-    purchase.cancelledAt = new Date();
-    await purchase.save();
+    try {
+      if (pick.result === ResultType.WIN) {
+        // Capture the authorized funds
+        await stripe.paymentIntents.capture(purchase.paymentIntentId);
+        purchase.status = PickPurchaseStatus.PAID;
+        purchase.capturedAt = new Date();
+        await purchase.save();
+        console.log(`Successfully captured payment for purchase ${purchase._id}`);
+      } else {
+        // Cancel the authorization (Result is LOSS or VOID)
+        await stripe.paymentIntents.cancel(purchase.paymentIntentId);
+        purchase.status = PickPurchaseStatus.CANCELLED;
+        purchase.cancelledAt = new Date();
+        await purchase.save();
+        console.log(`Successfully cancelled authorization for purchase ${purchase._id} due to ${pick.result}`);
+      }
+    } catch (error) {
+      console.error(`Error settling purchase ${purchase._id}:`, error);
+      // We don't throw here to allow other purchases to be processed
+    }
   }
 };
 
