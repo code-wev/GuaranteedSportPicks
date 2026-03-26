@@ -7,10 +7,20 @@ import AffiliateModel, {
   AffiliateStatus,
   IAffiliate,
 } from '../../../src/model/affiliates/affiliate.model';
+import AffiliateWithdrawalModel, {
+  AffiliateWithdrawalStatus,
+  IAffiliateWithdrawal,
+} from '../../../src/model/affiliates/affiliate-withdrawal.model';
 import User, { IUser } from '../../../src/model/user/user.schema';
 import { IdOrIdsInput, SearchQueryInput } from '../../handlers/common-zod-validator';
 import { TAffiliateSummary, TCreateAffiliate } from './affiliate.interface';
-import { AffiliateApprovalInput, UpdateAffiliateInput } from './affiliate.validation';
+import {
+  AdminWithdrawalUpdateInput,
+  AffiliateApprovalInput,
+  CreateWithdrawalInput,
+  RetryWithdrawalInput,
+  UpdateAffiliateInput,
+} from './affiliate.validation';
 
 const generateAffiliateCode = async (seed: string): Promise<string> => {
   const normalizedSeed = seed.replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 6) || 'AFF';
@@ -45,13 +55,16 @@ const buildAffiliateSummary = async (
       referralCount: 0,
       totalCommission: 0,
       commissionRate: getCommissionRate(),
+      paidOut: 0,
+      availableBalance: 0,
       commissions: [],
+      withdrawals: [],
     };
   }
 
   const affiliateId = new mongoose.Types.ObjectId(String(affiliateDoc._id));
 
-  const [referralCount, commissionAggregate, commissions] = await Promise.all([
+  const [referralCount, commissionAggregate, withdrawalAggregate, commissions, withdrawals] = await Promise.all([
     User.countDocuments({ referredByAffiliateId: affiliateId } as any),
     AffiliateCommissionModel.aggregate([
       { $match: { affiliateId } },
@@ -62,20 +75,44 @@ const buildAffiliateSummary = async (
         },
       },
     ]),
+    AffiliateWithdrawalModel.aggregate([
+      {
+        $match: {
+          affiliateId,
+          status: { $in: [AffiliateWithdrawalStatus.PROCESSING, AffiliateWithdrawalStatus.PAID] },
+        },
+      },
+      {
+        $group: {
+          _id: '$affiliateId',
+          paidOut: { $sum: '$amount' },
+        },
+      },
+    ]),
     AffiliateCommissionModel.find({ affiliateId } as any)
       .sort({ createdAt: -1 })
       .limit(10)
       .populate('referredUserId', 'firstName lastName email')
       .populate('subscriptionId', 'packageName price selectedSport')
       .lean(),
+    AffiliateWithdrawalModel.find({ affiliateId } as any)
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean(),
   ]);
+
+  const totalCommission = roundCurrency(commissionAggregate[0]?.totalCommission ?? 0);
+  const paidOut = roundCurrency(withdrawalAggregate[0]?.paidOut ?? 0);
 
   return {
     affiliate: affiliateDoc,
     referralCount,
-    totalCommission: roundCurrency(commissionAggregate[0]?.totalCommission ?? 0),
+    totalCommission,
     commissionRate: getCommissionRate(),
+    paidOut,
+    availableBalance: roundCurrency(Math.max(totalCommission - paidOut, 0)),
     commissions,
+    withdrawals,
   };
 };
 
@@ -263,7 +300,7 @@ const getManyAffiliate = async (
 };
 
 const getAffiliateAdminSummary = async () => {
-  const [totalRequests, approvedAffiliates, pendingAffiliates, commissionAggregate] =
+  const [totalRequests, approvedAffiliates, pendingAffiliates, commissionAggregate, withdrawalAggregate] =
     await Promise.all([
       AffiliateModel.countDocuments(),
       AffiliateModel.countDocuments({ status: AffiliateStatus.APPROVED }),
@@ -276,6 +313,14 @@ const getAffiliateAdminSummary = async () => {
           },
         },
       ]),
+      AffiliateWithdrawalModel.aggregate([
+        {
+          $group: {
+            _id: null,
+            paidOut: { $sum: '$amount' },
+          },
+        },
+      ]),
     ]);
 
   return {
@@ -283,8 +328,127 @@ const getAffiliateAdminSummary = async () => {
     approvedAffiliates,
     pendingAffiliates,
     totalCommission: roundCurrency(commissionAggregate[0]?.totalCommission ?? 0),
+    totalPaidOut: roundCurrency(withdrawalAggregate[0]?.paidOut ?? 0),
     commissionRate: getCommissionRate(),
   };
+};
+
+const createWithdrawalRequest = async (
+  userId: string,
+  data: CreateWithdrawalInput
+): Promise<Partial<IAffiliateWithdrawal>> => {
+  const summary = await getMyAffiliate(userId);
+  const affiliate = summary.affiliate as (Partial<IAffiliate> & { _id?: unknown; status?: string }) | null;
+
+  if (!affiliate?._id || affiliate.status !== AffiliateStatus.APPROVED) {
+    throw new Error('Approved affiliate account is required before withdrawal');
+  }
+
+  const amount = roundCurrency(Number(data.amount));
+  if (amount <= 0) {
+    throw new Error('Withdrawal amount must be greater than zero');
+  }
+
+  if (amount > summary.availableBalance) {
+    throw new Error('Requested amount exceeds available balance');
+  }
+
+  const withdrawal = await AffiliateWithdrawalModel.create({
+    affiliateId: affiliate._id as any,
+    userId: new mongoose.Types.ObjectId(userId) as any,
+    amount,
+    payoutMethod: data.payoutMethod.trim(),
+    payoutDetails: data.payoutDetails.trim(),
+    note: data.note?.trim() || undefined,
+    status: AffiliateWithdrawalStatus.PENDING,
+  });
+
+  return (withdrawal as any).toObject();
+};
+
+const getWithdrawalRequests = async (
+  query: SearchQueryInput
+): Promise<{ withdrawals: Record<string, unknown>[]; totalData: number; totalPages: number }> => {
+  const { searchKey = '', showPerPage = 20, pageNo = 1 } = query;
+  const skipItems = (pageNo - 1) * showPerPage;
+
+  const searchFilter = searchKey
+    ? {
+        $or: [
+          { payoutMethod: { $regex: searchKey, $options: 'i' } },
+          { payoutDetails: { $regex: searchKey, $options: 'i' } },
+          { transferReference: { $regex: searchKey, $options: 'i' } },
+        ],
+      }
+    : {};
+
+  const [totalData, withdrawals] = await Promise.all([
+    AffiliateWithdrawalModel.countDocuments(searchFilter as any),
+    AffiliateWithdrawalModel.find(searchFilter as any)
+      .populate('userId', 'firstName lastName email')
+      .populate('affiliateId', 'affiliateCode status')
+      .sort({ createdAt: -1 })
+      .skip(skipItems)
+      .limit(showPerPage)
+      .lean(),
+  ]);
+
+  const totalPages = Math.ceil(totalData / showPerPage);
+  return { withdrawals: withdrawals as any, totalData, totalPages };
+};
+
+const updateWithdrawalRequest = async (
+  id: string,
+  data: AdminWithdrawalUpdateInput
+): Promise<Partial<IAffiliateWithdrawal | null>> => {
+  const updatePayload: Record<string, unknown> = {
+    status: data.status,
+    adminNote: data.adminNote?.trim() || undefined,
+    transferReference: data.transferReference?.trim() || undefined,
+  };
+
+  if (data.status === AffiliateWithdrawalStatus.PAID) {
+    updatePayload.paidAt = new Date();
+  }
+
+  const withdrawal = await AffiliateWithdrawalModel.findByIdAndUpdate(id, updatePayload, {
+    new: true,
+  });
+
+  return withdrawal as any;
+};
+
+const retryWithdrawalRequest = async (
+  userId: string,
+  id: string,
+  data: RetryWithdrawalInput
+): Promise<Partial<IAffiliateWithdrawal | null>> => {
+  const affiliate = await AffiliateModel.findOne({
+    userId: new mongoose.Types.ObjectId(userId),
+  } as any).lean();
+
+  if (!affiliate?._id) {
+    throw new Error('Affiliate account not found');
+  }
+
+  const withdrawal = await AffiliateWithdrawalModel.findOneAndUpdate(
+    {
+      _id: id,
+      affiliateId: affiliate._id,
+      status: AffiliateWithdrawalStatus.PAID,
+    } as any,
+    {
+      status: AffiliateWithdrawalStatus.RETRY_REQUESTED,
+      note: data.note?.trim() || undefined,
+    },
+    { new: true }
+  );
+
+  if (!withdrawal) {
+    throw new Error('Paid withdrawal request not found');
+  }
+
+  return withdrawal as any;
 };
 
 const recordAffiliateCommissionForSubscription = async (
@@ -387,6 +551,10 @@ export const affiliateServices = {
   createAffiliate,
   updateAffiliate,
   approveAffiliate,
+  createWithdrawalRequest,
+  getWithdrawalRequests,
+  updateWithdrawalRequest,
+  retryWithdrawalRequest,
   deleteAffiliate,
   deleteManyAffiliate,
   getAffiliateById,

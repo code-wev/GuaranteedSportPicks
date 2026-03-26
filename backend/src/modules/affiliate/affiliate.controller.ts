@@ -80,3 +80,42 @@ export const getAffiliateAdminSummary = catchAsync(async (_req: Request, res: Re
 
   ServerResponse(res, true, 200, 'Affiliate admin summary retrieved successfully', result);
 });
+
+export const createWithdrawalRequest = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const result = await affiliateServices.createWithdrawalRequest(req.user!._id, req.body);
+
+  ServerResponse(res, true, 201, 'Withdrawal request submitted successfully', result);
+});
+
+export const getWithdrawalRequests = catchAsync(async (req: Request, res: Response) => {
+  const query = req.query as SearchQueryInput;
+  const { withdrawals, totalData, totalPages } = await affiliateServices.getWithdrawalRequests(query);
+
+  ServerResponse(res, true, 200, 'Withdrawal requests retrieved successfully', {
+    withdrawals,
+    totalData,
+    totalPages,
+  });
+});
+
+export const updateWithdrawalRequest = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const result = await affiliateServices.updateWithdrawalRequest(id as string, req.body);
+
+  if (!result) {
+    throw new Error('Withdrawal request not found');
+  }
+
+  ServerResponse(res, true, 200, 'Withdrawal request updated successfully', result);
+});
+
+export const retryWithdrawalRequest = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const result = await affiliateServices.retryWithdrawalRequest(req.user!._id, id as string, req.body);
+
+  if (!result) {
+    throw new Error('Withdrawal request not found');
+  }
+
+  ServerResponse(res, true, 200, 'Withdrawal retry request submitted successfully', result);
+});

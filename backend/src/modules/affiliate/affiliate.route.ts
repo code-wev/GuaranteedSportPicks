@@ -9,6 +9,7 @@ import {
 } from '../../handlers/common-zod-validator';
 import {
   approveAffiliate,
+  createWithdrawalRequest,
   createAffiliate,
   deleteAffiliate,
   deleteManyAffiliate,
@@ -16,11 +17,17 @@ import {
   getAffiliateById,
   getManyAffiliate,
   getMyAffiliate,
+  getWithdrawalRequests,
+  retryWithdrawalRequest,
+  updateWithdrawalRequest,
   updateAffiliate,
 } from './affiliate.controller';
 import {
+  validateAdminWithdrawalUpdate,
   validateAffiliateApproval,
+  validateCreateWithdrawal,
   validateCreateAffiliate,
+  validateRetryWithdrawal,
   validateUpdateAffiliate,
 } from './affiliate.validation';
 
@@ -36,6 +43,23 @@ router.post(
 
 router.get(['/me'], isAuthorized, getMyAffiliate);
 
+router.post(
+  ['/withdrawal'],
+  isAuthorized,
+  authorizedRoles([UserRole.USER]),
+  validateCreateWithdrawal,
+  createWithdrawalRequest
+);
+
+router.put(
+  ['/withdrawal/:id/retry'],
+  validateId,
+  isAuthorized,
+  authorizedRoles([UserRole.USER]),
+  validateRetryWithdrawal,
+  retryWithdrawalRequest
+);
+
 router.get(
   ['/summary/admin'],
   isAuthorized,
@@ -49,6 +73,14 @@ router.get(
   isAuthorized,
   authorizedRoles([UserRole.ADMIN]),
   getManyAffiliate
+);
+
+router.get(
+  ['/withdrawal/many'],
+  validateSearchQueries,
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  getWithdrawalRequests
 );
 
 router.get(
@@ -75,6 +107,15 @@ router.put(
   authorizedRoles([UserRole.ADMIN]),
   validateAffiliateApproval,
   approveAffiliate
+);
+
+router.put(
+  ['/withdrawal/:id'],
+  validateId,
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  validateAdminWithdrawalUpdate,
+  updateWithdrawalRequest
 );
 
 router.delete(

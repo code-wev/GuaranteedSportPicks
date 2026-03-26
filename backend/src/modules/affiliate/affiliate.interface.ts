@@ -20,5 +20,8 @@ export interface TAffiliateSummary {
   referralCount: number;
   totalCommission: number;
   commissionRate: number;
+  paidOut: number;
+  availableBalance: number;
   commissions: unknown[];
+  withdrawals: unknown[];
 }

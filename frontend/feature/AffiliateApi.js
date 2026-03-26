@@ -60,6 +60,37 @@ export const AffiliateApi = createApi({
       }),
       providesTags: ["Affiliate"],
     }),
+    createWithdrawalRequest: builder.mutation({
+      query: (body) => ({
+        url: "/affiliate/withdrawal",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Affiliate"],
+    }),
+    retryWithdrawalRequest: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/affiliate/withdrawal/${id}/retry`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Affiliate"],
+    }),
+    getWithdrawalRequests: builder.query({
+      query: (params) => ({
+        url: "/affiliate/withdrawal/many",
+        params,
+      }),
+      providesTags: ["Affiliate"],
+    }),
+    updateWithdrawalRequest: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/affiliate/withdrawal/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Affiliate"],
+    }),
   }),
 });
 
@@ -70,4 +101,8 @@ export const {
   useGetManyAffiliateQuery,
   useGetMyAffiliateQuery,
   useGetAffiliateAdminSummaryQuery,
+  useCreateWithdrawalRequestMutation,
+  useRetryWithdrawalRequestMutation,
+  useGetWithdrawalRequestsQuery,
+  useUpdateWithdrawalRequestMutation,
 } = AffiliateApi;
