@@ -110,6 +110,7 @@ export default function Dashboard() {
       </div>
 
       <QuickActions />
+      
     </div>
   );
 }
