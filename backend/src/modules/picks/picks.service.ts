@@ -97,6 +97,28 @@ const sanitizePickForAccess = (pick: any, unlocked: boolean) => {
   };
 };
 
+const settleAuthorizedPurchase = async (purchase: IPickPurchase, pick: IPicks) => {
+  if (!purchase.paymentIntentId) {
+    console.log(`Purchase ${purchase._id} missing paymentIntentId, skipping.`);
+    return;
+  }
+
+  if (pick.result === ResultType.WIN) {
+    await stripe.paymentIntents.capture(purchase.paymentIntentId);
+    purchase.status = PickPurchaseStatus.PAID;
+    purchase.capturedAt = new Date();
+    await purchase.save();
+    console.log(`Successfully captured payment for purchase ${purchase._id}`);
+    return;
+  }
+
+  await stripe.paymentIntents.cancel(purchase.paymentIntentId);
+  purchase.status = PickPurchaseStatus.CANCELLED;
+  purchase.cancelledAt = new Date();
+  await purchase.save();
+  console.log(`Successfully cancelled authorization for purchase ${purchase._id} due to ${pick.result}`);
+};
+
 const settleAuthorizedPurchasesForPick = async (pick: IPicks) => {
   // We only settle if the pick has a definitive result
   if (![ResultType.WIN, ResultType.LOSS, ResultType.VOID].includes(pick.result as ResultType)) {
@@ -112,27 +134,8 @@ const settleAuthorizedPurchasesForPick = async (pick: IPicks) => {
   console.log(`Settling ${authorizedPurchases.length} authorized purchases for pick ${pick._id} (Result: ${pick.result})`);
 
   for (const purchase of authorizedPurchases) {
-    if (!purchase.paymentIntentId) {
-      console.log(`Purchase ${purchase._id} missing paymentIntentId, skipping.`);
-      continue;
-    }
-
     try {
-      if (pick.result === ResultType.WIN) {
-        // Capture the authorized funds
-        await stripe.paymentIntents.capture(purchase.paymentIntentId);
-        purchase.status = PickPurchaseStatus.PAID;
-        purchase.capturedAt = new Date();
-        await purchase.save();
-        console.log(`Successfully captured payment for purchase ${purchase._id}`);
-      } else {
-        // Cancel the authorization (Result is LOSS or VOID)
-        await stripe.paymentIntents.cancel(purchase.paymentIntentId);
-        purchase.status = PickPurchaseStatus.CANCELLED;
-        purchase.cancelledAt = new Date();
-        await purchase.save();
-        console.log(`Successfully cancelled authorization for purchase ${purchase._id} due to ${pick.result}`);
-      }
+      await settleAuthorizedPurchase(purchase, pick);
     } catch (error) {
       console.error(`Error settling purchase ${purchase._id}:`, error);
       // We don't throw here to allow other purchases to be processed
@@ -395,6 +398,9 @@ const getMyAccessiblePicks = async (userId: string): Promise<Partial<IPicks>[]> 
 
   const picks = await Picks.find({
     $or: [
+      {
+        premium: false,
+      },
       activeSubscription
         ? {
             premium: true,
@@ -438,6 +444,14 @@ export const processPickPurchaseWebhookEvent = async (event: Stripe.Event): Prom
     }
 
     await purchase.save();
+
+    if (purchase.paymentModel === PaymentModel.PAY_AFTER_WIN) {
+      const pick = await Picks.findById(session.metadata.pickId);
+      if (pick && [ResultType.WIN, ResultType.LOSS, ResultType.VOID].includes(pick.result as ResultType)) {
+        await settleAuthorizedPurchase(purchase, pick);
+      }
+    }
+
     return true;
   }
 

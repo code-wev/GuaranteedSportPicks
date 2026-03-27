@@ -9,35 +9,15 @@ import { GrUserAdmin } from "react-icons/gr";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { RiFileHistoryFill } from "react-icons/ri";
 import { TbUsersGroup } from "react-icons/tb";
+import { FiMessageSquare } from "react-icons/fi";
 
 const userMenu = [
   { title: "Dashboard", icon: <FiGrid />, url: "/dashboard" },
-  { title: "Admin Dashboard", icon: <GrUserAdmin />, url: "/dashboard/admin" },
-  {
-    title: "Manage picks",
-    icon: <IoDocumentTextOutline />,
-    url: "/dashboard/admin/manage-picks",
-  },
-  {
-    title: "Users",
-    icon: <IoDocumentTextOutline />,
-    url: "/dashboard/admin/users",
-  },
-  {
-    title: "Orders",
-    icon: <IoDocumentTextOutline />,
-    url: "/dashboard/admin/orders",
-  },
-  {
-    title: "Blogs",
-    icon: <IoDocumentTextOutline />,
-    url: "/dashboard/admin/blogs",
-  },
-  {
-    title: "Testimonials",
-    icon: <IoDocumentTextOutline />,
-    url: "/dashboard/admin/testimonials",
-  },
+
+
+
+
+
   {
     title: "Affiliate Program",
     icon: <IoDocumentTextOutline />,
@@ -63,6 +43,11 @@ const userMenu = [
     title: "Payment History",
     icon: <RiFileHistoryFill />,
     url: "/dashboard/purchase-history",
+  },
+  {
+    title: "Testimonials",
+    icon: <FiMessageSquare />,
+    url: "/dashboard/testimonials",
   },
   { title: "Profile & Settings", icon: <FiUser />, url: "/dashboard/profile" },
 ];

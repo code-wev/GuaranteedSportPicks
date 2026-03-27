@@ -5,6 +5,19 @@ import { GoDotFill } from "react-icons/go";
 import { useGetAllArticlesQuery } from "@/feature/ArticleApi";
 import Link from "next/link";
 
+const getSafeImageSrc = (src) => {
+  if (!src || typeof src !== "string") return null;
+  const trimmedSrc = src.trim();
+  if (!trimmedSrc) return null;
+  if (trimmedSrc.startsWith("/")) return trimmedSrc;
+
+  try {
+    return new URL(trimmedSrc).toString();
+  } catch {
+    return null;
+  }
+};
+
 const RelatedArticles = ({ currentCategory, excludeId }) => {
   const { data, isLoading } = useGetAllArticlesQuery({
     category: currentCategory,
@@ -30,16 +43,16 @@ const RelatedArticles = ({ currentCategory, excludeId }) => {
       </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto px-4">
-        {filteredArticles.map((article) => (
-          <div
-            key={article._id}
-            className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col"
-          >
+        {filteredArticles.map((article) => {
+          const safeImageSrc = getSafeImageSrc(article.image);
+
+          return (
+          <div key={article._id} className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col">
             {/* IMAGE */}
             <div className="relative w-full h-56 bg-gray-100 rounded-t-2xl overflow-hidden">
-              {article.image ? (
+              {safeImageSrc ? (
                 <Image
-                  src={article.image}
+                  src={safeImageSrc}
                   alt={article.title}
                   fill
                   className="object-cover hover:scale-105 transition-transform duration-500"
@@ -78,7 +91,7 @@ const RelatedArticles = ({ currentCategory, excludeId }) => {
               </p>
             </div>
           </div>
-        ))}
+        )})}
       </div>
 
       <div className="text-center mt-12">

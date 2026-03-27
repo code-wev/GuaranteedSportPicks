@@ -9,6 +9,9 @@ import {
   getUserById,
   getManyUser,
   getUserByAutorization,
+  getUserDashboardSummary,
+  getAdminDashboardSummary,
+  getAdminOrdersSummary,
 } from './user.controller';
 
 //Import validation from corresponding module
@@ -99,6 +102,19 @@ router.get(
  * @param {function} controller - ['getUserById']
  */
 router.get(['/profile/me', '/user/profile/me'], isAuthorized, getUserByAutorization);
+router.get(['/dashboard-summary', '/user/dashboard-summary'], isAuthorized, getUserDashboardSummary);
+router.get(
+  ['/admin/dashboard-summary', '/user/admin/dashboard-summary'],
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  getAdminDashboardSummary
+);
+router.get(
+  ['/admin/orders-summary', '/user/admin/orders-summary'],
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  getAdminOrdersSummary
+);
 
 // Export the router
 module.exports = router;

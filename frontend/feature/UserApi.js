@@ -30,6 +30,18 @@ export const UserApi = createApi({
       query: () => `/user/profile/me`,
       providesTags: ["Users"],
     }),
+    getMyDashboardSummary: builder.query({
+      query: () => `/user/dashboard-summary`,
+      providesTags: ["Users"],
+    }),
+    getAdminDashboardSummary: builder.query({
+      query: () => `/user/admin/dashboard-summary`,
+      providesTags: ["Users"],
+    }),
+    getAdminOrdersSummary: builder.query({
+      query: () => `/user/admin/orders-summary`,
+      providesTags: ["Users"],
+    }),
     updateUser: builder.mutation({
       query: (body) => ({
         url: `/user`,
@@ -62,5 +74,8 @@ export const {
   useUpdateUserMutation,
   useUpdateUserByIdMutation,
   useDeleteUserMutation,
-  useMyProfileQuery
+  useMyProfileQuery,
+  useGetMyDashboardSummaryQuery,
+  useGetAdminDashboardSummaryQuery,
+  useGetAdminOrdersSummaryQuery
 } = UserApi;

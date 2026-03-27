@@ -9,6 +9,19 @@ import RelatedArticles from "@/components/BlogDetails/RelatedArticles";
 import { useGetArticleBySlugQuery } from "@/feature/ArticleApi";
 import "../blog.css";
 
+const getSafeImageSrc = (src) => {
+  if (!src || typeof src !== "string") return null;
+  const trimmedSrc = src.trim();
+  if (!trimmedSrc) return null;
+  if (trimmedSrc.startsWith("/")) return trimmedSrc;
+
+  try {
+    return new URL(trimmedSrc).toString();
+  } catch {
+    return null;
+  }
+};
+
 export default function BlogDetails({ params }) {
   const { slug } = params;
   const { data, isLoading, isError } = useGetArticleBySlugQuery(slug);
@@ -17,6 +30,7 @@ export default function BlogDetails({ params }) {
   if (isError || !data?.status) return <div className="text-center p-20 min-h-screen">Article not found.</div>;
 
   const article = data.data;
+  const safeImageSrc = getSafeImageSrc(article.image);
 
   return (
     <div className="bg-white">
@@ -69,10 +83,10 @@ export default function BlogDetails({ params }) {
         </div>
 
         {/* Banner Image */}
-        {article.image && (
+        {safeImageSrc && (
           <div className="relative w-full h-[300px] md:h-[500px] rounded-2xl overflow-hidden mb-12 shadow-xl">
             <Image
-              src={article.image}
+              src={safeImageSrc}
               fill
               alt={article.title}
               className="object-cover"

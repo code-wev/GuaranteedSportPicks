@@ -65,3 +65,11 @@ export {
   useUpdateArticleMutation,
   useDeleteArticleMutation,
 } from "./ArticleApi";
+
+export {
+  useCreateTestimonialMutation,
+  useGetMyTestimonialsQuery,
+  useGetApprovedTestimonialsQuery,
+  useGetAdminTestimonialsQuery,
+  useUpdateTestimonialStatusMutation,
+} from "./TestimonialApi";

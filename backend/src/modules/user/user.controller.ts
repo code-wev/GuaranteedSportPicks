@@ -92,6 +92,24 @@ export const getUserByAutorization = catchAsync(
   }
 );
 
+export const getUserDashboardSummary = catchAsync(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const id = req.user!._id;
+    const result = await userServices.getUserDashboardSummary(id as string);
+    ServerResponse(res, true, 200, 'User dashboard summary retrieved successfully', result);
+  }
+);
+
+export const getAdminDashboardSummary = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const result = await userServices.getAdminDashboardSummary();
+  ServerResponse(res, true, 200, 'Admin dashboard summary retrieved successfully', result);
+});
+
+export const getAdminOrdersSummary = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const result = await userServices.getAdminOrdersSummary();
+  ServerResponse(res, true, 200, 'Admin orders summary retrieved successfully', result);
+});
+
 /**
  * Controller function to handle the retrieval of multiple users.
  *
