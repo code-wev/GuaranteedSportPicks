@@ -7,6 +7,7 @@ import { useGetMyAccessiblePicksQuery } from "@/feature/PicksApi";
 const getStatusTone = (status) => {
   if (status === "win") return "bg-green-100 text-green-700";
   if (status === "loss") return "bg-red-100 text-red-700";
+  if (status === "void") return "bg-gray-100 text-gray-600";
   return "bg-yellow-100 text-yellow-700";
 };
 
@@ -55,13 +56,10 @@ export default function MyPicksPage() {
   const accessiblePicks = accessiblePicksData?.data || [];
   const activeSubscription = subscriptionData?.data;
 
-  // Filter out picks that were cancelled (LOSS/VOID in PAW model) if they are in completed tab
-  // but keep them if the user wants to see their history. 
-  // Actually, getMyAccessiblePicks only returns AUTHORIZED or PAID.
-  // So for CANCELLED PAW picks, they might not show up in accessiblePicks.
-  
-  const activePicks = accessiblePicks.filter((pick) => !pick.result && pick.status === "active");
-  const completedPicks = accessiblePicks.filter((pick) => pick.result === "win" || pick.result === "loss");
+  const activePicks = accessiblePicks.filter((pick) => !pick.result);
+  const completedPicks = accessiblePicks.filter(
+    (pick) => pick.result === "win" || pick.result === "loss" || pick.result === "void"
+  );
 
   const visiblePicks = tab === "active" ? activePicks : completedPicks;
   const isLoading = isLoadingPurchases || isLoadingAccessible;

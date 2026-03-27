@@ -391,7 +391,7 @@ const getMyAccessiblePicks = async (userId: string): Promise<Partial<IPicks>[]> 
 
   const purchases = await PickPurchase.find({
     userId: new mongoose.Types.ObjectId(userId),
-    status: { $in: [PickPurchaseStatus.AUTHORIZED, PickPurchaseStatus.PAID] },
+    status: { $in: [PickPurchaseStatus.AUTHORIZED, PickPurchaseStatus.PAID, PickPurchaseStatus.CANCELLED] },
   } as any).lean();
 
   const purchasedPickIds = purchases.map((purchase) => purchase.pickId);

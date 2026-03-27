@@ -236,7 +236,7 @@ const getUserDashboardSummary = async (userId: string): Promise<UserDashboardSum
 
   const paidPurchases = await PickPurchase.find({
     userId: normalizedUserId,
-    status: { $in: [PickPurchaseStatus.AUTHORIZED, PickPurchaseStatus.PAID] },
+    status: { $in: [PickPurchaseStatus.AUTHORIZED, PickPurchaseStatus.PAID, PickPurchaseStatus.CANCELLED] },
   } as any)
     .select('pickId status price createdAt capturedAt')
     .lean();
@@ -257,7 +257,7 @@ const getUserDashboardSummary = async (userId: string): Promise<UserDashboardSum
     .lean();
 
   const activePicks = accessiblePicks.filter(
-    (pick: any) => pick.status === PicksStatus.ACTIVE && !pick.result
+    (pick: any) => !pick.result
   ).length;
   const totalWins = accessiblePicks.filter((pick: any) => pick.result === ResultType.WIN).length;
   const totalLosses = accessiblePicks.filter((pick: any) => pick.result === ResultType.LOSS).length;
