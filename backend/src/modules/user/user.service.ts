@@ -7,7 +7,9 @@ import PickPurchase, { PickPurchaseStatus } from '../../model/pick/pick-purchase
 import Picks, { PicksStatus, ResultType } from '../../model/pick/picks.model';
 import Subscription, { SubscriptionStatus } from '../../model/subscription/subscription.model';
 import NewsLatter from '../../model/newslatter/newslatter.model';
-import { CreateUserInput, UpdateUserInput } from './user.validation';
+import compareInfo from '../../utils/bcrypt/compare-info';
+import { CreateUserInput, DeleteOwnAccountInput, UpdateUserInput } from './user.validation';
+import { UserRole } from '../../model/user/user.schema';
 
 type DashboardMonthlyPoint = {
   label: string;
@@ -167,6 +169,56 @@ const updateUser = async (
 const deleteUser = async (id: IdOrIdsInput['id']): Promise<Partial<IUser | null>> => {
   const deletedUser = await User.findByIdAndDelete(id);
   return deletedUser;
+};
+
+const deleteOwnAccount = async (
+  userId: string,
+  payload: DeleteOwnAccountInput
+): Promise<{ deletedUserId: string }> => {
+  const user = await User.findById(userId).select('+password');
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  if (user.role === UserRole.ADMIN) {
+    throw new Error('Admin accounts cannot be deleted from the profile page');
+  }
+
+  if (user.email.toLowerCase() !== payload.email.toLowerCase()) {
+    throw new Error('Email confirmation does not match your account');
+  }
+
+  const isPasswordValid = await compareInfo(payload.currentPassword, user.password);
+
+  if (!isPasswordValid) {
+    throw new Error('Current password is incorrect');
+  }
+
+  const activeSubscription = await Subscription.findOne({
+    userId: user._id,
+    status: SubscriptionStatus.PAID,
+    isSubscribed: true,
+    subscriptionEnd: { $gt: new Date().toISOString() },
+  } as any).lean();
+
+  if (activeSubscription) {
+    throw new Error('Cancel your active subscription before deleting this account');
+  }
+
+  const lockedPurchase = await PickPurchase.findOne({
+    userId: user._id,
+    status: { $in: [PickPurchaseStatus.PENDING, PickPurchaseStatus.AUTHORIZED] },
+  } as any).lean();
+
+  if (lockedPurchase) {
+    throw new Error('You have a payment still processing. Please wait until it finishes before deleting');
+  }
+
+  await NewsLatter.deleteMany({ email: user.email });
+  await User.findByIdAndDelete(user._id);
+
+  return { deletedUserId: user._id.toString() };
 };
 
 /**
@@ -607,6 +659,7 @@ export const userServices = {
   createUser,
   updateUser,
   deleteUser,
+  deleteOwnAccount,
   getUserById,
   getManyUser,
   getUserDashboardSummary,
