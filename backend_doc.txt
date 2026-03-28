@@ -1,0 +1,1573 @@
+BADB BACKEND DOCUMENTATION
+Professional Technical Project Document
+
+Document Purpose
+This document provides a complete technical reference for the BADB backend application. It is written as a project handover and engineering reference document so it can be pasted directly into Google Docs or used as a formal internal project document.
+
+System Name
+BADB Final Version Backend
+
+Primary Responsibility
+The backend serves as the main business logic and data-processing layer for the sports picks platform. It manages users, authentication, premium picks, subscription billing, single-pick purchases, blog content, affiliate operations, newsletter delivery, testimonials, and dashboard reporting.
+
+
+==================================================
+1. EXECUTIVE SUMMARY
+==================================================
+
+The BADB backend is a modular Express and TypeScript API built on top of MongoDB. The application follows a feature-based module structure and separates responsibilities across route handlers, controllers, services, models, and utility helpers.
+
+The platform supports three major operational areas:
+
+1. Public platform services
+These include article retrieval, public pick board access, testimonials, and public-facing onboarding flows such as signup and password recovery.
+
+2. Authenticated user services
+These include account management, subscription purchase and cancellation, premium pick access, pick purchase history, dashboard analytics, and newsletter preferences.
+
+3. Administrative services
+These include user management, pick creation and settlement, order reporting, affiliate management, newsletter campaign delivery, testimonial moderation, and article publishing.
+
+The backend also integrates with Stripe for billing and uses webhook-driven payment confirmation to activate subscriptions and finalize pick-purchase states.
+
+
+==================================================
+2. TECHNOLOGY STACK
+==================================================
+
+Application Framework
+- Node.js
+- Express 5
+- TypeScript
+
+Database Layer
+- MongoDB
+- Mongoose
+
+Security and Middleware
+- Helmet
+- HPP
+- express-mongo-sanitize
+- express-rate-limit
+- cookie-parser
+- CORS
+
+Validation
+- Zod
+
+Payments
+- Stripe
+
+Authentication
+- JWT
+- bcrypt
+
+Email Delivery
+- Nodemailer-based utility
+
+Logging
+- Morgan
+- custom Winston stream integration
+
+Uploads
+- express-fileupload
+
+
+==================================================
+3. BASE URL AND APPLICATION ENTRY
+==================================================
+
+Base API URL
+http://localhost:5000/api/v1
+
+Primary Entry File
+backend/src/app.ts
+
+What the entry file does
+- creates the Express application
+- mounts the Stripe webhook raw-body route before JSON parsing
+- registers common middleware
+- loads all route modules from the modules directory automatically
+- connects to MongoDB on startup
+- exposes the API under the /api/v1 route prefix
+
+Important note
+The Stripe webhook route must be registered before the JSON parser because Stripe signature verification requires the raw request body.
+
+
+==================================================
+4. ARCHITECTURE OVERVIEW
+==================================================
+
+The backend is organized using a modular feature-based structure.
+
+Standard module pattern
+- route file
+- controller file
+- service file
+- validation file
+- optional interface file
+
+Supporting layers
+- models
+- middleware
+- handlers
+- helpers
+- utility services
+
+High-level folder structure
+
+backend/
+  src/
+    app.ts
+    config/
+    handlers/
+    helpers/
+    middlewares/
+    model/
+    modules/
+      affiliate/
+      article/
+      auth/
+      newslatter/
+      picks/
+      subscription/
+      testimonial/
+      user/
+    utils/
+
+Design characteristics
+- routes define API endpoints and attach middleware
+- controllers translate HTTP requests into service calls
+- services contain business rules and domain logic
+- models define MongoDB persistence structure
+- validators protect request integrity before logic executes
+
+
+==================================================
+5. GLOBAL MIDDLEWARE AND SECURITY
+==================================================
+
+The application applies a number of global middleware layers to improve security, input quality, and operational visibility.
+
+Global middleware in use
+- express.json
+- express.urlencoded
+- cookie-parser
+- express-fileupload
+- CORS
+- Helmet
+- mongo sanitize protection
+- HPP
+- Morgan request logging
+- custom logger stream
+- request rate limiting
+
+CORS behavior
+The backend currently allows the local frontend origin:
+- http://localhost:3000
+- http://localhost:3000/
+
+Security intent
+- sanitize request payloads to reduce NoSQL injection risk
+- limit duplicate query/body pollution
+- apply common security headers
+- restrict excessive request rate in production
+
+
+==================================================
+6. AUTHENTICATION AND AUTHORIZATION MODEL
+==================================================
+
+Authentication method
+The system uses JWT-based authentication. After a successful login, the frontend stores the token and sends it back in the Authorization header as a bearer token.
+
+Authorization model
+The platform supports two roles:
+- ADMIN
+- USER
+
+Core middleware used
+- isAuthorized
+- authorizedRoles
+- optionalUser
+
+Behavior summary
+- isAuthorized validates the JWT and attaches the user to the request
+- authorizedRoles restricts access to selected roles
+- optionalUser allows the request to continue even if no user token is present, but still enriches the request when a token exists
+
+
+==================================================
+7. STANDARD RESPONSE STYLE
+==================================================
+
+The controllers use a shared response helper to keep successful responses consistent.
+
+Typical success response shape
+
+success: true
+statusCode: HTTP status code
+message: operation result message
+data: actual response payload
+
+Typical example
+
+{
+  "success": true,
+  "statusCode": 200,
+  "message": "Picks retrieved successfully",
+  "data": {
+    "pickss": []
+  }
+}
+
+Validation errors and business-rule failures are routed through the centralized error handling system.
+
+
+==================================================
+8. DOMAIN MODELS
+==================================================
+
+8.1 User Model
+File: backend/src/model/user/user.schema.ts
+
+Purpose
+Stores registered user accounts and authentication-related state.
+
+Important fields
+- firstName
+- lastName
+- email
+- phoneNumber
+- password
+- isEmailVerified
+- emailVerificationToken
+- emailVerificationTokenExpiry
+- resetToken
+- resetTokenExpiry
+- isActive
+- role
+- affiliateCode
+- referredByAffiliateId
+- referredByAffiliateCode
+
+
+8.2 Picks Model
+File: backend/src/model/pick/picks.model.ts
+
+Purpose
+Stores both public and premium sports picks.
+
+Important fields
+- sportId
+- sportKey
+- sport_title
+- home_team
+- away_team
+- commence_time
+- odds
+- bookmakers
+- selected_team
+- price
+- market_type
+- units
+- confidence
+- writeup
+- premium
+- release_time
+- result
+- status
+- pickBanner
+
+Enumerations
+- status: pending, active, close
+- market_type: moneyline, spread, totals
+- confidence: low, medium, high
+- result: win, loss, void
+
+
+8.3 Pick Purchase Model
+File: backend/src/model/pick/pick-purchase.model.ts
+
+Purpose
+Tracks the purchase of a premium pick by a user.
+
+Important fields
+- userId
+- pickId
+- paymentModel
+- price
+- status
+- paymentIntentId
+- stripeSessionId
+- paymentLink
+- purchasedAt
+- capturedAt
+- cancelledAt
+
+Enumerations
+- paymentModel: PREPAID, PAY_AFTER_WIN
+- status: PENDING, AUTHORIZED, PAID, CANCELLED, REFUNDED
+
+
+8.4 Subscription Model
+File: backend/src/model/subscription/subscription.model.ts
+
+Purpose
+Tracks recurring and seasonal subscription purchases.
+
+Important fields
+- userId
+- subscriptionStart
+- subscriptionEnd
+- nextBilling
+- packageName
+- selectedSport
+- price
+- isSeasonal
+- seasonalDays
+- seasonalPrice
+- paymentLink
+- paymentIntentId
+- stripeSubscriptionId
+- stripeSessionId
+- isSubscribed
+- status
+- cancelledAt
+
+Enumerations
+- packageName: DAILY, WEEKLY, MONTHLY, SEASONAL
+- selectedSport: NFL, NBA, MLB, NHL
+- status: PENDING, PAID, FAILED, CANCELLED, EXPIRED, TRIAL, REFUNDED, SUSPENDED
+
+
+8.5 Article Model
+File: backend/src/model/article/article.schema.ts
+
+Purpose
+Stores blog and editorial content.
+
+Important fields
+- title
+- slug
+- content
+- category
+- image
+- author
+- isActive
+
+
+8.6 Testimonial Model
+File: backend/src/model/testimonial/testimonial.model.ts
+
+Purpose
+Stores user testimonial submissions and moderation status.
+
+Important fields
+- userId
+- name
+- email
+- location
+- title
+- review
+- rating
+- status
+- approvedAt
+
+Enumerations
+- PENDING
+- APPROVED
+- REJECTED
+
+
+8.7 Affiliate Model
+File: backend/src/model/affiliates/affiliate.model.ts
+
+Purpose
+Stores affiliate applications and affiliate approval state.
+
+Important fields
+- userId
+- status
+- affiliateCode
+- website
+- socialLinks
+- notes
+- approvedAt
+
+Enumerations
+- pending
+- approved
+- declined
+
+Related models
+- affiliate-commission.model.ts
+- affiliate-withdrawal.model.ts
+
+
+8.8 Newsletter Model
+File: backend/src/model/newslatter/newslatter.model.ts
+
+Purpose
+Stores newsletter subscription state per user/email.
+
+Important fields
+- email
+- userId
+- isActive
+
+
+==================================================
+9. CORE BUSINESS FLOWS
+==================================================
+
+9.1 User Registration and Verification
+
+Registration flow
+1. User submits signup information.
+2. Backend validates email, phone number, and password rules.
+3. Backend checks duplicate email and duplicate phone number.
+4. Password is hashed.
+5. Email verification token is generated.
+6. User record is saved with unverified email state.
+7. Verification email is sent to the user.
+
+Verification flow
+1. User opens verification link.
+2. Frontend sends email and token to the verification API.
+3. Backend validates the token and expiry.
+4. User account is marked verified.
+
+
+9.2 Login Flow
+
+1. User submits email and password.
+2. Backend verifies the user exists.
+3. Backend confirms email has already been verified.
+4. Password is compared using bcrypt.
+5. JWT token is generated and returned.
+
+
+9.3 Password Recovery Flow
+
+Forget password
+1. User submits email.
+2. Backend generates reset token and expiry.
+3. Reset email is sent.
+
+Reset password
+1. User submits email, token, and new password.
+2. Backend validates token and expiry.
+3. Backend checks the new password is different from the existing password.
+4. Password is hashed and updated.
+
+
+9.4 Premium Pick Access Flow
+
+Premium access is determined by:
+- active paid subscription
+- successful individual purchase of the pick
+- or the pick being free
+
+For users without access, the backend sanitizes premium picks by hiding:
+- selected_team
+- units
+- writeup
+
+This allows the pick board to show that a premium pick exists without leaking the premium content itself.
+
+
+9.5 Subscription Billing Flow
+
+Recurring plans
+- DAILY
+- WEEKLY
+- MONTHLY
+
+Seasonal plan
+- SEASONAL
+
+Flow
+1. Frontend requests subscription creation.
+2. Backend creates a pending subscription record.
+3. Backend creates a Stripe checkout session.
+4. User is redirected to Stripe.
+5. Stripe webhook confirms payment.
+6. Backend activates the subscription and updates billing dates.
+
+
+9.6 Single Pick Purchase Flow
+
+Supported payment modes
+- PREPAID
+- PAY_AFTER_WIN
+
+PREPAID behavior
+- payment is captured as part of normal checkout completion
+
+PAY_AFTER_WIN behavior
+- card is authorized first
+- payment is captured only if the pick result becomes win
+- authorization is cancelled if result becomes loss or void
+
+
+9.7 Affiliate Revenue Flow
+
+1. User signs up using a referral code.
+2. Backend resolves the code to an approved affiliate.
+3. User is linked to that affiliate.
+4. If the user buys or renews a subscription, a commission entry may be created.
+5. Approved affiliates can request withdrawals.
+6. Admin can update withdrawal statuses.
+
+
+==================================================
+10. STRIPE WEBHOOK BEHAVIOR
+==================================================
+
+Webhook endpoint
+/api/v1/subscription/webhook
+
+Important handled events
+
+checkout.session.completed
+- activates seasonal subscriptions
+- activates recurring subscriptions
+- marks prepaid pick purchases as paid
+- marks pay-after-win purchases as authorized
+
+invoice.paid
+- updates recurring subscription billing period
+- records renewal affiliate commission when appropriate
+
+invoice.payment_failed
+- marks subscription as failed
+
+customer.subscription.deleted
+- marks subscription as cancelled
+
+checkout.session.expired
+- cancels abandoned pending pick purchases
+
+Important operational note
+Stripe webhook processing is the real source of truth for final payment state. Frontend redirects alone should never be treated as completed billing confirmation.
+
+
+==================================================
+11. API MODULES AND ROUTE REFERENCE
+==================================================
+
+All endpoints below are relative to:
+/api/v1
+
+
+--------------------------------------------------
+11.1 AUTH MODULE
+Base route: /auth
+--------------------------------------------------
+
+POST /auth/register
+Purpose
+Register a new user account.
+
+Access
+Public
+
+Expected request fields
+- firstName
+- lastName
+- email
+- phoneNumber
+- password
+- referralCode (optional)
+
+Key validation rules
+- email must be valid
+- phone number must be 10 to 15 characters
+- password must contain uppercase, lowercase, and numeric content
+
+
+POST /auth/login
+Purpose
+Authenticate a verified user.
+
+Access
+Public
+
+Expected request fields
+- email
+- password
+
+Response
+Returns a JWT token when authentication succeeds.
+
+
+PATCH /auth/verify-email
+Purpose
+Verify a user email using email and token.
+
+Access
+Public
+
+Expected request fields
+- email
+- token
+
+
+POST /auth/resend-verification-email
+Purpose
+Resend an email verification token.
+
+Access
+Public
+
+Expected request fields
+- email
+
+
+POST /auth/forget-password
+Purpose
+Trigger password reset email delivery.
+
+Access
+Public
+
+Expected request fields
+- email
+
+
+POST /auth/reset-password
+Purpose
+Reset a password using email and reset token.
+
+Access
+Public
+
+Expected request fields
+- email
+- token
+- password
+- confirmPassword
+
+
+PATCH /auth/change-password
+Purpose
+Change password for the logged-in user.
+
+Access
+Authenticated user
+
+Expected request fields
+- currentPassword
+- newPassword
+- confirmNewPassword
+
+
+--------------------------------------------------
+11.2 PICKS MODULE
+Base route: /picks
+--------------------------------------------------
+
+POST /picks
+Purpose
+Create a new pick.
+
+Access
+Admin only
+
+Key request fields
+- sportId
+- sportKey
+- sport_title
+- commence_time
+- home_team
+- away_team
+- odds
+- selected_team
+- price
+- market_type
+- units
+- confidence
+- writeup
+- premium
+- release_time
+
+Important business rule
+selected_team must match either home_team or away_team.
+
+
+PUT /picks/:id
+Purpose
+Update an existing pick.
+
+Access
+Admin only
+
+Typical update targets
+- odds and sporting information
+- writeup
+- result
+- status
+- premium flag
+- price
+
+Special behavior
+If result is updated, pay-after-win purchases may be captured or cancelled automatically.
+
+
+DELETE /picks/:id
+Purpose
+Delete one pick.
+
+Access
+Admin only
+
+
+DELETE /picks/delete-picks/many
+Purpose
+Bulk delete picks.
+
+Access
+Admin only
+
+Expected request body
+- ids: array of Mongo IDs
+
+
+GET /picks/get-picks/many
+Purpose
+Return the public or semi-personalized pick board.
+
+Access
+Public, with optional authenticated enrichment
+
+Supported query fields
+- pageNo
+- showPerPage
+- searchKey
+
+Response includes
+- pickss
+- totalData
+- totalPages
+- totalActivePicks
+
+Important behavior
+If a user is authenticated, the backend may unlock premium details for purchased picks or subscription-covered picks.
+
+
+GET /picks/admin/all
+Purpose
+Return the full admin pick list.
+
+Access
+Admin only
+
+Supported query fields
+- pageNo
+- showPerPage
+- searchKey
+
+
+GET /picks/:id
+Purpose
+Get one pick by ID.
+
+Access
+Public
+
+
+POST /picks/purchase
+Purpose
+Initiate purchase for a premium pick.
+
+Access
+Authenticated USER role
+
+Expected request fields
+- pickId
+- paymentModel
+
+Valid paymentModel values
+- PREPAID
+- PAY_AFTER_WIN
+
+Important business rules
+- pick must exist
+- pick must be premium
+- pick must be active
+- user must not already have access
+- active subscription holders cannot buy a single premium pick separately
+
+Response
+Returns a purchase record containing a Stripe payment link.
+
+
+GET /picks/my-purchases
+Purpose
+Get pick purchase history for the current user.
+
+Access
+Authenticated USER role
+
+
+GET /picks/my-access
+Purpose
+Get all picks currently accessible to the current user.
+
+Access
+Authenticated USER role
+
+
+--------------------------------------------------
+11.3 SUBSCRIPTION MODULE
+Base route: /subscription
+--------------------------------------------------
+
+GET /subscription/health
+Purpose
+Simple health-check endpoint for the subscription router.
+
+Access
+Public
+
+
+POST /subscription/webhook
+Purpose
+Receive Stripe webhook events.
+
+Access
+Stripe webhook endpoint only
+
+
+POST /subscription
+Purpose
+Create a subscription checkout session.
+
+Access
+Authenticated USER role
+
+Expected request fields for recurring plans
+- packageName
+- selectedSport
+- price
+
+Expected request fields for seasonal plans
+- packageName
+- selectedSport
+- isSeasonal
+- seasonalDays
+- seasonalPrice
+
+Valid package names
+- DAILY
+- WEEKLY
+- MONTHLY
+- SEASONAL
+
+Important business rules
+- only one active recurring subscription is allowed at a time
+- seasonal plans can still be created separately
+
+
+GET /subscription/my-active
+Purpose
+Return the current user’s latest active subscription.
+
+Access
+Authenticated USER role
+
+
+GET /subscription/my-history
+Purpose
+Return paginated subscription history for the current user.
+
+Access
+Authenticated USER role
+
+Supported query fields
+- pageNo
+- showPerPage
+
+
+POST /subscription/:id/cancel
+Purpose
+Cancel an active subscription.
+
+Access
+Authenticated USER role
+
+Behavior
+- recurring Stripe subscriptions are set to cancel at period end
+- local subscription state is marked cancelled
+
+
+GET /subscription/admin/all
+Purpose
+Return the admin subscription list.
+
+Access
+Admin only
+
+
+GET /subscription/:id
+Purpose
+Return one subscription by ID.
+
+Access
+Admin or authenticated user
+
+
+PUT /subscription/:id
+Purpose
+Update subscription record manually.
+
+Access
+Admin only
+
+
+DELETE /subscription/:id
+Purpose
+Delete one subscription record.
+
+Access
+Admin only
+
+
+DELETE /subscription
+Purpose
+Bulk delete subscription records.
+
+Access
+Admin only
+
+
+--------------------------------------------------
+11.4 USER MODULE
+Base route: /user
+--------------------------------------------------
+
+PUT /user
+Purpose
+Update the current user profile.
+
+Access
+Authenticated user
+
+Allowed update fields
+- firstName
+- lastName
+- phoneNumber
+- other allowed fields depending on validation rules
+
+
+PUT /user/update-user/:id
+Purpose
+Update a specific user by ID.
+
+Access
+Admin only
+
+
+DELETE /user/delete-user/:id
+Purpose
+Delete a specific user account.
+
+Access
+Admin only
+
+
+POST /user/delete-account
+Purpose
+Self-service account deletion with safety checks.
+
+Access
+Authenticated user
+
+Required request fields
+- currentPassword
+- email
+- confirmationText
+- acknowledgeRisk
+
+Important business rules
+- confirmationText must be exactly DELETE MY ACCOUNT
+- email must match the logged-in user email
+- active subscriptions block deletion
+- pending or authorized payments block deletion
+- admin accounts cannot be deleted through this route
+
+
+GET /user/many
+Purpose
+Return paginated admin user list.
+
+Access
+Admin only
+
+Supported query fields
+- pageNo
+- showPerPage
+- searchKey
+- isActive
+
+
+GET /user/get-user/:id
+Purpose
+Return one user by ID.
+
+Access
+Admin only
+
+
+GET /user/profile/me
+Purpose
+Return the current authenticated user profile.
+
+Access
+Authenticated user
+
+
+GET /user/dashboard-summary
+Purpose
+Return dashboard summary for the current user.
+
+Access
+Authenticated user
+
+Summary includes
+- activePicks
+- totalWins
+- totalLosses
+- totalVoids
+- gradedPicks
+- winRate
+- walletBalance
+- totalSpent
+- totalPickSpend
+- totalSubscriptionSpend
+- paidPickPurchases
+- activeSubscription
+- monthlyPerformance
+- winLossRatio
+
+
+GET /user/admin/dashboard-summary
+Purpose
+Return overall admin dashboard metrics.
+
+Access
+Admin only
+
+Summary includes
+- user counts
+- active picks count
+- total orders
+- total revenue
+- newsletter subscribers
+- win/loss ratio
+- daily sales data
+- top sports
+- recent activity feed
+
+
+GET /user/admin/orders-summary
+Purpose
+Return consolidated order and payment reporting for admin use.
+
+Access
+Admin only
+
+Summary includes
+- totalRevenue
+- heldAmount
+- refundedAmount
+- totalOrders
+- detailed order rows for subscriptions and pick purchases
+
+
+--------------------------------------------------
+11.5 ARTICLE MODULE
+Base route: /article
+--------------------------------------------------
+
+POST /article
+Purpose
+Create a new article.
+
+Access
+Admin only
+
+Expected fields
+- title
+- content
+- category
+- image
+- isActive
+
+
+GET /article
+Purpose
+Return article list.
+
+Access
+Public
+
+
+GET /article/:slug
+Purpose
+Return one article by slug.
+
+Access
+Public
+
+
+GET /article/get-article-by-id/:id
+Purpose
+Return one article by Mongo ID.
+
+Access
+Public
+
+
+PUT /article/:id
+Purpose
+Update an article.
+
+Access
+Admin only
+
+
+DELETE /article/:id
+Purpose
+Delete an article.
+
+Access
+Admin only
+
+
+--------------------------------------------------
+11.6 TESTIMONIAL MODULE
+Base route: /testimonial
+--------------------------------------------------
+
+GET /testimonial
+Purpose
+Return approved testimonials for public display.
+
+Access
+Public
+
+
+POST /testimonial
+Purpose
+Create a testimonial submission.
+
+Access
+Authenticated USER role
+
+Expected fields
+- location
+- title
+- review
+- rating
+
+
+GET /testimonial/my
+Purpose
+Return testimonials submitted by the current user.
+
+Access
+Authenticated USER role
+
+
+GET /testimonial/admin/all
+Purpose
+Return testimonial list for moderation.
+
+Access
+Admin only
+
+
+PUT /testimonial/admin/:id/status
+Purpose
+Approve or reject a testimonial.
+
+Access
+Admin only
+
+Expected fields
+- status
+
+Valid values
+- APPROVED
+- REJECTED
+
+
+--------------------------------------------------
+11.7 AFFILIATE MODULE
+Base route: /affiliate
+--------------------------------------------------
+
+POST /affiliate/request
+Purpose
+Submit an affiliate application.
+
+Access
+Authenticated USER role
+
+Expected fields
+- website
+- socialLinks
+- notes
+
+
+GET /affiliate/me
+Purpose
+Return affiliate summary for the current user.
+
+Access
+Authenticated user
+
+Summary includes
+- affiliate profile
+- referralCount
+- totalCommission
+- paidOut
+- availableBalance
+- recent commissions
+- recent withdrawals
+
+
+POST /affiliate/withdrawal
+Purpose
+Create a withdrawal request.
+
+Access
+Authenticated approved affiliate
+
+Expected fields
+- amount
+- payoutMethod
+- payoutDetails
+- note
+
+
+PUT /affiliate/withdrawal/:id/retry
+Purpose
+Retry or reopen a paid withdrawal issue.
+
+Access
+Authenticated affiliate user
+
+
+GET /affiliate/summary/admin
+Purpose
+Return affiliate overview metrics for admins.
+
+Access
+Admin only
+
+
+GET /affiliate/many
+Purpose
+Return paginated affiliate list.
+
+Access
+Admin only
+
+
+GET /affiliate/withdrawal/many
+Purpose
+Return paginated affiliate withdrawal list.
+
+Access
+Admin only
+
+
+GET /affiliate/:id
+Purpose
+Return one affiliate record by ID.
+
+Access
+Admin only
+
+
+PUT /affiliate/request/:id
+Purpose
+Update the current user’s affiliate request.
+
+Access
+Authenticated USER role
+
+
+PUT /affiliate/approve/:id
+Purpose
+Approve or decline an affiliate request.
+
+Access
+Admin only
+
+Expected fields
+- status
+- notes
+
+Valid values
+- approved
+- declined
+
+
+PUT /affiliate/withdrawal/:id
+Purpose
+Update admin-side withdrawal status.
+
+Access
+Admin only
+
+Expected fields
+- status
+- adminNote
+- transferReference
+
+
+DELETE /affiliate/:id
+Purpose
+Delete one affiliate record.
+
+Access
+Admin only
+
+
+DELETE /affiliate/delete-many
+Purpose
+Bulk delete affiliate records.
+
+Access
+Admin only
+
+
+--------------------------------------------------
+11.8 NEWSLETTER MODULE
+Base route: /newslatter
+--------------------------------------------------
+
+Important note
+The route and module name use the spelling newslatter throughout the codebase.
+
+POST /newslatter
+Purpose
+Create or toggle newsletter status for the current user.
+
+Access
+Authenticated user
+
+
+POST /newslatter/toggle
+Purpose
+Toggle newsletter state from the frontend profile page.
+
+Access
+Authenticated user
+
+
+GET /newslatter/me
+Purpose
+Return the current user newsletter subscription state.
+
+Access
+Authenticated user
+
+
+PUT /newslatter/:id
+Purpose
+Update a newsletter record.
+
+Access
+Used as a protected management route in practice
+
+
+GET /newslatter/get-newslatter/many
+Purpose
+Return paginated newsletter subscriber list.
+
+Access
+Admin only
+
+
+GET /newslatter/admin/campaigns
+Purpose
+Return newsletter campaign history.
+
+Access
+Admin only
+
+
+POST /newslatter/admin/send
+Purpose
+Create and send a newsletter campaign.
+
+Access
+Admin only
+
+Expected fields
+- title
+- subject
+- content
+
+
+==================================================
+12. VALIDATION RULES BY FEATURE
+==================================================
+
+Auth validation highlights
+- registration enforces strong password format
+- email fields must be valid
+- password reset requires password confirmation
+- password change requires new password confirmation
+
+Pick validation highlights
+- pick purchase requires valid Mongo pick ID
+- payment model must be PREPAID or PAY_AFTER_WIN
+- market_type must be moneyline, spread, or totals
+- confidence must be low, medium, or high
+
+Subscription validation highlights
+- at least one sport must be selected
+- seasonal plans require seasonalDays and seasonalPrice
+- recurring plans require price
+- compatibility fields such as customDays and customPrice are still supported
+
+User validation highlights
+- self-delete requires exact phrase DELETE MY ACCOUNT
+- profile update requests must contain at least one field
+
+Affiliate validation highlights
+- withdrawal amount must be positive
+- withdrawal update statuses are controlled
+- affiliate approval only allows approved or declined
+
+Article validation highlights
+- title minimum 5 characters
+- content minimum 20 characters
+- category required
+
+Testimonial validation highlights
+- review minimum 20 characters
+- rating must be between 1 and 5
+
+Newsletter validation highlights
+- campaign title, subject, and content are required for sending newsletters
+
+
+==================================================
+13. DASHBOARD DATA AGGREGATION RESPONSIBILITIES
+==================================================
+
+User dashboard summary combines data from
+- picks
+- subscriptions
+- pick purchases
+
+Admin dashboard summary combines data from
+- users
+- picks
+- subscriptions
+- pick purchases
+- newsletter records
+
+Admin order summary combines
+- subscription payments
+- pick purchase transactions
+
+This means the backend is not only an API for CRUD operations. It is also an analytics layer for operational reporting.
+
+
+==================================================
+14. CONFIGURATION EXPECTATIONS
+==================================================
+
+Configuration source
+backend/src/config/config.ts
+
+The backend expects configuration values for
+- server port
+- base URL
+- database connection string
+- frontend URL
+- Stripe webhook secret
+- Stripe price IDs for recurring plans
+- request limit settings
+- file upload settings
+- email verification redirect URL
+- password reset redirect URL
+- affiliate commission rate
+
+
+==================================================
+15. KNOWN IMPLEMENTATION NOTES
+==================================================
+
+1. Route aliases
+Some modules expose multiple route aliases for backward compatibility.
+
+2. Naming legacy
+The spelling newslatter is used consistently across backend and frontend.
+
+3. Compatibility fields
+Subscription logic still supports older fields such as:
+- isSession
+- customDays
+- customPrice
+
+4. Payment truth source
+Stripe webhook updates should be treated as authoritative for final billing state.
+
+5. Access sanitization
+Premium picks can appear on the board without exposing hidden premium details if the user does not have access.
+
+
+==================================================
+16. RECOMMENDED INTEGRATION CHECKLIST
+==================================================
+
+For any frontend or external client integrating with this backend:
+
+1. Use /auth/login to obtain a JWT token.
+2. Send the token as a bearer token in the Authorization header.
+3. Use /user/profile/me to initialize the authenticated session.
+4. Use /subscription/my-active to determine premium subscription coverage.
+5. Use /picks/my-access to determine which picks are fully visible to the user.
+6. Redirect the user to Stripe using the paymentLink returned by purchase endpoints.
+7. After returning from Stripe, refetch API state instead of trusting the browser redirect alone.
+
+
+==================================================
+17. FINAL SUMMARY
+==================================================
+
+The BADB backend is a professionally structured modular API that handles:
+- authentication and account security
+- sports pick publication and access control
+- recurring subscriptions and one-time pick purchases
+- Stripe payment orchestration and webhook state updates
+- affiliate commission management
+- newsletter operations
+- testimonial moderation
+- article publishing
+- user and admin analytics dashboards
+
+From an engineering perspective, the backend is strongest in the following areas:
+- clear module separation
+- strong validation coverage
+- role-based route protection
+- webhook-based billing workflow
+- aggregated reporting endpoints for dashboards
+
+This document can be used for:
+- developer onboarding
+- team handover
+- client/project documentation
+- admin panel integration planning
+- QA test planning
+- future maintenance reference
