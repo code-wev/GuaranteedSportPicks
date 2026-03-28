@@ -1,9 +1,6 @@
 import express, { Application } from 'express';
 import fs from 'fs';
 import path from 'path';
-import config from './config/config';
-
-// Security and Middleware imports
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import fileUpload from 'express-fileupload';
@@ -13,56 +10,49 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 import mongoose from 'mongoose';
 import morgan from 'morgan';
+import config from './config/config';
 import PathNotFound from './helpers/responses/path-not-found';
 import { webhook } from './modules/subscription/subscription.controller';
 import { loggerStream } from './utils/logger/logger';
 
-// Terminal colors
 const GREEN = '\x1b[32m';
 const BLUE = '\x1b[34m';
 const YELLOW = '\x1b[33m';
 const WHITE = '\x1b[37m';
 const RESET = '\x1b[0m';
 
-// Express app initialization
 const app: Application = express();
+let databaseConnectionPromise: Promise<typeof mongoose> | null = null;
 
-// Define the path to the public directory
 const publicDirPath = path.join(__dirname, '..', 'public');
-
-// // Stripe webhook needs raw body for signature verification
-// app.use('/api/v1/webhooks/stripe', express.raw({ type: 'application/json' }));
-
-// // Define route handlers
-// /**
-//  * @route POST /api/v1/subscription/create-subscription
-//  * @description Create a new subscription
-//  * @access Public
-//  * @param {function} validation - ['validateCreateSubscription']
-//  * @param {function} controller - ['createSubscription']
 
 app.post('/api/v1/subscription/webhook', express.raw({ type: 'application/json' }), webhook);
 
 app.use(express.json({ limit: config.MAX_JSON_SIZE }));
-
 app.use(express.urlencoded({ extended: config.URL_ENCODED }));
 app.use(cookieParser());
 app.use(fileUpload(config.EXPRESS_FILE_UPLOAD_CONFIG));
 
-// Security middleware initialization with CORS configuration
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'http://localhost:3000/', 'https://guaranteed-sport-picks.vercel.app', 'https://guaranteed-sport-picks.vercel.app/'], // frontend origin
-    credentials: true, // if you are using cookies or authorization headers
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3000/',
+      'https://guaranteed-sport-picks.vercel.app',
+      'https://guaranteed-sport-picks.vercel.app/',
+    ],
+    credentials: true,
   })
 );
 
 app.use(helmet());
 app.use((req: any, res: any, next: any) => {
   const sanitizer = (mongoSanitize as any).sanitize || ((obj: any) => obj);
+
   ['body', 'params', 'headers', 'query'].forEach((key) => {
     if (req[key]) {
       const target = sanitizer(req[key]);
+
       try {
         req[key] = target;
       } catch (err) {
@@ -75,15 +65,14 @@ app.use((req: any, res: any, next: any) => {
       }
     }
   });
+
   next();
 });
+
 app.use(hpp());
 app.use(morgan('dev'));
-
-// Use Morgan with the custom logger
 app.use(morgan('combined', { stream: loggerStream }));
 
-// Request Rate Limit
 app.use(
   rateLimit({
     windowMs: config.REQUEST_LIMIT_TIME,
@@ -93,7 +82,6 @@ app.use(
   })
 );
 
-// Serve static files from the public directory
 app.use(
   express.static(publicDirPath, {
     setHeaders: (res) => {
@@ -102,7 +90,6 @@ app.use(
   })
 );
 
-// Recursive function to load routes from nested folders
 const routes: {
   module: string;
   path: string;
@@ -111,62 +98,68 @@ const routes: {
 }[] = [];
 
 const loadRoutes = (basePath: string, baseRoute: string) => {
-  if (fs.existsSync(basePath)) {
-    fs.readdirSync(basePath).forEach((item: string) => {
-      const itemPath = path.join(basePath, item);
-
-      const routePrefix = `${baseRoute}/${item.replace('.route', '')}`;
-
-      const start = performance.now();
-      if (fs.statSync(itemPath).isDirectory()) {
-        loadRoutes(itemPath, routePrefix);
-      } else if (item.endsWith('.route.ts') || item.endsWith('.route.js')) {
-        const routeModule = require(itemPath);
-        const router = routeModule.default || routeModule;
-        app.use(baseRoute, router);
-
-        if (config.NODE_ENV !== 'production') {
-          const end = performance.now();
-          router.stack.forEach((layer: any) => {
-            if (layer.route) {
-              Object.keys(layer.route.methods).forEach((method) => {
-                routes.push({
-                  module: item.split('.')[0],
-                  path: `${baseRoute}${layer.route.path}`,
-                  method: method.toUpperCase(),
-                  time: end - start,
-                });
-              });
-            }
-          });
-        }
-      }
-    });
+  if (!fs.existsSync(basePath)) {
+    return;
   }
+
+  fs.readdirSync(basePath).forEach((item: string) => {
+    const itemPath = path.join(basePath, item);
+    const start = performance.now();
+
+    if (fs.statSync(itemPath).isDirectory()) {
+      loadRoutes(itemPath, `${baseRoute}/${item.replace('.route', '')}`);
+      return;
+    }
+
+    if (!item.endsWith('.route.ts') && !item.endsWith('.route.js')) {
+      return;
+    }
+
+    const routeModule = require(itemPath);
+    const router = routeModule.default || routeModule;
+    app.use(baseRoute, router);
+
+    if (config.NODE_ENV !== 'production') {
+      const end = performance.now();
+
+      router.stack.forEach((layer: any) => {
+        if (!layer.route) {
+          return;
+        }
+
+        Object.keys(layer.route.methods).forEach((method) => {
+          routes.push({
+            module: item.split('.')[0],
+            path: `${baseRoute}${layer.route.path}`,
+            method: method.toUpperCase(),
+            time: end - start,
+          });
+        });
+      });
+    }
+  });
 };
 
-// Load routes starting from the 'modules' directory
 const routesPath = path.join(__dirname, 'modules');
 loadRoutes(routesPath, '/api/v1');
 
-// Path not found handler
 app.use(PathNotFound);
 
-// Helper: formatted date
 const getFormattedDate = () => {
   const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(
+    now.getDate()
+  ).padStart(2, '0')}`;
 };
 
-// Helper: formatted time
 const getFormattedTime = () => {
   const now = new Date();
-  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+  return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(
+    2,
+    '0'
+  )}:${String(now.getSeconds()).padStart(2, '0')}`;
 };
 
-// ────────────────────────────────────────────────
-// Log routes grouped by module
-// ────────────────────────────────────────────────
 function logRoutesByModule() {
   const grouped: Record<string, any[]> = {};
 
@@ -181,7 +174,10 @@ function logRoutesByModule() {
     );
 
     routeList.forEach((route: any) => {
-      const info = `${GREEN}${route.method} ${route.path} - ${YELLOW}${route.time.toFixed(2)} ms${RESET}`;
+      const info = `${GREEN}${route.method} ${route.path} - ${YELLOW}${route.time.toFixed(
+        2
+      )} ms${RESET}`;
+
       console.log(
         `${GREEN}[Express] ${WHITE}${getFormattedDate()} ${getFormattedTime()} ${GREEN}LOG ${YELLOW}[RouterExplorer] ${info}${RESET}`
       );
@@ -191,19 +187,41 @@ function logRoutesByModule() {
   });
 }
 
-app.listen(config.PORT, async () => {
-  // Connect to MongoDB
-  await mongoose.connect(config.DB_CONNECTION_URI);
-  // Connect to Redis
+export const connectToDatabase = async () => {
+  if (!databaseConnectionPromise) {
+    databaseConnectionPromise = mongoose.connect(config.DB_CONNECTION_URI);
+  }
 
-  console.log(
-    `${GREEN}✔${RESET} ${WHITE}Connected to MongoDB successfully.${RESET}\n`,
-    `${GREEN}✔${RESET} ${WHITE}Connected to Redis successfully.${RESET}\n`,
-    `${BLUE}🚀  Server Details:${RESET}\n`,
-    `Base URL: ${YELLOW}${config.BASE_URL}:${config.PORT}${RESET}\n`,
-    `Environment: ${YELLOW}${config.NODE_ENV}${RESET}\n`,
-    `Port: ${YELLOW}${config.PORT}${RESET}\n`
-  );
-  console.log(`Server is running at ${config.BASE_URL}:${config.PORT} in ${config.NODE_ENV} mode.`);
-  logRoutesByModule();
-});
+  return databaseConnectionPromise;
+};
+
+export const initializeApp = async () => {
+  await connectToDatabase();
+  return app;
+};
+
+const startServer = async () => {
+  await connectToDatabase();
+
+  app.listen(config.PORT, () => {
+    console.log(
+      `${GREEN}Connected to MongoDB successfully.${RESET}\n`,
+      `${GREEN}Connected to Redis successfully.${RESET}\n`,
+      `${BLUE}Server Details:${RESET}\n`,
+      `Base URL: ${YELLOW}${config.BASE_URL}:${config.PORT}${RESET}\n`,
+      `Environment: ${YELLOW}${config.NODE_ENV}${RESET}\n`,
+      `Port: ${YELLOW}${config.PORT}${RESET}\n`
+    );
+    console.log(`Server is running at ${config.BASE_URL}:${config.PORT} in ${config.NODE_ENV} mode.`);
+    logRoutesByModule();
+  });
+};
+
+if (require.main === module) {
+  startServer().catch((error) => {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  });
+}
+
+export default app;
