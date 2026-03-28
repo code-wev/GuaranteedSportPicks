@@ -1,9 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { FaTimesCircle } from "react-icons/fa";
+import { Suspense } from "react";
 
-export default function PaymentCancelPage() {
+function PaymentCancelContent() {
+  const params = useSearchParams();
+  const source = params.get("source");
+  const isPickPurchase = source === "pick";
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-white flex items-center justify-center px-4">
       <div className="bg-white rounded-3xl shadow-xl p-10 max-w-md w-full text-center">
@@ -12,11 +18,13 @@ export default function PaymentCancelPage() {
         </div>
         <h1 className="text-2xl font-bold text-gray-800 mb-2">Payment Cancelled</h1>
         <p className="text-gray-500 text-sm mb-8">
-          Your payment was cancelled. No charges were made. You can try again anytime.
+          {isPickPurchase
+            ? "Your pick checkout was cancelled. No access was granted, and no charge was captured."
+            : "Your payment was cancelled. No charges were made. You can try again anytime."}
         </p>
         <div className="flex flex-col gap-3">
           <Link
-            href="/packages"
+            href={isPickPurchase ? "/dashboard/purchase" : "/packages"}
             className="w-full bg-[#B91C1C] hover:bg-red-800 text-white font-semibold py-3 rounded-xl transition text-sm"
           >
             Try Again
@@ -30,5 +38,13 @@ export default function PaymentCancelPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentCancelPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center" />}>
+      <PaymentCancelContent />
+    </Suspense>
   );
 }

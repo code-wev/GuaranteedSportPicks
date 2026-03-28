@@ -55,3 +55,21 @@ export {
   useGetManyNewslatterQuery,
   useGetNewslatterByIdQuery,
 } from "./NewslatterApi";
+
+// Article API hooks
+export {
+  useCreateArticleMutation,
+  useGetAllArticlesQuery,
+  useGetArticleBySlugQuery,
+  useGetArticleByIdQuery,
+  useUpdateArticleMutation,
+  useDeleteArticleMutation,
+} from "./ArticleApi";
+
+export {
+  useCreateTestimonialMutation,
+  useGetMyTestimonialsQuery,
+  useGetApprovedTestimonialsQuery,
+  useGetAdminTestimonialsQuery,
+  useUpdateTestimonialStatusMutation,
+} from "./TestimonialApi";

@@ -1,85 +1,137 @@
-// Import Router from express
 import { Router } from 'express';
-
-// Import controller from corresponding module
-import {
-  createAffiliate,
-  deleteAffiliate,
-  deleteManyAffiliate,
-  getAffiliateById,
-  getManyAffiliate,
-  updateAffiliate,
-} from './affiliate.controller';
-
-//Import validation from corresponding module
 import authorizedRoles from '../../../src/middlewares/authorized-roles';
-import { UserRole } from '../../../src/model/user/user.schema';
 import isAuthorized from '../../../src/middlewares/is-authorized';
+import { UserRole } from '../../../src/model/user/user.schema';
 import {
   validateId,
   validateIds,
   validateSearchQueries,
 } from '../../handlers/common-zod-validator';
-import { validateCreateAffiliate, validateUpdateAffiliate } from './affiliate.validation';
+import {
+  approveAffiliate,
+  createWithdrawalRequest,
+  createAffiliate,
+  deleteAffiliate,
+  deleteManyAffiliate,
+  getAffiliateAdminSummary,
+  getAffiliateById,
+  getManyAffiliate,
+  getMyAffiliate,
+  getWithdrawalRequests,
+  retryWithdrawalRequest,
+  updateWithdrawalRequest,
+  updateAffiliate,
+} from './affiliate.controller';
+import {
+  validateAdminWithdrawalUpdate,
+  validateAffiliateApproval,
+  validateCreateWithdrawal,
+  validateCreateAffiliate,
+  validateRetryWithdrawal,
+  validateUpdateAffiliate,
+} from './affiliate.validation';
 
-// Initialize router
 const router = Router();
 
-// Define route handlers
-/**
- * @route POST /api/v1/affiliate/create-affiliate
- * @description Create a new affiliate
- * @access Public
- * @param {function} validation - ['validateCreateAffiliate']
- * @param {function} controller - ['createAffiliate']
- */
 router.post(
-  '/',
+  ['/', '/request'],
   isAuthorized,
   authorizedRoles([UserRole.USER]),
   validateCreateAffiliate,
   createAffiliate
 );
 
-/**
- * @route PUT /api/v1/affiliate/update-affiliate/:id
- * @description Update affiliate information
- * @access Public
- * @param {IdOrIdsInput['id']} id - The ID of the affiliate to update
- * @param {function} validation - ['validateId', 'validateUpdateAffiliate']
- * @param {function} controller - ['updateAffiliate']
- */
-router.put('/:id', isAuthorized, validateId, validateUpdateAffiliate, updateAffiliate);
+router.get(['/me'], isAuthorized, getMyAffiliate);
 
-/**
- * @route DELETE /api/v1/affiliate/delete-affiliate/:id
- * @description Delete a affiliate
- * @access Public
- * @param {IdOrIdsInput['id']} id - The ID of the affiliate to delete
- * @param {function} validation - ['validateId']
- * @param {function} controller - ['deleteAffiliate']
- */
-router.delete('/:id', isAuthorized, validateId, deleteAffiliate);
+router.post(
+  ['/withdrawal'],
+  isAuthorized,
+  authorizedRoles([UserRole.USER]),
+  validateCreateWithdrawal,
+  createWithdrawalRequest
+);
 
-/**
- * @route GET /api/v1/affiliate/get-affiliate/many
- * @description Get multiple affiliates
- * @access Public
- * @param {function} validation - ['validateSearchQueries']
- * @param {function} controller - ['getManyAffiliate']
- */
-router.get('/get-affiliate/many', validateSearchQueries, getManyAffiliate);
+router.put(
+  ['/withdrawal/:id/retry'],
+  validateId,
+  isAuthorized,
+  authorizedRoles([UserRole.USER]),
+  validateRetryWithdrawal,
+  retryWithdrawalRequest
+);
 
-/**
- * @route GET /api/v1/affiliate/get-affiliate/:id
- * @description Get a affiliate by ID
- * @access Public
- * @param {IdOrIdsInput['id']} id - The ID of the affiliate to retrieve
- * @param {function} validation - ['validateId']
- * @param {function} controller - ['getAffiliateById']
- */
-router.get('/get-affiliate/:id', validateId, getAffiliateById);
+router.get(
+  ['/summary/admin'],
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  getAffiliateAdminSummary
+);
 
-// Export the router
+router.get(
+  ['/get-affiliate/many', '/many'],
+  validateSearchQueries,
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  getManyAffiliate
+);
+
+router.get(
+  ['/withdrawal/many'],
+  validateSearchQueries,
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  getWithdrawalRequests
+);
+
+router.get(
+  ['/get-affiliate/:id', '/:id'],
+  validateId,
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  getAffiliateById
+);
+
+router.put(
+  ['/request/:id'],
+  validateId,
+  isAuthorized,
+  authorizedRoles([UserRole.USER]),
+  validateUpdateAffiliate,
+  updateAffiliate
+);
+
+router.put(
+  ['/approve/:id'],
+  validateId,
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  validateAffiliateApproval,
+  approveAffiliate
+);
+
+router.put(
+  ['/withdrawal/:id'],
+  validateId,
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  validateAdminWithdrawalUpdate,
+  updateWithdrawalRequest
+);
+
+router.delete(
+  ['/:id'],
+  validateId,
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  deleteAffiliate
+);
+
+router.delete(
+  ['/delete-many'],
+  validateIds,
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  deleteManyAffiliate
+);
+
 module.exports = router;
-

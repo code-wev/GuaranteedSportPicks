@@ -3,10 +3,14 @@ import { Router } from 'express';
 
 // Import controller from corresponding module
 import {
+  createPickPurchase,
   createPicks,
   deleteManyPicks,
   deletePicks,
+  getManyPicksAdmin,
   getManyPicks,
+  getMyAccessiblePicks,
+  getMyPickPurchases,
   getPicksById,
   updatePicks,
 } from './picks.controller';
@@ -14,13 +18,14 @@ import {
 //Import validation from corresponding module
 import authorizedRoles from '../../../src/middlewares/authorized-roles';
 import isAuthorized from '../../../src/middlewares/is-authorized';
+import optionalUser from '../../middlewares/optional-user';
 import { UserRole } from '../../../src/model/user/user.schema';
 import {
   validateId,
   validateIds,
   validateSearchQueries,
 } from '../../handlers/common-zod-validator';
-import { validateCreatePicks, validateUpdatePicks } from './picks.validation';
+import { validateCreatePickPurchase, validateCreatePicks, validateUpdatePicks } from './picks.validation';
 
 // Import pick purchase routes
 
@@ -36,7 +41,7 @@ const router = Router();
  * @param {function} validation - ['validateCreatePicks']
  * @param {function} controller - ['createPicks']
  */
-router.post('/', isAuthorized, authorizedRoles([UserRole.ADMIN]), validateCreatePicks, createPicks);
+router.post(['/','/picks'], isAuthorized, authorizedRoles([UserRole.ADMIN]), validateCreatePicks, createPicks);
 
 /**
  * @route PUT /api/v1/picks/update-picks/:id
@@ -47,7 +52,7 @@ router.post('/', isAuthorized, authorizedRoles([UserRole.ADMIN]), validateCreate
  * @param {function} controller - ['updatePicks']
  */
 router.put(
-  '/:id',
+  ['/:id', '/picks/:id'],
   isAuthorized,
   authorizedRoles([UserRole.ADMIN]),
   validateId,
@@ -63,7 +68,7 @@ router.put(
  * @param {function} controller - ['deleteManyPicks']
  */
 router.delete(
-  '/delete-picks/many',
+  ['/delete-picks/many', '/picks/delete-picks/many'],
   isAuthorized,
   authorizedRoles([UserRole.ADMIN]),
   validateIds,
@@ -78,7 +83,7 @@ router.delete(
  * @param {function} validation - ['validateId']
  * @param {function} controller - ['deletePicks']
  */
-router.delete('/:id', isAuthorized, authorizedRoles([UserRole.ADMIN]), validateId, deletePicks);
+router.delete(['/:id', '/picks/:id'], isAuthorized, authorizedRoles([UserRole.ADMIN]), validateId, deletePicks);
 
 /**
  * @route GET /api/v1/picks/get-picks/many
@@ -104,7 +109,37 @@ router.delete('/:id', isAuthorized, authorizedRoles([UserRole.ADMIN]), validateI
 //TODO: Filter by home_team
 //TODO: Filter by away team
 
-router.get('/get-picks/many', validateSearchQueries, getManyPicks);
+router.get(['/get-picks/many', '/picks/get-picks/many'], optionalUser, validateSearchQueries, getManyPicks);
+
+router.get(
+  ['/admin/all'],
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  validateSearchQueries,
+  getManyPicksAdmin
+);
+
+router.post(
+  ['/purchase', '/picks/purchase'],
+  isAuthorized,
+  authorizedRoles([UserRole.USER]),
+  validateCreatePickPurchase,
+  createPickPurchase
+);
+
+router.get(
+  ['/my-purchases', '/picks/my-purchases'],
+  isAuthorized,
+  authorizedRoles([UserRole.USER]),
+  getMyPickPurchases
+);
+
+router.get(
+  ['/my-access', '/picks/my-access'],
+  isAuthorized,
+  authorizedRoles([UserRole.USER]),
+  getMyAccessiblePicks
+);
 
 /**
  * @route GET /api/v1/picks/get-picks/:id
@@ -114,7 +149,7 @@ router.get('/get-picks/many', validateSearchQueries, getManyPicks);
  * @param {function} validation - ['validateId']
  * @param {function} controller - ['getPicksById']
  */
-router.get('/:id', validateId, getPicksById);
+router.get(['/:id', '/picks/:id'], validateId, getPicksById);
 
 // // Use pick purchase routes
 // router.use('/', pickPurchaseRoutes);

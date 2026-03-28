@@ -20,6 +20,7 @@ export const PicksApi = createApi({
       return headers;
     },
   }),
+  tagTypes: ["Picks"],
   endpoints: (builder) => ({
     createPicks: builder.mutation({
       query: (data) => ({
@@ -27,6 +28,7 @@ export const PicksApi = createApi({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Picks"],
     }),
 
     getManyPicks: builder.query({
@@ -35,6 +37,16 @@ export const PicksApi = createApi({
         method: "GET",
         params,
       }),
+      providesTags: ["Picks"],
+    }),
+
+    getAdminPicks: builder.query({
+      query: (params) => ({
+        url: "/picks/admin/all",
+        method: "GET",
+        params,
+      }),
+      providesTags: ["Picks"],
     }),
 
     getPicksById: builder.query({
@@ -42,6 +54,15 @@ export const PicksApi = createApi({
         url: `/picks/${id}`,
         method: "GET",
       }),
+      providesTags: (result, error, id) => [{ type: "Picks", id }],
+    }),
+
+    getMyAccessiblePicks: builder.query({
+      query: () => ({
+        url: "/picks/my-access",
+        method: "GET",
+      }),
+      providesTags: ["Picks"],
     }),
 
     updatePicks: builder.mutation({
@@ -50,6 +71,10 @@ export const PicksApi = createApi({
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: (result, error, { id }) => [
+        "Picks",
+        { type: "Picks", id },
+      ],
     }),
 
     deletePicks: builder.mutation({
@@ -57,6 +82,7 @@ export const PicksApi = createApi({
         url: `/picks/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Picks"],
     }),
 
     deleteManyPicks: builder.mutation({
@@ -65,6 +91,7 @@ export const PicksApi = createApi({
         method: "DELETE",
         body,
       }),
+      invalidatesTags: ["Picks"],
     }),
   }),
 });
@@ -72,7 +99,9 @@ export const PicksApi = createApi({
 export const {
   useCreatePicksMutation,
   useGetManyPicksQuery,
+  useGetAdminPicksQuery,
   useGetPicksByIdQuery,
+  useGetMyAccessiblePicksQuery,
   useUpdatePicksMutation,
   useDeletePicksMutation,
   useDeleteManyPicksMutation,

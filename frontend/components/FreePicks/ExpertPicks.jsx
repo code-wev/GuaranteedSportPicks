@@ -1,145 +1,122 @@
 "use client";
 
-import Image from "next/image";
-import { FaFootballBall } from "react-icons/fa";
-import { MdSportsBasketball, MdSportsBaseball, MdSportsSoccer, MdSportsHockey, MdOutlineSportsRugby } from "react-icons/md";
-
-const picks = [
-  {
-    league: "NFL",
-    time: "8:20 PM ET",
-    title: "Kansas City Chiefs vs Buffalo Bills",
-    pick: "Chiefs – 3.5",
-    odds: "+125",
-    confidence: "High Confidence",
-    highlight: "Top Pick",
-    description: "Chiefs have dominated at home this season with 7-1 record. Buffalo struggling on the road against top-tier offenses.",
-    icon: <MdOutlineSportsRugby />,
-  },
-  {
-    league: "NBA",
-    time: "10:00 PM ET",
-    title: "Los Angeles Lakers vs Boston Celtics",
-    pick: "Chiefs – 3.5",
-    odds: "+125",
-    confidence: "Medium Confidence",
-    highlight: "",
-    description: "Both teams average high-scoring games when healthy. Lakers offense has been potent, Celtics offense clicking.",
-    icon: <MdSportsBasketball />,
-  },
-  {
-    league: "MLB",
-    time: "7:30 PM ET",
-    title: "New York Yankees vs Houston Astros",
-    pick: "Yankees ML",
-    odds: "+125",
-    confidence: "High Confidence",
-    highlight: "",
-    description: "Yankees are stronger on the mound with 2.35 ERA. Astros struggling against left-handed pitching this season.",
-    icon: <MdSportsBaseball />,
-  },
-  {
-    league: "Soccer",
-    time: "12:20 PM ET",
-    title: "Manchester United vs Arsenal",
-    pick: "Under 2.5 Goals",
-    odds: "-120",
-    confidence: "Medium Confidence",
-    highlight: "",
-    description:
-      "Both teams have tightened up defensively. Historic matchups tend to be low-scoring affairs.",
-    icon: <MdSportsSoccer/>,
-  },
-  {
-    league: "NBA",
-    time: "9:00 PM ET",
-    title: "Golden State Warriors vs Phoenix Suns",
-    pick: "Warriors +7.5",
-    odds: "-110",
-    confidence: "High Confidence",
-    highlight: "",
-    description:
-      "Warriors getting healthy at the right time. Suns dealing with key injuries and sluggish from back-to-back games.",
-    icon: <MdSportsBasketball />,
-  },
-  {
-    league: "NHL",
-    time: "7:20 PM ET",
-    title: "Tampa Bay Lightning vs Florida Panthers",
-    pick: "Chiefs – 3.5",
-    odds: "+125",
-    confidence: "Medium Confidence",
-    highlight: "",
-    description:
-      "Chiefs have dominated at home this season with 7-1 record. Buffalo struggling on the road against top-tier offenses.",
-    icon: <MdSportsHockey />,
-  },
-];
+import Link from "next/link";
+import { useGetManyPicksQuery } from "@/feature/PicksApi";
 
 export default function ExpertPicks() {
+  const { data, isLoading } = useGetManyPicksQuery({
+    pageNo: 1,
+    showPerPage: 12,
+  });
+
+  const picks = (data?.data?.pickss || []).filter((pick) => pick.status === "active");
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-20">
-      {/* Header */}
       <div className="text-center mb-10">
-        <h1 className="text-3xl md:text-4xl font-semibold mb-3">Expert Picks for Today</h1>
-        <p className="text-xl">Carefully analyzed selections from our professional handicappers</p>
+        <h1 className="text-3xl md:text-4xl font-semibold mb-3">Today&apos;s Picks Board</h1>
+        <p className="text-lg text-gray-500">
+          Free picks are fully visible. Premium picks stay blurred until you buy the pick or unlock it with a subscription.
+        </p>
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {picks.map((item, idx) => (
-          <div
-            key={idx}
-            className="bg-white rounded-xl shadow-sm border-l-4 border-[#B91C1C] p-6 hover:shadow-md transition-all"
-          >
-            {/* Top Row */}
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-               <p className="w-10 h-10 bg-[#B91C1C] text-xl text-white flex justify-center rounded-full items-center">{item.icon}</p> 
-                <p className="font-medium text-sm">{item.league}</p>
-              </div>
-              <p className="text-gray-400 text-sm">{item.time}</p>
-            </div>
+      {isLoading ? (
+        <div className="py-20 text-center text-gray-500">Loading picks...</div>
+      ) : picks.length === 0 ? (
+        <div className="py-20 text-center text-gray-400">No active picks available right now.</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {picks.map((pick) => {
+            const locked = Boolean(pick.accessLocked);
 
-            {/* Title */}
-            <h2 className="text-2xl font-semibold leading-snug mb-2">{item.title}</h2>
-
-            {/* Pick + Odds */}
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <p className="font-semibold text-xl">{item.pick}</p>
-                <p className="text-gray-500 text-sm">Our Pick</p>
-              </div>
-              <div className="text-right">
-                <p className="font-semibold text-xl">{item.odds}</p>
-                <p className="text-gray-500 text-sm">Odds</p>
-              </div>
-            </div> 
-
-            {/* Confidence Badge */}
-            <div className="flex items-center justify-between gap-2 mb-3">
-              <span
-                className={`px-3 py-1 text-xs rounded-full font-medium ${
-                  item.confidence === "High Confidence"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
-                }`}
+            return (
+              <div
+                key={pick._id}
+                className="relative bg-white rounded-2xl shadow-sm border border-gray-200 p-6 overflow-hidden"
               >
-                {item.confidence}
-              </span>
+                <div>
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-red-600 font-bold">
+                        {pick.sport_title}
+                      </p>
+                      <h2 className="text-2xl font-semibold leading-snug mt-2">
+                        {pick.away_team} @ {pick.home_team}
+                      </h2>
+                    </div>
+                    <span
+                      className={`px-3 py-1 text-xs rounded-full font-medium ${
+                        pick.confidence === "high"
+                          ? "bg-green-100 text-green-700"
+                          : pick.confidence === "medium"
+                            ? "bg-yellow-100 text-yellow-700"
+                            : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {pick.confidence}
+                    </span>
+                  </div>
 
-              {item.highlight && (
-                <span className="px-2 py-1 text-xs bg-yellow-300 text-black rounded-full font-semibold">
-                  {item.highlight}
-                </span>
-              )}
-            </div>
+                  <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+                    <div className="rounded-xl bg-gray-50 p-3">
+                      <p className="text-gray-400">Start</p>
+                      <p className="font-semibold text-gray-800">{new Date(pick.commence_time).toLocaleString()}</p>
+                    </div>
+                    <div className="rounded-xl bg-gray-50 p-3">
+                      <p className="text-gray-400">Price</p>
+                      <p className="font-semibold text-gray-800">
+                        {pick.premium ? `$${Number(pick.price).toFixed(2)}` : "Free"}
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-gray-50 p-3">
+                      <p className="text-gray-400">Pick</p>
+                      {locked ? (
+                        <div className="h-5 mt-1 rounded bg-gray-200 blur-[2px]" />
+                      ) : (
+                        <p className="font-semibold text-gray-800">{pick.selected_team}</p>
+                      )}
+                    </div>
+                    <div className="rounded-xl bg-gray-50 p-3">
+                      <p className="text-gray-400">Market</p>
+                      <p className="font-semibold text-gray-800 capitalize">{pick.market_type}</p>
+                    </div>
+                  </div>
 
-            {/* Description */}
-            <p className="text-gray-500 text-sm leading-relaxed">{item.description}</p>
-          </div>
-        ))}
-      </div>
+                  <div className="rounded-xl bg-[#F9FAFB] border border-gray-100 p-4">
+                    <p className="text-xs uppercase tracking-[0.18em] text-gray-400 font-bold mb-2">Writeup</p>
+                    {locked ? (
+                      <div className="space-y-2">
+                        <div className="h-4 rounded bg-gray-200 blur-[2px]" />
+                        <div className="h-4 rounded bg-gray-200 blur-[2px]" />
+                        <div className="h-4 w-2/3 rounded bg-gray-200 blur-[2px]" />
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-600 leading-6">{pick.writeup}</p>
+                    )}
+                  </div>
+                </div>
+
+                {locked && (
+                  <div className="absolute bottom-6 left-6 right-6 flex flex-col items-center justify-center bg-white/85 border border-red-100 rounded-2xl p-6 text-center shadow-sm">
+                    <span className="px-3 py-1 rounded-full bg-[#B91C1C] text-white text-xs font-bold uppercase tracking-[0.2em]">
+                      Premium Pick
+                    </span>
+                    <p className="mt-4 text-sm font-medium text-gray-700">
+                      Buy this pick with prepaid or Pay After Win, or unlock all picks from this sport with a subscription.
+                    </p>
+                    <Link
+                      href="/dashboard/purchase"
+                      className="mt-5 inline-flex items-center justify-center rounded-xl bg-[#B91C1C] px-5 py-3 text-sm font-semibold text-white hover:bg-red-800 transition"
+                    >
+                      Unlock Picks
+                    </Link>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

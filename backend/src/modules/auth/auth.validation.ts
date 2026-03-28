@@ -61,6 +61,7 @@ const zodCreateUserSchema = z
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
         'Password must contain at least one uppercase letter, one lowercase letter, and one number'
       ),
+    referralCode: z.string().trim().toUpperCase().optional(),
   })
   .strict();
 

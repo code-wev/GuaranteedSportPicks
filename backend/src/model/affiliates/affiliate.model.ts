@@ -19,6 +19,7 @@ export interface IAffiliate extends Document {
   website?: string; // optional affiliate website
   socialLinks?: string[]; // optional social media links
   notes?: string; // admin notes
+  approvedAt?: Date;
 }
 
 // ========================
@@ -36,6 +37,7 @@ const AffiliateSchema = new Schema<IAffiliate>(
     website: { type: String },
     socialLinks: [{ type: String }],
     notes: { type: String },
+    approvedAt: { type: Date },
   },
   { timestamps: true }
 );

@@ -1,19 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import Sidebar from "./components/Sidebar";
 import DashNavbar from "./components/DashNavbar";
+import Sidebar from "./components/Sidebar";
 
 export default function DashboardLayout({ children }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen">
+    <div className='flex min-h-screen items-start'>
       <Sidebar open={open} setOpen={setOpen} />
-
-      <div className="flex-1">
+      <div className='flex-1'>
         <DashNavbar setOpen={setOpen} />
-        <main className="p-6">{children}</main>
+        <main className='p-6'>{children}</main>
       </div>
     </div>
   );

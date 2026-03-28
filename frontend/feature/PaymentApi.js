@@ -1,18 +1,13 @@
 import { base_url } from "@/utils/utils";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
-const getCookie = (name) => {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
-  return match ? decodeURIComponent(match[2]) : null;
-};
+import Cookies from "js-cookie";
 
 export const PaymentApi = createApi({
   reducerPath: "PaymentApi",
   baseQuery: fetchBaseQuery({
     baseUrl: base_url,
     prepareHeaders: (headers) => {
-      const token = getCookie("token");
+      const token = typeof window !== 'undefined' ? Cookies.get('token') : null;
 
       if (token) headers.set("authorization", `Bearer ${token}`);
 
@@ -20,7 +15,7 @@ export const PaymentApi = createApi({
     },
     credentials: "include",
   }),
-  tagTypes: ["Subscription"],
+  tagTypes: ["Subscription", "PickPurchase"],
 
   endpoints: (builder) => ({
     // Create a subscription → returns paymentLink for Stripe checkout
@@ -33,23 +28,23 @@ export const PaymentApi = createApi({
       invalidatesTags: ["Subscription"],
     }),
 
-    // Get the logged-in user's latest subscription
+    // Get the logged-in user's latest active subscription
     getMySubscription: builder.query({
-      query: () => "/subscription/me",
+      query: () => "/subscription/my-active",
       providesTags: ["Subscription"],
     }),
 
     // Get all subscriptions for the logged-in user (payment history)
     getMySubscriptionHistory: builder.query({
       query: ({ pageNo = 1, showPerPage = 10 } = {}) =>
-        `/subscription/many?pageNo=${pageNo}&showPerPage=${showPerPage}`,
+        `/subscription/my-history?pageNo=${pageNo}&showPerPage=${showPerPage}`,
       providesTags: ["Subscription"],
     }),
 
     // Cancel an active subscription
     cancelSubscription: builder.mutation({
       query: (id) => ({
-        url: `/subscription/cancel/${id}`,
+        url: `/subscription/${id}/cancel`,
         method: "POST",
       }),
       invalidatesTags: ["Subscription"],

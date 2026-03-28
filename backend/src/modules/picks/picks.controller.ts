@@ -3,6 +3,7 @@ import { picksServices } from './picks.service';
 import { SearchQueryInput } from '../../handlers/common-zod-validator';
 import ServerResponse from '../../helpers/responses/custom-response';
 import catchAsync from '../../utils/catch-async/catch-async';
+import { AuthenticatedRequest } from '../../middlewares/is-authorized';
 
 /**
  * Controller function to handle the creation of a single picks.
@@ -128,13 +129,42 @@ export const getPicksById = catchAsync(async (req: Request, res: Response) => {
 export const getManyPicks = catchAsync(async (req: Request, res: Response) => {
   // Type assertion for query parameters
   const query = req.query as SearchQueryInput;
-  // Call the service method to get multiple pickss based on query parameters and get the result
-  const { pickss, totalData, totalPages } = await picksServices.getManyPicks(query);
+  const userId = (req as AuthenticatedRequest).user?._id?.toString();
+  const { pickss, totalData, totalPages, totalActivePicks } = await picksServices.getPickBoard(query, userId);
   if (!pickss) throw new Error('Failed to retrieve pickss');
-  // Send a success response with the retrieved pickss data
   ServerResponse(res, true, 200, 'Pickss retrieved successfully', {
     pickss,
     totalData,
     totalPages,
+    totalActivePicks,
   });
+});
+
+export const getManyPicksAdmin = catchAsync(async (req: Request, res: Response) => {
+  const query = req.query as SearchQueryInput;
+  const { pickss, totalData, totalPages, totalActivePicks } = await picksServices.getManyPicks(query);
+  ServerResponse(res, true, 200, 'Pickss retrieved successfully', {
+    pickss,
+    totalData,
+    totalPages,
+    totalActivePicks,
+  });
+});
+
+export const createPickPurchase = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!._id.toString();
+  const result = await picksServices.createPickPurchase(userId, req.body);
+  ServerResponse(res, true, 201, 'Pick purchase initiated successfully', result);
+});
+
+export const getMyPickPurchases = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!._id.toString();
+  const result = await picksServices.getMyPickPurchases(userId);
+  ServerResponse(res, true, 200, 'Pick purchases retrieved successfully', result);
+});
+
+export const getMyAccessiblePicks = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!._id.toString();
+  const result = await picksServices.getMyAccessiblePicks(userId);
+  ServerResponse(res, true, 200, 'Accessible picks retrieved successfully', result);
 });

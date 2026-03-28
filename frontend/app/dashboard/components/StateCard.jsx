@@ -1,4 +1,4 @@
-import { FiBarChart2, FiCreditCard, FiTrendingUp, FiBookmark } from "react-icons/fi";
+import { FiBookmark } from "react-icons/fi";
 import { IoTrophyOutline } from "react-icons/io5";
 import { MdOutlineAccountBalanceWallet } from "react-icons/md";
 import { RiBarChartFill } from "react-icons/ri";
@@ -10,7 +10,14 @@ const icons = {
   wallet: <MdOutlineAccountBalanceWallet  />,
 };
 
-export default function StatCard({ title, value, change, icon }) {
+export default function StatCard({ title, value, change, icon, changeTone = "positive" }) {
+  const toneClass =
+    changeTone === "negative"
+      ? "text-red-600"
+      : changeTone === "neutral"
+      ? "text-gray-500"
+      : "text-green-600";
+
   return (
     <div className="bg-white p-5 rounded-2xl shadow-sm">
       <h4 className="text-gray-600">{title}</h4>
@@ -20,7 +27,7 @@ export default function StatCard({ title, value, change, icon }) {
         <span className="text-red-500 text-2xl">{icons[icon]}</span>
       </div>
 
-      <p className="text-sm text-green-600 mt-2">{change}</p>
+      <p className={`text-sm mt-2 ${toneClass}`}>{change}</p>
     </div>
   );
 }

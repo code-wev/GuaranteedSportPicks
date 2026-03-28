@@ -17,13 +17,13 @@ router.get('/health', (req, res) => {
 /**
  * Webhook route (no auth required)
  */
-router.post('/webhook', webhook);
+router.post(['/webhook', '/subscription/webhook'], webhook);
 
 /**
  * Authenticated user routes
  */
 router.post(
-  '/',
+  ['/', '/subscription'],
   isAuthorized,
   authorizedRoles([UserRole.USER]),
   validateCreateSubscription,
@@ -31,14 +31,14 @@ router.post(
 );
 
 router.get(
-  '/my-active',
+  ['/my-active', '/subscription/my-active'],
   isAuthorized,
   authorizedRoles([UserRole.USER]),
   getUserActiveSubscription
 );
 
 router.get(
-  '/my-history',
+  ['/my-history', '/subscription/my-history'],
   isAuthorized,
   authorizedRoles([UserRole.USER]),
   validateSearchQueries,
@@ -46,7 +46,7 @@ router.get(
 );
 
 router.post(
-  '/:id/cancel',
+  ['/:id/cancel', '/subscription/:id/cancel'],
   isAuthorized,
   authorizedRoles([UserRole.USER]),
   validateId,
@@ -57,7 +57,7 @@ router.post(
  * Admin routes
  */
 router.get(
-  '/admin/all',
+  ['/admin/all', '/subscription/admin/all'],
   isAuthorized,
   authorizedRoles([UserRole.ADMIN]),
   validateSearchQueries,
@@ -65,7 +65,7 @@ router.get(
 );
 
 router.get(
-  '/:id',
+  ['/:id', '/subscription/:id'],
   isAuthorized,
   authorizedRoles([UserRole.ADMIN, UserRole.USER]),
   validateId,
@@ -73,7 +73,7 @@ router.get(
 );
 
 router.put(
-  '/:id',
+  ['/:id', '/subscription/:id'],
   isAuthorized,
   authorizedRoles([UserRole.ADMIN]),
   validateId,
@@ -82,7 +82,7 @@ router.put(
 );
 
 router.delete(
-  '/:id',
+  ['/:id', '/subscription/:id'],
   isAuthorized,
   authorizedRoles([UserRole.ADMIN]),
   validateId,
@@ -90,7 +90,7 @@ router.delete(
 );
 
 router.delete(
-  '/',
+  ['/', '/subscription'],
   isAuthorized,
   authorizedRoles([UserRole.ADMIN]),
   deleteManySubscription

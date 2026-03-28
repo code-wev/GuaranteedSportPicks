@@ -7,7 +7,6 @@ import { AffiliateStatus } from 'src/model/affiliates/affiliate.model';
  * @interface TAffiliate
  */
 export interface TCreateAffiliate {
-  // Add fields as needed
   userId: string; // Linked user ID
   status?: AffiliateStatus;
   affiliateCode?: string; // Unique tracking code
@@ -16,3 +15,13 @@ export interface TCreateAffiliate {
   notes?: string; // Admin notes
 }
 
+export interface TAffiliateSummary {
+  affiliate: unknown;
+  referralCount: number;
+  totalCommission: number;
+  commissionRate: number;
+  paidOut: number;
+  availableBalance: number;
+  commissions: unknown[];
+  withdrawals: unknown[];
+}

@@ -1,8 +1,9 @@
 "use client";
 import { base_url } from "@/utils/utils";
 import axios from "axios";
+import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 
 /**
@@ -18,6 +19,7 @@ export default function RegisterPage() {
     phoneNumber: "",
     password: "",
     confirmPassword: "",
+    referralCode: "",
     agree: false,
   });
 
@@ -37,6 +39,22 @@ export default function RegisterPage() {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const referralCode = params.get("ref") || params.get("affiliate") || "";
+
+    if (referralCode) {
+      setForm((prev) => ({
+        ...prev,
+        referralCode: referralCode.toUpperCase(),
+      }));
+    }
+  }, []);
 
   const validate = () => {
     const err = {};
@@ -126,6 +144,7 @@ export default function RegisterPage() {
       email: form.email.trim().toLowerCase(),
       phoneNumber: form.phoneNumber.trim(),
       password: form.password,
+      referralCode: form.referralCode.trim().toUpperCase() || undefined,
     };
 
     try {
@@ -168,11 +187,12 @@ export default function RegisterPage() {
         {/* LEFT: image + info */}
         <div className='lg:col-span-7 bg-white rounded-2xl p-8 shadow-sm flex flex-col justify-between'>
           <div>
-            <div className='w-full h-56 md:h-72 bg-gray-200 rounded-xl overflow-hidden mb-6'>
-              <img
+            <div className='relative w-full h-56 md:h-72 bg-gray-200 rounded-xl overflow-hidden mb-6'>
+              <Image
                 src='/mnt/data/83d819e8-10a0-4732-ba5b-1927424bfb7e.png'
                 alt='hero'
-                className='w-full h-full object-cover'
+                fill
+                className='object-cover'
               />
             </div>
 
@@ -325,6 +345,19 @@ export default function RegisterPage() {
                     {errors.phoneNumber}
                   </p>
                 )}
+              </div>
+
+              <div>
+                <label className='block text-xs text-gray-600 mb-1'>
+                  Affiliate Code
+                </label>
+                <input
+                  name='referralCode'
+                  value={form.referralCode}
+                  onChange={handleChange}
+                  placeholder='Optional referral code'
+                  className='w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none uppercase'
+                />
               </div>
 
               <div>

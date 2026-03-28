@@ -5,116 +5,69 @@ import ServerResponse from '../../helpers/responses/custom-response';
 import catchAsync from '../../utils/catch-async/catch-async';
 import { affiliateServices } from './affiliate.service';
 
-/**
- * Controller function to handle the creation of a single affiliate.
- *
- * @param {Request} req - The request object containing affiliate data in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<IAffiliate>>} - The created affiliate.
- * @throws {Error} - Throws an error if the affiliate creation fails.
- */
 export const createAffiliate = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
-  // get the User Id from Requiest body (assuming it's sent in the request body, adjust if it's in headers or elsewhere)
+  req.body.userId = req.user!._id;
 
-  const userId = req.user!._id;
-  console.log(userId, 'yes id reciave');
-  req.body.userId = userId; // Ensure userId is included in the body for service layer processing
-
-  // Call the service method to create a new affiliate and get the result
   const result = await affiliateServices.createAffiliate(req.body);
-  if (!result) throw new Error('Failed to create affiliate');
-  // Send a success response with the created affiliate data
-  ServerResponse(res, true, 201, 'Affiliate created successfully', result);
+  ServerResponse(res, true, 201, 'Affiliate request submitted successfully', result);
 });
 
-/**
- * Controller function to handle the update operation for a single affiliate.
- *
- * @param {Request} req - The request object containing the ID of the affiliate to update in URL parameters and the updated data in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<IAffiliate>>} - The updated affiliate.
- * @throws {Error} - Throws an error if the affiliate update fails.
- */
 export const updateAffiliate = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
-  // Call the service method to update the affiliate by ID and get the result
-  const userRole = req.user!.role;
-  req.body.userRole = userRole;
-  const result = await affiliateServices.updateAffiliate(id as string, req.body);
-  if (!result) throw new Error('Failed to update affiliate');
-  // Send a success response with the updated affiliate data
+  const result = await affiliateServices.updateAffiliate(id as string, req.body, req.user!._id);
+
+  if (!result) {
+    throw new Error('Affiliate request not found');
+  }
+
   ServerResponse(res, true, 200, 'Affiliate updated successfully', result);
 });
 
-/**
- * Controller function to handle the deletion of a single affiliate.
- *
- * @param {Request} req - The request object containing the ID of the affiliate to delete in URL parameters.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<IAffiliate>>} - The deleted affiliate.
- * @throws {Error} - Throws an error if the affiliate deletion fails.
- */
+export const approveAffiliate = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const result = await affiliateServices.approveAffiliate(id as string, req.body);
+
+  if (!result) {
+    throw new Error('Affiliate request not found');
+  }
+
+  ServerResponse(res, true, 200, 'Affiliate request updated successfully', result);
+});
+
 export const deleteAffiliate = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
   const { id } = req.params;
-  const userRole = req.user!.role;
-  req.body.userRole = userRole;
-  // Call the service method to delete the affiliate by ID
   const result = await affiliateServices.deleteAffiliate(id as string);
   if (!result) throw new Error('Failed to delete affiliate');
-  // Send a success response confirming the deletion
+
   ServerResponse(res, true, 200, 'Affiliate deleted successfully');
 });
 
-/**
- * Controller function to handle the deletion of multiple affiliates.
- *
- * @param {Request} req - The request object containing an array of IDs of affiliate to delete in the body.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<IAffiliate>[]>} - The deleted affiliates.
- * @throws {Error} - Throws an error if the affiliate deletion fails.
- */
 export const deleteManyAffiliate = catchAsync(async (req: Request, res: Response) => {
-  // Extract ids from request body
   const { ids } = req.body;
-  // Call the service method to delete multiple affiliates and get the result
   const result = await affiliateServices.deleteManyAffiliate(ids);
   if (!result) throw new Error('Failed to delete multiple affiliates');
-  // Send a success response confirming the deletions
+
   ServerResponse(res, true, 200, 'Affiliates deleted successfully');
 });
 
-/**
- * Controller function to handle the retrieval of a single affiliate by ID.
- *
- * @param {Request} req - The request object containing the ID of the affiliate to retrieve in URL parameters.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<IAffiliate>>} - The retrieved affiliate.
- * @throws {Error} - Throws an error if the affiliate retrieval fails.
- */
 export const getAffiliateById = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
-  // Call the service method to get the affiliate by ID and get the result
   const result = await affiliateServices.getAffiliateById(id as string);
   if (!result) throw new Error('Affiliate not found');
-  // Send a success response with the retrieved resource data
+
   ServerResponse(res, true, 200, 'Affiliate retrieved successfully', result);
 });
 
-/**
- * Controller function to handle the retrieval of multiple affiliates.
- *
- * @param {Request} req - The request object containing query parameters for filtering.
- * @param {Response} res - The response object used to send the response.
- * @returns {Promise<Partial<IAffiliate>[]>} - The retrieved affiliates.
- * @throws {Error} - Throws an error if the affiliates retrieval fails.
- */
+export const getMyAffiliate = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const result = await affiliateServices.getMyAffiliate(req.user!._id);
+
+  ServerResponse(res, true, 200, 'Affiliate summary retrieved successfully', result);
+});
+
 export const getManyAffiliate = catchAsync(async (req: Request, res: Response) => {
-  // Type assertion for query parameters
   const query = req.query as SearchQueryInput;
-  // Call the service method to get multiple affiliates based on query parameters and get the result
   const { affiliates, totalData, totalPages } = await affiliateServices.getManyAffiliate(query);
-  if (!affiliates) throw new Error('Failed to retrieve affiliates');
-  // Send a success response with the retrieved affiliates data
+
   ServerResponse(res, true, 200, 'Affiliates retrieved successfully', {
     affiliates,
     totalData,
@@ -122,3 +75,47 @@ export const getManyAffiliate = catchAsync(async (req: Request, res: Response) =
   });
 });
 
+export const getAffiliateAdminSummary = catchAsync(async (_req: Request, res: Response) => {
+  const result = await affiliateServices.getAffiliateAdminSummary();
+
+  ServerResponse(res, true, 200, 'Affiliate admin summary retrieved successfully', result);
+});
+
+export const createWithdrawalRequest = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const result = await affiliateServices.createWithdrawalRequest(req.user!._id, req.body);
+
+  ServerResponse(res, true, 201, 'Withdrawal request submitted successfully', result);
+});
+
+export const getWithdrawalRequests = catchAsync(async (req: Request, res: Response) => {
+  const query = req.query as SearchQueryInput;
+  const { withdrawals, totalData, totalPages } = await affiliateServices.getWithdrawalRequests(query);
+
+  ServerResponse(res, true, 200, 'Withdrawal requests retrieved successfully', {
+    withdrawals,
+    totalData,
+    totalPages,
+  });
+});
+
+export const updateWithdrawalRequest = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const result = await affiliateServices.updateWithdrawalRequest(id as string, req.body);
+
+  if (!result) {
+    throw new Error('Withdrawal request not found');
+  }
+
+  ServerResponse(res, true, 200, 'Withdrawal request updated successfully', result);
+});
+
+export const retryWithdrawalRequest = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const { id } = req.params;
+  const result = await affiliateServices.retryWithdrawalRequest(req.user!._id, id as string, req.body);
+
+  if (!result) {
+    throw new Error('Withdrawal request not found');
+  }
+
+  ServerResponse(res, true, 200, 'Withdrawal retry request submitted successfully', result);
+});

@@ -1,0 +1,1021 @@
+BADB FRONTEND DOCUMENTATION
+Professional Technical Project Document
+
+Document Purpose
+This document provides a complete technical and architectural overview of the BADB frontend application. It is written in a formal documentation style so it can be pasted directly into Google Docs or reused as a polished project handover document.
+
+System Name
+BADB Final Version Frontend
+
+Primary Responsibility
+The frontend delivers the public website, customer account experience, subscription and pick purchasing interfaces, user dashboard, and full administrative dashboard for platform operations.
+
+
+==================================================
+1. EXECUTIVE SUMMARY
+==================================================
+
+The BADB frontend is a Next.js App Router application built with React and Tailwind CSS. It communicates with the backend through Redux Toolkit Query and is organized into public pages, authenticated dashboard pages, and admin operations pages.
+
+The application supports three major interaction layers:
+
+1. Public website experience
+This includes the home page, packages, free picks, blog pages, about page, and contact page.
+
+2. Authenticated user experience
+This includes login, signup, email verification, password recovery, profile management, subscription management, pick access, purchase flows, and the user analytics dashboard.
+
+3. Admin operations experience
+This includes management interfaces for users, orders, picks, newsletters, blogs, testimonials, and affiliate workflows.
+
+The frontend is built to operate closely with the BADB backend and depends on backend-controlled billing status, access state, and analytics summaries.
+
+
+==================================================
+2. TECHNOLOGY STACK
+==================================================
+
+Framework
+- Next.js 16 App Router
+
+UI Library
+- React 19
+
+Styling
+- Tailwind CSS 4
+
+State and Data Fetching
+- Redux Toolkit
+- RTK Query
+
+Icons and UI Helpers
+- react-icons
+- react-hot-toast
+
+Charts and Visualization
+- chart.js
+- react-chartjs-2
+- recharts
+
+Client Utilities
+- js-cookie
+
+
+==================================================
+3. FRONTEND ARCHITECTURE OVERVIEW
+==================================================
+
+The frontend follows a layered application structure.
+
+Primary architectural layers
+- app routes
+- reusable UI components
+- API integration slices
+- Redux provider and store
+- static assets
+
+Main directory structure
+
+frontend/
+  app/
+  components/
+  feature/
+  provider/
+  store/
+  utils/
+  public/
+
+Design characteristics
+- public pages are built from reusable content components
+- dashboards are composed from route-specific page files and reusable dashboard widgets
+- API communication is centralized into RTK Query slices
+- auth state is primarily represented through a cookie-stored JWT token
+- backend state is considered authoritative for purchases, subscriptions, and access control
+
+
+==================================================
+4. ROOT APPLICATION STRUCTURE
+==================================================
+
+Root layout file
+frontend/app/layout.js
+
+Global responsibilities of the root layout
+- loads global fonts
+- wraps the app in Redux provider
+- renders the public site navbar
+- renders page content
+- renders the public site footer
+- mounts toast notifications globally
+
+Global implication
+The root layout provides a common shell for the site, while dashboard routes introduce their own internal layout and navigation system inside the main application body.
+
+
+==================================================
+5. DASHBOARD LAYOUT STRUCTURE
+==================================================
+
+Dashboard layout file
+frontend/app/dashboard/layout.jsx
+
+Dashboard layout responsibilities
+- renders the left sidebar
+- renders the dashboard top navigation bar
+- manages mobile sidebar open and close state
+- wraps dashboard page content in a padded workspace
+
+This layout acts as the operational shell for both user pages and admin pages under the dashboard route tree.
+
+
+==================================================
+6. STATE MANAGEMENT AND DATA LAYER
+==================================================
+
+Store file
+frontend/store/store.js
+
+Provider file
+frontend/provider/AllProvider.jsx
+
+The frontend uses Redux Toolkit Query to centralize all API communication. This gives the application:
+- generated hooks for queries and mutations
+- request caching
+- cache invalidation
+- standardized API access
+- predictable data flow for dashboard and admin pages
+
+Configured RTK Query slices
+- UserApi
+- PaymentApi
+- PicksApi
+- NewslatterApi
+- AuthApi
+- AffiliateApi
+- ArticleApi
+- TestimonialApi
+
+Each slice is registered in the Redux store as both:
+- reducer
+- middleware
+
+
+==================================================
+7. API BASE URL AND AUTH HEADER STRATEGY
+==================================================
+
+Configuration file
+frontend/utils/utils.js
+
+Current API base URL
+http://localhost:5000/api/v1
+
+Authentication strategy
+Most API slices read the JWT token from browser cookies and attach it to the Authorization header as:
+
+Authorization: Bearer <token>
+
+Important note
+The frontend does not treat client navigation as proof of access. It still depends on backend authorization for all protected operations.
+
+
+==================================================
+8. NEXT.JS MIDDLEWARE AND ROUTE PROTECTION
+==================================================
+
+Middleware file
+frontend/middleware.js
+
+The middleware currently supports:
+
+Public-only routes
+- /login
+- /signup
+
+Public routes
+- /
+- /resend-verification
+- /verify-email
+- /forgot-password
+- /reset-password
+
+Protected route roots
+- /dashboard
+- /profile
+- /settings
+
+Current behavior
+- authenticated users are redirected away from login/signup to the dashboard
+- unauthenticated users are redirected to login when visiting protected areas
+- a redirect query parameter is appended so the user can be sent back after login
+
+Important implementation note
+This middleware protects authenticated entry, but role-level restrictions are still enforced by the backend.
+
+
+==================================================
+9. PUBLIC ROUTE INVENTORY
+==================================================
+
+9.1 Home Page
+Route: /
+File: frontend/app/page.js
+
+Major sections used on the home page
+- HomeBanner
+- TrustedPartners
+- GetSportsPicks
+- StatsOverview
+- ExpertPicksHero
+- Package
+- GetFreeDailyPicks
+- WhyChoose
+- Members
+- LatestBettingInsights
+
+Purpose
+The home page acts as the main conversion and trust-building page for the platform.
+
+
+9.2 About Page
+Route: /about
+
+Purpose
+Introduces brand identity, credibility, team positioning, and company messaging.
+
+Related component groups
+- components/About/*
+
+
+9.3 Contact Page
+Route: /contact
+
+Purpose
+Provides contact forms, office information, and FAQ-style support content.
+
+Related component groups
+- components/contact/*
+
+
+9.4 Packages Page
+Route: /packages
+
+Purpose
+Displays plan offerings and promotional package information.
+
+Related component groups
+- components/packages/*
+
+
+9.5 Free Picks Page
+Route: /freepicks
+
+Purpose
+Displays public pick-related promotional content and CTA blocks for premium conversion.
+
+Current page composition
+- FreePicksBanner
+- ExpertPicks
+- WinningPicks
+
+
+9.6 Blog Listing Page
+Route: /blog
+
+Purpose
+Shows article list and blog discovery experience.
+
+
+9.7 Blog Detail Page
+Route: /blog/[slug]
+
+Purpose
+Displays a single article using slug-based routing.
+
+Related components
+- components/Blog/*
+- components/BlogDetails/*
+
+
+==================================================
+10. AUTHENTICATION AND ACCOUNT PAGES
+==================================================
+
+Routes included in the frontend
+- /login
+- /signup
+- /forgot-password
+- /reset-password
+- /email-verification
+- /resend-verification
+
+These pages connect directly to the AuthApi slice and are responsible for:
+- account creation
+- authentication
+- password reset initiation
+- password reset completion
+- email verification
+- resend verification handling
+
+Operational role
+These routes serve as the onboarding and account recovery layer of the application.
+
+
+==================================================
+11. STRIPE PAYMENT FEEDBACK PAGES
+==================================================
+
+Routes
+- /payment-success
+- /payment-cancel
+
+Purpose
+These pages handle the return experience after the user leaves Stripe checkout.
+
+Important note
+These pages should not be considered the source of truth for billing success. Final access state depends on backend webhook processing and refreshed API data.
+
+
+==================================================
+12. USER DASHBOARD ROUTES
+==================================================
+
+Base route
+/dashboard
+
+User-facing dashboard routes
+- /dashboard
+- /dashboard/profile
+- /dashboard/my-picks
+- /dashboard/my-subscription
+- /dashboard/purchase
+- /dashboard/purchase-history
+- /dashboard/testimonials
+
+These pages represent the logged-in customer workspace.
+
+
+==================================================
+13. ADMIN DASHBOARD ROUTES
+==================================================
+
+Admin route inventory
+- /dashboard/admin
+- /dashboard/admin/users
+- /dashboard/admin/new-picks
+- /dashboard/admin/manage-picks
+- /dashboard/admin/orders
+- /dashboard/admin/newsletters
+- /dashboard/admin/testimonials
+- /dashboard/admin/blogs
+- /dashboard/admin/blogs/new-blog
+- /dashboard/admin/blogs/edit/[id]
+- /dashboard/admin/affiliate
+
+These routes represent the operational back office for platform management.
+
+
+==================================================
+14. API SLICE REFERENCE
+==================================================
+
+14.1 AuthApi
+File: frontend/feature/AuthApi.js
+
+Primary generated hooks
+- useRegisterMutation
+- useLoginMutation
+- useChangePasswordMutation
+- useForgetPasswordMutation
+- useResetPasswordMutation
+- useUpdateAuthMutation
+- useVerifyEmailMutation
+- useResendVerificationEmailMutation
+
+Used by
+- signup page
+- login page
+- reset password pages
+- profile password update form
+
+
+14.2 PicksApi
+File: frontend/feature/PicksApi.js
+
+Primary generated hooks
+- useCreatePicksMutation
+- useGetManyPicksQuery
+- useGetAdminPicksQuery
+- useGetPicksByIdQuery
+- useGetMyAccessiblePicksQuery
+- useUpdatePicksMutation
+- useDeletePicksMutation
+- useDeleteManyPicksMutation
+
+Used by
+- purchase page
+- my picks page
+- admin new picks page
+- admin manage picks page
+
+
+14.3 PaymentApi
+File: frontend/feature/PaymentApi.js
+
+Primary generated hooks
+- useCreateSubscriptionMutation
+- useGetMySubscriptionQuery
+- useGetMySubscriptionHistoryQuery
+- useCancelSubscriptionMutation
+- useCreatePickPurchaseMutation
+- useGetMyPickPurchasesQuery
+
+Used by
+- purchase page
+- my subscription page
+- purchase history page
+- my picks page
+
+
+14.4 ArticleApi
+File: frontend/feature/ArticleApi.js
+
+Primary generated hooks
+- useCreateArticleMutation
+- useGetAllArticlesQuery
+- useGetArticleBySlugQuery
+- useGetArticleByIdQuery
+- useUpdateArticleMutation
+- useDeleteArticleMutation
+
+Used by
+- blog pages
+- admin blog management pages
+
+
+14.5 UserApi
+File: frontend/feature/UserApi.js
+
+Primary generated hooks
+- useGetAllUserQuery
+- useGetSingleUserQuery
+- useMyProfileQuery
+- useGetMyDashboardSummaryQuery
+- useGetAdminDashboardSummaryQuery
+- useGetAdminOrdersSummaryQuery
+- useUpdateUserMutation
+- useUpdateUserByIdMutation
+- useDeleteUserMutation
+
+Used by
+- profile page
+- dashboard home
+- admin dashboard
+- admin users
+- admin orders
+
+
+14.6 AffiliateApi
+File: frontend/feature/AffiliateApi.js
+
+Primary generated hooks
+- useCreateAffiliateRequestMutation
+- useUpdateAffiliateRequestMutation
+- useApproveAffiliateRequestMutation
+- useGetManyAffiliateQuery
+- useGetMyAffiliateQuery
+- useGetAffiliateAdminSummaryQuery
+- useCreateWithdrawalRequestMutation
+- useRetryWithdrawalRequestMutation
+- useGetWithdrawalRequestsQuery
+- useUpdateWithdrawalRequestMutation
+
+Used by
+- admin affiliate operations
+- user affiliate-related screens
+
+
+14.7 TestimonialApi
+File: frontend/feature/TestimonialApi.js
+
+Primary generated hooks
+- useCreateTestimonialMutation
+- useGetMyTestimonialsQuery
+- useGetApprovedTestimonialsQuery
+- useGetAdminTestimonialsQuery
+- useUpdateTestimonialStatusMutation
+
+Used by
+- user testimonial submission
+- public testimonials
+- admin moderation
+
+
+14.8 NewslatterApi
+File: frontend/feature/NewslatterApi.js
+
+Primary generated hooks
+- useCreateNewslatterMutation
+- useUpdateNewslatterMutation
+- useGetManyNewslatterQuery
+- useGetNewsletterCampaignsQuery
+- useGetNewslatterByIdQuery
+- useGetUserNewsletterStatusQuery
+- useToggleNewsletterMutation
+- useSendNewsletterCampaignMutation
+
+Used by
+- profile newsletter controls
+- admin newsletter page
+
+Important note
+The API name and route spelling intentionally follow the backend naming pattern: newslatter.
+
+
+==================================================
+15. KEY USER JOURNEYS
+==================================================
+
+15.1 Signup and Email Verification Journey
+
+1. User opens the signup page.
+2. Frontend submits registration data using useRegisterMutation.
+3. Backend creates the account and sends a verification email.
+4. User opens the verification link.
+5. Frontend submits the verification token using useVerifyEmailMutation.
+6. User becomes eligible to log in.
+
+
+15.2 Login Journey
+
+1. User submits email and password on the login page.
+2. Frontend sends credentials using useLoginMutation.
+3. Token is stored in cookie.
+4. Middleware permits access to protected routes.
+5. Dashboard pages begin using authenticated API hooks.
+
+
+15.3 Password Recovery Journey
+
+1. User requests a reset from the forgot-password page.
+2. Frontend triggers useForgetPasswordMutation.
+3. User receives reset link.
+4. Reset page submits email, token, and new password using useResetPasswordMutation.
+5. User returns to login flow.
+
+
+15.4 Subscription Purchase Journey
+
+Primary page
+frontend/app/dashboard/purchase/page.js
+
+Flow
+1. User selects a package.
+2. User selects one or more sports.
+3. If seasonal package is selected, user enters days and price.
+4. Frontend validates the form locally.
+5. Frontend creates a subscription using useCreateSubscriptionMutation.
+6. Backend returns a Stripe payment link.
+7. Browser redirects to Stripe checkout.
+8. After payment, the user returns to the frontend.
+9. Pages refetch backend state to show updated subscription access.
+
+
+15.5 Individual Pick Purchase Journey
+
+Primary page
+frontend/app/dashboard/purchase/page.js
+
+Flow
+1. Frontend loads premium active picks from the board.
+2. User chooses either prepaid purchase or pay-after-win.
+3. Frontend creates a pick purchase using useCreatePickPurchaseMutation.
+4. Backend returns Stripe payment link.
+5. Browser redirects to Stripe.
+6. Purchase status later appears through my-picks and purchase queries.
+
+
+15.6 My Picks Journey
+
+Primary page
+frontend/app/dashboard/my-picks/page.js
+
+Data sources
+- getMyPickPurchases
+- getMyAccessiblePicks
+- getMySubscription
+
+Page behavior
+- divides visible content into Active and Completed tabs
+- renders purchase badges for prepaid or pay-after-win purchases
+- displays subscription access badge when all premium picks are unlocked
+- shows expert writeup for accessible picks
+
+
+15.7 Profile Management Journey
+
+Primary page
+frontend/app/dashboard/profile/page.js
+
+Capabilities
+- update first name
+- update last name
+- update phone number
+- change password
+- toggle newsletter subscription
+- delete account securely
+
+Important deletion safeguards in UI
+- current password field required
+- exact account email confirmation required
+- exact phrase DELETE MY ACCOUNT required
+- acknowledgment checkbox required
+
+
+15.8 Subscription Management Journey
+
+Primary page
+frontend/app/dashboard/my-subscription/page.js
+
+Page responsibilities
+- show active or recent subscription details
+- display start and end dates
+- show next billing date when applicable
+- indicate whether the plan is recurring or seasonal
+- allow cancellation from the UI
+
+
+15.9 Purchase History Journey
+
+Primary page
+frontend/app/dashboard/purchase-history/page.js
+
+Page responsibilities
+- show paginated subscription history
+- show status badges
+- provide renew or cancel actions depending on state
+- route the user back to package purchasing when needed
+
+
+==================================================
+16. USER DASHBOARD EXPERIENCE
+==================================================
+
+Main dashboard page
+frontend/app/dashboard/page.jsx
+
+Primary data source
+useGetMyDashboardSummaryQuery
+
+Main dashboard widgets
+- WelcomeCard
+- Active picks stat card
+- Total wins stat card
+- Win rate stat card
+- Wallet balance stat card
+- PerformanceTrendChart
+- PieChart
+- wallet summary section
+- QuickActions
+
+Purpose
+The dashboard gives the user a quick snapshot of access, performance, and payment-related usage.
+
+
+==================================================
+17. ADMIN DASHBOARD EXPERIENCE
+==================================================
+
+Main admin dashboard page
+frontend/app/dashboard/admin/page.js
+
+Primary data source
+useGetAdminDashboardSummaryQuery
+
+Main sections
+- KPI summary cards
+- daily sales chart
+- win/loss donut chart
+- top sports panel
+- quick actions panel
+- recent activity feed
+
+Purpose
+The admin dashboard acts as the operational summary for platform management and oversight.
+
+
+==================================================
+18. ADMIN OPERATIONS PAGES
+==================================================
+
+18.1 User Management
+Route: /dashboard/admin/users
+
+Purpose
+Provides administrative access to user lists and user-level management controls.
+
+
+18.2 New Pick Creation
+Route: /dashboard/admin/new-picks
+
+Primary component
+components/Dashboard/admin/CreatePickForm.jsx
+
+Purpose
+Allows admins to publish new picks with all required betting and access metadata.
+
+
+18.3 Pick Management
+Route: /dashboard/admin/manage-picks
+
+Purpose
+Allows admins to:
+- review picks
+- filter and search picks
+- edit pick records
+- delete picks
+- inspect results and statuses
+- monitor page-level win-rate summary
+
+
+18.4 Orders Management
+Route: /dashboard/admin/orders
+
+Purpose
+Displays consolidated subscription and pick-purchase reporting for admin operations.
+
+
+18.5 Newsletter Management
+Route: /dashboard/admin/newsletters
+
+Purpose
+Allows admins to:
+- view newsletter subscribers
+- inspect campaign history
+- send newsletter campaigns
+
+
+18.6 Testimonial Moderation
+Route: /dashboard/admin/testimonials
+
+Purpose
+Allows admins to review and approve or reject submitted testimonials.
+
+
+18.7 Blog Management
+Routes
+- /dashboard/admin/blogs
+- /dashboard/admin/blogs/new-blog
+- /dashboard/admin/blogs/edit/[id]
+
+Purpose
+Provides full article publishing workflow including creation, editing, and deletion.
+
+
+18.8 Affiliate Management
+Route: /dashboard/admin/affiliate
+
+Purpose
+Allows administrators to manage affiliate requests, summaries, and withdrawal operations.
+
+
+==================================================
+19. COMPONENT ORGANIZATION
+==================================================
+
+Public website component groups
+- components/Home
+- components/About
+- components/contact
+- components/Blog
+- components/BlogDetails
+- components/FreePicks
+- components/packages
+
+Dashboard component groups
+- app/dashboard/components
+- components/Dashboard/Purchase
+- components/Dashboard/admin
+
+Component design role
+The component structure keeps the app maintainable by separating:
+- public marketing UI
+- dashboard widgets
+- admin operational components
+- purchase-specific forms and summary panels
+
+
+==================================================
+20. STATIC ASSETS AND UI RESOURCES
+==================================================
+
+Assets directory
+frontend/public
+
+Assets include
+- homepage visuals
+- blog images
+- dashboard images
+- sponsor logos
+- pick-related graphics
+- avatar and branding visuals
+
+Purpose
+Static assets support branded presentation and visual segmentation throughout the application.
+
+
+==================================================
+21. STYLING APPROACH
+==================================================
+
+Primary styling method
+Tailwind CSS utility classes are used directly in page and component files.
+
+Common design patterns used in the application
+- rounded white cards
+- muted gray dashboard backgrounds
+- red-accent buttons and highlights
+- compact KPI cards
+- semantic color-coded status badges
+- spacious empty states with recovery CTAs
+
+Styling intent
+The frontend uses a familiar dashboard and marketing-site style that emphasizes readability, call-to-action clarity, and administrative usability.
+
+
+==================================================
+22. CHARTS AND ANALYTICS VISUALIZATION
+==================================================
+
+Analytics components used by the frontend
+- PerformanceTrendChart
+- PieChart
+- admin DailySalesChart
+- admin DonutChart
+
+Data characteristics
+The backend performs most of the heavy data aggregation. The frontend mainly receives ready-to-render summary structures and transforms them into charts and KPI cards.
+
+
+==================================================
+23. DATA CONTRACT EXPECTATIONS
+==================================================
+
+The frontend assumes several important backend response structures.
+
+For picks pages, it expects fields such as
+- _id
+- sport_title
+- away_team
+- home_team
+- commence_time
+- selected_team
+- units
+- market_type
+- confidence
+- writeup
+- price
+- premium
+- status
+- result
+
+For subscription pages, it expects fields such as
+- _id
+- packageName
+- selectedSport
+- price
+- subscriptionStart
+- subscriptionEnd
+- nextBilling
+- status
+- isSubscribed
+- isSeasonal
+- seasonalDays
+
+For admin reporting pages, it expects
+- summary objects
+- KPI blocks
+- chart data arrays
+- normalized order row arrays
+
+Because of this, backend response consistency is critical for frontend stability.
+
+
+==================================================
+24. IMPORTANT IMPLEMENTATION NOTES
+==================================================
+
+1. Token dependency
+Authenticated API calls depend on token availability in cookies.
+
+2. Billing truth source
+The frontend should always refresh backend state after Stripe redirect. Redirect completion alone does not guarantee access.
+
+3. Naming consistency
+The newslatter spelling is intentionally preserved to match backend routes.
+
+4. Role security
+Admin pages exist in the route tree, but backend role validation remains the final source of access control.
+
+5. Backend-driven analytics
+Most dashboard analytics are server-aggregated, which keeps the frontend simpler and more presentation-focused.
+
+
+==================================================
+25. NEW DEVELOPER ONBOARDING GUIDE
+==================================================
+
+Recommended reading order for a new frontend developer
+
+1. frontend/app/layout.js
+Understand the global site shell.
+
+2. frontend/app/dashboard/layout.jsx
+Understand the dashboard shell and navigation behavior.
+
+3. frontend/store/store.js
+Understand how the app connects data sources globally.
+
+4. frontend/feature/*
+Understand every backend integration slice and available hooks.
+
+5. frontend/app/dashboard/*
+Understand user-facing operational flows.
+
+6. frontend/app/dashboard/admin/*
+Understand administrative workflows.
+
+7. frontend/components/*
+Understand reusable UI groups and page composition strategy.
+
+
+==================================================
+26. PROJECT STRUCTURE REFERENCE
+==================================================
+
+frontend/
+  app/
+    about/
+    blog/
+    contact/
+    dashboard/
+      admin/
+      components/
+      my-picks/
+      my-subscription/
+      profile/
+      purchase/
+      purchase-history/
+      testimonials/
+    freepicks/
+    login/
+    signup/
+    forgot-password/
+    reset-password/
+    email-verification/
+    resend-verification/
+    payment-success/
+    payment-cancel/
+  components/
+    About/
+    Blog/
+    BlogDetails/
+    contact/
+    Dashboard/
+    FreePicks/
+    Home/
+    packages/
+  feature/
+  provider/
+  store/
+  utils/
+  public/
+
+
+==================================================
+27. FINAL SUMMARY
+==================================================
+
+The BADB frontend is a well-structured Next.js application that supports:
+- public marketing and blog pages
+- authentication and account recovery
+- premium pick and subscription purchase flows
+- user self-service account management
+- analytics-focused user dashboard
+- full administrative operational interface
+
+Its main strengths are:
+- clear route segmentation
+- centralized RTK Query API layer
+- reusable dashboard widget structure
+- backend-driven operational reporting
+- consistent purchase and account management flows
+
+This document can be used for:
+- engineering handover
+- developer onboarding
+- internal project documentation
+- product walkthrough documentation
+- admin panel planning
+- QA reference
+- Google Docs project documentation import

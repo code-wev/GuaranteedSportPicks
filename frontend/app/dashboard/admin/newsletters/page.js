@@ -1,237 +1,392 @@
 "use client";
 
-import { useState } from "react";
 import {
-  FiEye,
-  FiCopy,
-  FiX,
-  FiBold,
-  FiItalic,
-  FiUnderline,
-  FiLink,
-  FiList,
-//   FiListOl,
-  FiClock,
-} from "react-icons/fi";
+  useGetManyNewslatterQuery,
+  useGetNewsletterCampaignsQuery,
+  useGetUserNewsletterStatusQuery,
+  useSendNewsletterCampaignMutation,
+  useToggleNewsletterMutation,
+} from "@/feature/NewslatterApi";
+import { useMyProfileQuery } from "@/feature/UserApi";
+import { useState } from "react";
+import toast, { Toaster } from "react-hot-toast";
+import { FiMail, FiSend, FiUsers } from "react-icons/fi";
 
-export default function Newsletters() {
-  const [openModal, setOpenModal] = useState(false);
+const initialForm = {
+  title: "",
+  subject: "",
+  content: "",
+};
 
-  const campaigns = [
-    {
-      title: "Weekly NFL Picks - Week 12",
-      desc: "Your Weekly NFL Picks are here!",
-      date: "2025-05-01",
-      recipients: 2847,
-      status: "Sent",
-    },
-    {
-      title: "NBA Player Props - Special",
-      desc: "Your Weekly NFL Picks are here!",
-      date: "2025-05-01",
-      recipients: 2897,
-      status: "Sent",
-    },
-    {
-      title: "NBA Player Props Special",
-      desc: "Your Weekly NFL Picks are here!",
-      date: "2025-05-01",
-      recipients: 6847,
-      status: "Sent",
-    },
-    {
-      title: "March Madness Previews",
-      desc: "Your Weekly NFL Picks are here!",
-      date: "2025-05-01",
-      recipients: 2847,
-      status: "Sent",
-    },
-  ];
+function StatCard({ label, value }) {
+  return (
+    <div className='rounded-2xl border border-gray-200 bg-white p-5 shadow-sm'>
+      <p className='text-sm text-gray-500'>{label}</p>
+      <p className='mt-2 text-2xl font-semibold text-[#111827]'>{value}</p>
+    </div>
+  );
+}
+
+function UserNewsletterPanel() {
+  const { data: newsletterData, isLoading, refetch } =
+    useGetUserNewsletterStatusQuery();
+  const [toggleNewsletter, { isLoading: isToggling }] =
+    useToggleNewsletterMutation();
+
+  const isActive = Boolean(newsletterData?.data?.isActive);
+  const email = newsletterData?.data?.email;
+
+  const handleToggle = async () => {
+    try {
+      await toggleNewsletter({ isActive: !isActive }).unwrap();
+      toast.success(
+        `Newsletter ${!isActive ? "enabled" : "disabled"} successfully.`,
+      );
+      refetch();
+    } catch (error) {
+      toast.error(
+        error?.data?.message || error?.data?.error || "Failed to update newsletter.",
+      );
+    }
+  };
 
   return (
-    <div className="min-h-screen p-6 md:p-10 bg-white">
-
-      {/* Inline Keyframes — NO globals.css needed */}
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: scale(0.97); }
-          to { opacity: 1; transform: scale(1); }
-        }
-      `}</style>
-
-      {/* HEADER */}
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-semibold">Newsletter Management</h1>
-
-        <button
-          onClick={() => setOpenModal(true)}
-          className="bg-red-500 hover:bg-red-600 transition text-white px-3 py-1.5 md:px-5 md:py-2.5 rounded-lg font-medium flex items-center gap-2"
-        >
-          <span className="text-xl">+</span> Compose Newsletter
-        </button>
+    <div className='space-y-6'>
+      <div>
+        <h1 className='text-3xl font-semibold text-[#111827]'>
+          Newsletter Settings
+        </h1>
+        <p className='mt-2 text-sm text-gray-600'>
+          Manage your own newsletter subscription from here.
+        </p>
       </div>
 
-      {/* CAMPAIGN TABLE */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-6">Campaign History</h2>
+      <div className='rounded-3xl border border-gray-200 bg-white p-6 shadow-sm'>
+        <div className='flex flex-col gap-6 md:flex-row md:items-center md:justify-between'>
+          <div className='flex items-start gap-4'>
+            <div className='flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50 text-[#B91C1C]'>
+              <FiMail className='text-xl' />
+            </div>
+            <div>
+              <h2 className='text-xl font-semibold text-[#111827]'>
+                Email Updates
+              </h2>
+              <p className='mt-1 text-sm text-gray-600'>
+                {email || "Your account email"} will receive picks, promos, and
+                site updates when this is active.
+              </p>
+            </div>
+          </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left table-auto">
-            <thead>
-              <tr className="text-gray-500 text-sm border-b border-gray-300">
-                <th className="pb-6">CAMPAIGN</th>
-                <th className="pb-6">SENT DATE</th>
-                <th className="pb-6">RECIPIENTS</th>
-                <th className="pb-6">STATUS</th>
-                <th className="pb-6">Action</th>
-              </tr>
-            </thead>
+          <button
+            type='button'
+            disabled={isLoading || isToggling}
+            onClick={handleToggle}
+            className={`inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold transition ${
+              isActive
+                ? "bg-[#B91C1C] text-white hover:bg-[#991B1B]"
+                : "bg-gray-100 text-[#111827] hover:bg-gray-200"
+            } disabled:cursor-not-allowed disabled:opacity-60`}
+          >
+            {isToggling
+              ? "Updating..."
+              : isActive
+                ? "Turn Off Newsletter"
+                : "Turn On Newsletter"}
+          </button>
+        </div>
 
-            <tbody>
-              {campaigns.map((item, index) => (
-                <tr
-                  key={index}
-                  className="border-b border-gray-300 last:border-none text-sm hover:bg-gray-50 transition"
-                >
-                  <td className="py-6">
-                    <p className="font-semibold">{item.title}</p>
-                    <p className="text-gray-500">{item.desc}</p>
-                  </td>
+        <div className='mt-6 rounded-2xl bg-gray-50 p-4 text-sm text-gray-700'>
+          Status:{" "}
+          <span className='font-semibold text-[#111827]'>
+            {isActive ? "Active" : "Inactive"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-                  <td className="py-6">{item.date}</td>
-                  <td className="py-6">{item.recipients}</td>
+function AdminNewsletterPanel() {
+  const [searchKey, setSearchKey] = useState("");
+  const [formData, setFormData] = useState(initialForm);
+  const { data: subscribersData, isLoading: subscribersLoading, refetch } =
+    useGetManyNewslatterQuery({
+      pageNo: 1,
+      showPerPage: 100,
+      searchKey,
+    });
+  const { data: campaignsData, isLoading: campaignsLoading } =
+    useGetNewsletterCampaignsQuery();
+  const [sendNewsletterCampaign, { isLoading: isSending }] =
+    useSendNewsletterCampaignMutation();
 
-                  <td className="py-6">
-                    <span className="bg-green-100 text-green-600 px-3 py-1 rounded-md text-xs font-medium">
-                      {item.status}
-                    </span>
-                  </td>
+  const subscribers = subscribersData?.data?.newslatters || [];
+  const campaigns = campaignsData?.data?.campaigns || [];
 
-                  <td className="py-4">
-                    <div className="flex items-center gap-4 text-gray-600">
-                      <FiEye className="cursor-pointer hover:text-black transition" />
-                      <FiCopy className="cursor-pointer hover:text-black transition" />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+  const activeSubscribers = subscribers.filter(
+    (subscriber) => subscriber.isActive,
+  ).length;
+  const stats = {
+    total: subscribers.length,
+    active: activeSubscribers,
+    inactive: subscribers.length - activeSubscribers,
+  };
+
+  const handleSend = async (event) => {
+    event.preventDefault();
+
+    try {
+      const response = await sendNewsletterCampaign(formData).unwrap();
+      toast.success(
+        `Newsletter sent to ${response?.data?.recipientCount || 0} subscribers.`,
+      );
+      setFormData(initialForm);
+      refetch();
+    } catch (error) {
+      toast.error(
+        error?.data?.message || error?.data?.error || "Failed to send newsletter.",
+      );
+    }
+  };
+
+  return (
+    <div className='space-y-8'>
+      <div className='flex flex-col gap-3 md:flex-row md:items-end md:justify-between'>
+        <div>
+          <h1 className='text-3xl font-semibold text-[#111827]'>
+            Newsletter Management
+          </h1>
+          <p className='mt-2 text-sm text-gray-600'>
+            Manage subscribers and send email campaigns to active newsletter users.
+          </p>
+        </div>
+
+        <div className='w-full md:w-72'>
+          <label className='mb-1 block text-sm font-medium text-gray-600'>
+            Search Subscriber
+          </label>
+          <input
+            type='text'
+            value={searchKey}
+            onChange={(event) => setSearchKey(event.target.value)}
+            placeholder='Search by email'
+            className='w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#B91C1C]'
+          />
         </div>
       </div>
 
-      {/* MODAL */}
-      {openModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[9999]">
-          <div className="bg-white w-full max-w-3xl rounded-xl shadow-lg p-6 animate-[fadeIn_0.2s_ease-out]">
+      <div className='grid gap-4 md:grid-cols-3'>
+        <StatCard label='Total Subscribers' value={stats.total} />
+        <StatCard label='Active Subscribers' value={stats.active} />
+        <StatCard label='Inactive Subscribers' value={stats.inactive} />
+      </div>
 
-            {/* Modal Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">Compose Newsletter</h2>
-              <FiX
-                className="text-2xl cursor-pointer hover:text-red-500 transition"
-                onClick={() => setOpenModal(false)}
+      <div className='grid gap-8 xl:grid-cols-[1.15fr_0.85fr]'>
+        <section className='rounded-3xl border border-gray-200 bg-white p-6 shadow-sm'>
+          <div className='mb-5 flex items-center gap-3'>
+            <div className='flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-[#B91C1C]'>
+              <FiSend />
+            </div>
+            <div>
+              <h2 className='text-xl font-semibold text-[#111827]'>
+                Compose Newsletter
+              </h2>
+              <p className='text-sm text-gray-600'>
+                This will email all active subscribers immediately.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSend} className='space-y-4'>
+            <div>
+              <label className='mb-1 block text-sm font-medium text-gray-600'>
+                Campaign Title
+              </label>
+              <input
+                type='text'
+                value={formData.title}
+                onChange={(event) =>
+                  setFormData((prev) => ({ ...prev, title: event.target.value }))
+                }
+                className='w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#B91C1C]'
+                placeholder='Weekend premium picks update'
+                required
               />
             </div>
 
-            {/* Campaign Title + Subject */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Campaign Title</label>
-                <input
-                  type="text"
-                  placeholder="Enter your name"
-                  className="w-full border rounded-lg px-3 py-2 text-sm outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Email Subject</label>
-                <input
-                  type="text"
-                  placeholder="Email Subject"
-                  className="w-full border rounded-lg px-3 py-2 text-sm outline-none"
-                />
-              </div>
+            <div>
+              <label className='mb-1 block text-sm font-medium text-gray-600'>
+                Email Subject
+              </label>
+              <input
+                type='text'
+                value={formData.subject}
+                onChange={(event) =>
+                  setFormData((prev) => ({ ...prev, subject: event.target.value }))
+                }
+                className='w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#B91C1C]'
+                placeholder='Your latest picks are ready'
+                required
+              />
             </div>
 
-            {/* EMAIL BODY */}
-            <div className="mt-5">
-              <label className="block text-sm font-medium mb-1">Email Body</label>
-
-              <div className="flex items-center gap-3 border px-3 py-2 rounded-t-lg">
-                <FiBold />
-                <FiItalic />
-                <FiUnderline />
-                <FiLink />
-                <FiList />
-                {/* <FiListOl /> */}
-              </div>
-
+            <div>
+              <label className='mb-1 block text-sm font-medium text-gray-600'>
+                Email Content
+              </label>
               <textarea
-                placeholder="Write your newsletter content here..."
-                className="w-full border border-t-0 rounded-b-lg px-3 py-3 text-sm min-h-[120px] outline-none resize-none"
-              ></textarea>
+                value={formData.content}
+                onChange={(event) =>
+                  setFormData((prev) => ({ ...prev, content: event.target.value }))
+                }
+                className='min-h-[220px] w-full rounded-2xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-[#B91C1C]'
+                placeholder='Write your newsletter content here. Basic HTML is supported.'
+                required
+              />
             </div>
 
-            {/* Schedule */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-5">
+            <button
+              type='submit'
+              disabled={isSending}
+              className='inline-flex items-center gap-2 rounded-xl bg-[#B91C1C] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#991B1B] disabled:cursor-not-allowed disabled:opacity-60'
+            >
+              <FiSend />
+              {isSending ? "Sending..." : "Send Newsletter"}
+            </button>
+          </form>
+        </section>
+
+        <section className='space-y-8'>
+          <div className='rounded-3xl border border-gray-200 bg-white p-6 shadow-sm'>
+            <div className='mb-5 flex items-center gap-3'>
+              <div className='flex h-11 w-11 items-center justify-center rounded-2xl bg-red-50 text-[#B91C1C]'>
+                <FiUsers />
+              </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Schedule Date (Optional)</label>
-                <input
-                  type="date"
-                  className="w-full border rounded-lg px-3 py-2 text-sm outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">Schedule Time (Optional)</label>
-                <div className="relative">
-                  <input
-                    type="time"
-                    className="w-full border rounded-lg px-3 py-2 text-sm outline-none"
-                  />
-                  <FiClock className="absolute right-3 top-3 text-gray-500" />
-                </div>
+                <h2 className='text-xl font-semibold text-[#111827]'>
+                  Subscribers
+                </h2>
+                <p className='text-sm text-gray-600'>
+                  Active users will receive admin campaigns.
+                </p>
               </div>
             </div>
 
-            {/* Picks Analysis */}
-            <div className="mt-5">
-              <label className="block text-sm font-medium mb-1">Picks Analysis</label>
-
-              <div className="flex items-center gap-3 border px-3 py-2 rounded-t-lg">
-                <FiBold />
-                <FiItalic />
-                <FiUnderline />
-                <FiLink />
-                <FiList />
-                {/* <FiListOl /> */}
-              </div>
-
-              <textarea
-                placeholder="Write your detailed analysis and reasoning for this pick..."
-                className="w-full border border-t-0 rounded-b-lg px-3 py-3 text-sm min-h-[120px] outline-none resize-none"
-              ></textarea>
-            </div>
-
-            {/* FOOTER BUTTONS */}
-            <div className="flex justify-end gap-3 mt-8">
-              <button
-                onClick={() => setOpenModal(false)}
-                className="px-5 py-2 bg-gray-200 hover:bg-gray-300 transition rounded-lg"
-              >
-                Cancel
-              </button>
-
-              <button className="px-5 py-2 bg-red-500 hover:bg-red-600 transition rounded-lg text-white">
-                Send Now
-              </button>
+            <div className='max-h-[360px] overflow-auto'>
+              <table className='w-full text-left text-sm'>
+                <thead>
+                  <tr className='border-b border-gray-200 text-gray-500'>
+                    <th className='pb-3 font-medium'>Email</th>
+                    <th className='pb-3 font-medium'>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subscribersLoading ? (
+                    <tr>
+                      <td colSpan='2' className='py-4 text-gray-500'>
+                        Loading subscribers...
+                      </td>
+                    </tr>
+                  ) : subscribers.length ? (
+                    subscribers.map((subscriber) => (
+                      <tr key={subscriber._id} className='border-b border-gray-100'>
+                        <td className='py-3 text-[#111827]'>{subscriber.email}</td>
+                        <td className='py-3'>
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                              subscriber.isActive
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-600"
+                            }`}
+                          >
+                            {subscriber.isActive ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan='2' className='py-4 text-gray-500'>
+                        No subscribers found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
-        </div>
-      )}
 
+          <div className='rounded-3xl border border-gray-200 bg-white p-6 shadow-sm'>
+            <h2 className='text-xl font-semibold text-[#111827]'>
+              Campaign History
+            </h2>
+            <div className='mt-5 space-y-4'>
+              {campaignsLoading ? (
+                <p className='text-sm text-gray-500'>Loading campaigns...</p>
+              ) : campaigns.length ? (
+                campaigns.map((campaign) => (
+                  <div
+                    key={campaign._id}
+                    className='rounded-2xl border border-gray-200 p-4'
+                  >
+                    <div className='flex items-start justify-between gap-4'>
+                      <div>
+                        <h3 className='font-semibold text-[#111827]'>
+                          {campaign.title}
+                        </h3>
+                        <p className='mt-1 text-sm text-gray-600'>
+                          {campaign.subject}
+                        </p>
+                      </div>
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                          campaign.status === "SENT"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-amber-100 text-amber-700"
+                        }`}
+                      >
+                        {campaign.status}
+                      </span>
+                    </div>
+
+                    <div className='mt-3 flex flex-wrap gap-4 text-xs text-gray-500'>
+                      <span>Recipients: {campaign.recipientCount}</span>
+                      <span>Sent: {campaign.successCount}</span>
+                      <span>Failed: {campaign.failedCount}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className='text-sm text-gray-500'>
+                  No campaigns have been sent yet.
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
+  );
+}
+
+export default function NewslettersPage() {
+  const { data: profileData, isLoading } = useMyProfileQuery();
+  const role = profileData?.data?.role;
+  console.log(role, 'amot role madari');
+
+  if (isLoading) {
+    return (
+      <div className='flex min-h-screen items-center justify-center text-gray-500'>
+        Loading...
+      </div>
+    );
+  }
+
+  return (
+    <main className='min-h-screen bg-[#F9FAFB] p-6 md:p-8'>
+      <Toaster />
+      {role === "ADMIN" ? <AdminNewsletterPanel /> : <UserNewsletterPanel />}
+    </main>
   );
 }

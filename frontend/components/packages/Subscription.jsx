@@ -64,12 +64,12 @@ const PLANS = [
     ],
   },
   {
-    id: "SESSION",
+    id: "SEASONAL",
     label: "Sessional",
     price: null, // dynamic
     period: "/custom",
     description: "Pick your own duration & price",
-    isSession: true,
+    isSeasonal: true,
     popular: false,
     accent: false,
     features: [
@@ -100,7 +100,7 @@ export default function Subscription() {
   };
 
   const getPrice = (plan) => {
-    if (plan.id === "SESSION") return +(PRICE_PER_DAY * customDays).toFixed(2);
+    if (plan.id === "SEASONAL") return +(PRICE_PER_DAY * customDays).toFixed(2);
     return plan.price;
   };
 
@@ -113,10 +113,10 @@ export default function Subscription() {
       packageName: selectedPlan.id,
       selectedSport: selectedSports,
       price: getPrice(selectedPlan),
-      isSession: selectedPlan.isSession,
-      ...(selectedPlan.isSession && {
-        customDays: Number(customDays),
-        customPrice: +(PRICE_PER_DAY * customDays).toFixed(2),
+      isSeasonal: !!selectedPlan.isSeasonal,
+      ...(selectedPlan.isSeasonal && {
+        seasonalDays: Number(customDays),
+        seasonalPrice: +(PRICE_PER_DAY * customDays).toFixed(2),
       }),
     };
 
@@ -181,7 +181,7 @@ export default function Subscription() {
                   {plan.description}
                 </p>
 
-                {plan.isSession ? (
+                {plan.isSeasonal ? (
                   <div className="mb-4">
                     <p className="text-[12px] mb-1 font-medium text-gray-500">Custom Days</p>
                     <div className="flex items-center gap-2">
@@ -288,7 +288,7 @@ export default function Subscription() {
               <span className="text-gray-500">Sport(s)</span>
               <span className="font-semibold text-gray-800">{selectedSports.join(", ")}</span>
             </div>
-            {selectedPlan.isSession && (
+            {selectedPlan.isSeasonal && (
               <div className="flex justify-between mb-2 text-sm">
                 <span className="text-gray-500">Duration</span>
                 <span className="font-semibold text-gray-800 flex items-center gap-1">

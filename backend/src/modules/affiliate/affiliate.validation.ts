@@ -26,7 +26,7 @@ const zodCreateAffiliateSchema = z
     // age: z.number().int().positive().optional(),
     // status: z.enum(['active', 'inactive', 'pending']).default('pending'),
 
-    affiliateCode: z.string().optional(),
+    // affiliateCode: z.string().optional(),
     website: z.string().optional(),
     socialLinks: z.array(z.string()).optional(),
     notes: z.string().optional(),
@@ -57,9 +57,50 @@ const zodUpdateAffiliateSchema = z
 
 export type UpdateAffiliateInput = z.infer<typeof zodUpdateAffiliateSchema>;
 
+export const affiliateApprovalSchema = z
+  .object({
+    status: z.enum(['approved', 'declined']),
+    notes: z.string().trim().max(500, 'Notes are too long').optional(),
+  })
+  .strict();
+
+export type AffiliateApprovalInput = z.infer<typeof affiliateApprovalSchema>;
+
+export const createWithdrawalSchema = z.object({
+  amount: z.number({ message: 'Amount is required' }).positive('Amount must be greater than 0'),
+  payoutMethod: z
+    .string({ message: 'Payout method is required' })
+    .trim()
+    .min(2, 'Payout method is required')
+    .max(50, 'Payout method is too long'),
+  payoutDetails: z
+    .string({ message: 'Payout details are required' })
+    .trim()
+    .min(5, 'Payout details are required')
+    .max(500, 'Payout details are too long'),
+  note: z.string().trim().max(500, 'Note is too long').optional(),
+});
+
+export const adminWithdrawalUpdateSchema = z.object({
+  status: z.enum(['PROCESSING', 'PAID', 'REJECTED']),
+  adminNote: z.string().trim().max(500, 'Admin note is too long').optional(),
+  transferReference: z.string().trim().max(150, 'Reference is too long').optional(),
+});
+
+export const retryWithdrawalSchema = z.object({
+  note: z.string().trim().max(500, 'Note is too long').optional(),
+});
+
+export type CreateWithdrawalInput = z.infer<typeof createWithdrawalSchema>;
+export type AdminWithdrawalUpdateInput = z.infer<typeof adminWithdrawalUpdateSchema>;
+export type RetryWithdrawalInput = z.infer<typeof retryWithdrawalSchema>;
+
 /**
  * Named validators — use these directly in your Express routes
  */
 export const validateCreateAffiliate = validateBody(zodCreateAffiliateSchema);
 export const validateUpdateAffiliate = validateBody(zodUpdateAffiliateSchema);
-
+export const validateAffiliateApproval = validateBody(affiliateApprovalSchema);
+export const validateCreateWithdrawal = validateBody(createWithdrawalSchema);
+export const validateAdminWithdrawalUpdate = validateBody(adminWithdrawalUpdateSchema);
+export const validateRetryWithdrawal = validateBody(retryWithdrawalSchema);

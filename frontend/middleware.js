@@ -6,6 +6,7 @@ const PUBLIC_ROUTES = [
   "/resend-verification",
   "/verify-email",
   "/forgot-password",
+  "/reset-password",
 ];
 const PROTECTED_ROUTES = ["/dashboard", "/profile", "/settings"];
 

@@ -1,16 +1,59 @@
 "use client";
 
-import { FiGrid, FiShoppingBag, FiUser, FiX } from "react-icons/fi";
-import { RiFileHistoryFill } from "react-icons/ri";
+import { useMyProfileQuery } from "@/feature/UserApi";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { IoDocumentTextOutline } from "react-icons/io5";
+import {
+  FiGrid,
+  FiMessageSquare,
+  FiShoppingBag,
+  FiUser,
+  FiX,
+} from "react-icons/fi";
 import { GrUserAdmin } from "react-icons/gr";
+import { IoDocumentTextOutline } from "react-icons/io5";
+import { RiFileHistoryFill } from "react-icons/ri";
+import { TbUsersGroup } from "react-icons/tb";
 
-const menu = [
+const userMenu = [
   { title: "Dashboard", icon: <FiGrid />, url: "/dashboard" },
-  { title: "Admin Dashboard", icon: <GrUserAdmin />, url: "/dashboard/admin" },
+
+  {
+    title: "Affiliate Program",
+    icon: <IoDocumentTextOutline />,
+    url: "/dashboard/admin/affiliate",
+  },
+  {
+    title: "Newsletters",
+    icon: <IoDocumentTextOutline />,
+    url: "/dashboard/admin/newsletters",
+  },
+  { title: "My Picks", icon: <FiShoppingBag />, url: "/dashboard/my-picks" },
+  {
+    title: "Purchase Picks",
+    icon: <FiShoppingBag />,
+    url: "/dashboard/purchase",
+  },
+  {
+    title: "My Subscription",
+    icon: <RiFileHistoryFill />,
+    url: "/dashboard/my-subscription",
+  },
+  {
+    title: "Payment History",
+    icon: <RiFileHistoryFill />,
+    url: "/dashboard/purchase-history",
+  },
+  {
+    title: "Testimonials",
+    icon: <FiMessageSquare />,
+    url: "/dashboard/testimonials",
+  },
+  { title: "Profile & Settings", icon: <FiUser />, url: "/dashboard/profile" },
+];
+const adminMenu = [
+  { title: "Dashboard", icon: <GrUserAdmin />, url: "/dashboard/admin" },
   {
     title: "Manage picks",
     icon: <IoDocumentTextOutline />,
@@ -18,7 +61,7 @@ const menu = [
   },
   {
     title: "Users",
-    icon: <IoDocumentTextOutline />,
+    icon: <TbUsersGroup />,
     url: "/dashboard/admin/users",
   },
   {
@@ -46,27 +89,15 @@ const menu = [
     icon: <IoDocumentTextOutline />,
     url: "/dashboard/admin/newsletters",
   },
-  { title: "My Picks", icon: <FiShoppingBag />, url: "/dashboard/my-picks" },
-  {
-    title: "Purchase Picks",
-    icon: <FiShoppingBag />,
-    url: "/dashboard/purchase",
-  },
-  {
-    title: "My Subscription",
-    icon: <RiFileHistoryFill />,
-    url: "/dashboard/my-subscription",
-  },
-  {
-    title: "Payment History",
-    icon: <RiFileHistoryFill />,
-    url: "/dashboard/purchase-history",
-  },
-  { title: "Profile & Settings", icon: <FiUser />, url: "/dashboard/profile" },
 ];
 
 export default function Sidebar({ open, setOpen }) {
   const path = usePathname();
+  const { data } = useMyProfileQuery();
+
+  const role = data?.data?.role;
+  console.log(role, "user role");
+  const menu = role === "ADMIN" ? adminMenu : userMenu;
 
   return (
     <>
@@ -74,44 +105,43 @@ export default function Sidebar({ open, setOpen }) {
       {open && (
         <div
           onClick={() => setOpen(false)}
-          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          className='fixed inset-0 bg-black/40 z-40 lg:hidden'
         />
       )}
 
       <aside
-        className={`fixed top-0 left-0 w-64 bg-white shadow-xl p-5 z-50 
-        transform transition-transform duration-300
-        ${open ? "translate-x-0" : "-translate-x-full"} 
-        lg:translate-x-0 lg:static`}
-      >
+        className={`w-64 bg-white shadow-xl p-5 z-50 h-screen
+        fixed top-0 left-0 transform transition-transform duration-300
+        ${open ? "translate-x-0" : "-translate-x-full"}
+        lg:sticky lg:top-0 lg:translate-x-0`}>
         {/* Close button for mobile */}
-        <div className="flex justify-between items-center mb-6 lg:hidden">
-          <Link href="/">
+        <div className='flex justify-between items-center mb-6 lg:hidden'>
+          <Link href='/'>
             <Image
-              src="/dashboard/SportPicks.png"
+              src='/dashboard/SportPicks.png'
               width={120}
               height={40}
-              alt="logo"
+              alt='logo'
             />
           </Link>
           <FiX
-            className="text-2xl cursor-pointer"
+            className='text-2xl cursor-pointer'
             onClick={() => setOpen(false)}
           />
         </div>
 
         {/* Desktop Logo */}
-        <Link href="/">
+        <Link href='/'>
           <Image
-            src="/dashboard/SportPicks.png"
+            src='/dashboard/SportPicks.png'
             width={150}
             height={40}
-            alt="logo"
-            className="mb-6 hidden lg:block"
+            alt='logo'
+            className='mb-6 hidden lg:block'
           />
         </Link>
 
-        <ul className="space-y-2 pt-4">
+        <ul className='space-y-2 pt-4'>
           {menu.map((item, index) => {
             const isActive = path === item.url;
 
@@ -123,9 +153,8 @@ export default function Sidebar({ open, setOpen }) {
                       isActive
                         ? "bg-red-50 text-red-600 font-semibold"
                         : "hover:bg-gray-100"
-                    }`}
-                >
-                  <span className="text-xl">{item.icon}</span>
+                    }`}>
+                  <span className='text-xl'>{item.icon}</span>
                   {item.title}
                 </li>
               </Link>

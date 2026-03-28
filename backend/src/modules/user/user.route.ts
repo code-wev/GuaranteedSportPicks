@@ -4,14 +4,19 @@ import { Router } from 'express';
 // Import controller from corresponding module
 import {
   updateUser,
+  updateUserById,
   deleteUser,
+  deleteOwnAccount,
   getUserById,
   getManyUser,
   getUserByAutorization,
+  getUserDashboardSummary,
+  getAdminDashboardSummary,
+  getAdminOrdersSummary,
 } from './user.controller';
 
 //Import validation from corresponding module
-import { validateUpdateUser } from './user.validation';
+import { validateDeleteOwnAccount, validateUpdateUser } from './user.validation';
 import {
   validateId,
   validateIds,
@@ -32,7 +37,16 @@ const router = Router();
  * @param {function} validation - ['validateId', 'validateUpdateUser']
  * @param {function} controller - ['updateUser']
  */
-router.put('/', isAuthorized, validateUpdateUser, updateUser); // ! Must be recheck
+router.put(['/', '/user'], isAuthorized, validateUpdateUser, updateUser); // ! Must be recheck
+
+router.put(
+  ['/update-user/:id', '/user/update-user/:id'],
+  validateId,
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  validateUpdateUser,
+  updateUserById
+);
 
 /**
  * @route DELETE /api/v1/user/delete-user/:id
@@ -43,12 +57,19 @@ router.put('/', isAuthorized, validateUpdateUser, updateUser); // ! Must be rech
  * @param {function} controller - ['deleteUser']
  */
 router.delete(
-  '/delete-user/:id',
+  ['/delete-user/:id', '/user/delete-user/:id'],
   validateId,
   isAuthorized,
   authorizedRoles([UserRole.ADMIN]),
   deleteUser
 ); // todo: teasting done
+
+router.post(
+  ['/delete-account', '/user/delete-account'],
+  isAuthorized,
+  validateDeleteOwnAccount,
+  deleteOwnAccount
+);
 
 /**
  * @route GET /api/v1/user/get-user/many
@@ -58,7 +79,7 @@ router.delete(
  * @param {function} controller - ['getManyUser']
  */
 router.get(
-  '/many',
+  ['/many', '/user/many'],
   validateSearchQueries,
   isAuthorized,
   authorizedRoles([UserRole.ADMIN]),
@@ -74,7 +95,7 @@ router.get(
  * @param {function} controller - ['getUserById']
  */
 router.get(
-  '/get-user/:id',
+  ['/get-user/:id', '/user/get-user/:id'],
   validateId,
   isAuthorized,
   authorizedRoles([UserRole.ADMIN]),
@@ -88,7 +109,20 @@ router.get(
  * @param {function} validation - ['validateId']
  * @param {function} controller - ['getUserById']
  */
-router.get('/profile/me', isAuthorized, getUserByAutorization);
+router.get(['/profile/me', '/user/profile/me'], isAuthorized, getUserByAutorization);
+router.get(['/dashboard-summary', '/user/dashboard-summary'], isAuthorized, getUserDashboardSummary);
+router.get(
+  ['/admin/dashboard-summary', '/user/admin/dashboard-summary'],
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  getAdminDashboardSummary
+);
+router.get(
+  ['/admin/orders-summary', '/user/admin/orders-summary'],
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  getAdminOrdersSummary
+);
 
 // Export the router
 module.exports = router;

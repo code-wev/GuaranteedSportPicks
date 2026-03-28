@@ -29,6 +29,8 @@ interface Config {
   MONTHLY_PRICE_ID: string;
   WEEKLY_PRICE_ID: string;
   DAILY_PRICE_ID: string;
+  IMGBB_API_KEY: string;
+  AFFILIATE_COMMISSION_RATE: number;
 }
 
 const config: Config = {
@@ -64,6 +66,8 @@ const config: Config = {
   DAILY_PRICE_ID: process.env.DAILY_PRICE_ID as string,
   WEEKLY_PRICE_ID: process.env.WEEKLY_PRICE_ID as string,
   MONTHLY_PRICE_ID: process.env.MONTHLY_PRICE_ID as string,
+  IMGBB_API_KEY: process.env.IMGBB_API_KEY as string,
+  AFFILIATE_COMMISSION_RATE: parseFloat(process.env.AFFILIATE_COMMISSION_RATE as string) || 2,
 };
 
 export default config;

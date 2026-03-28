@@ -20,6 +20,8 @@ export interface IUser extends Document {
   resetToken?: string; // Token used for password reset (optional)
   resetTokenExpiry?: Date; // Expiry date for the password reset token (optional)
   affiliateCode?: string; // Optional affiliate code for tracking referrals
+  referredByAffiliateId?: mongoose.Schema.Types.ObjectId; // Affiliate owner that referred this user
+  referredByAffiliateCode?: string; // Affiliate code used during signup
 }
 
 // Define the user schema
@@ -75,6 +77,16 @@ const UserSchema: Schema<IUser> = new Schema(
       required: false,
       ref: 'Affiliate',
     } /* Optional affiliate code for tracking referrals */,
+    referredByAffiliateId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Affiliate',
+      required: false,
+    },
+    referredByAffiliateCode: {
+      type: String,
+      required: false,
+      trim: true,
+    },
     emailVerificationToken: {
       type: String,
     } /* Email verification token */,

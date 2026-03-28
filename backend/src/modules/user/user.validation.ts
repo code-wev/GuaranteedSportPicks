@@ -2,6 +2,12 @@ import { isMongoId } from 'validator';
 import { z } from 'zod';
 import { validateBody } from '../../handlers/zod-error-handler';
 
+const booleanInput = z.preprocess((value) => {
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return value;
+}, z.boolean());
+
 /**
  * User Validation Schemas and Types
  *
@@ -96,6 +102,7 @@ const zodUpdateUserSchema = z
       .regex(/^[0-9+\-\s]+$/, 'Phone number can only contain digits, +, -, and spaces')
       .trim()
       .optional(),
+    isActive: booleanInput.optional(),
   })
   .strict()
   .refine((data) => Object.keys(data).length > 0, {
@@ -124,6 +131,30 @@ const zodUpdateManyUserSchema = z
 
 export type UpdateManyUserInput = z.infer<typeof zodUpdateManyUserSchema>;
 
+const zodDeleteOwnAccountSchema = z
+  .object({
+    currentPassword: z
+      .string({ message: 'Current password is required' })
+      .min(1, 'Current password is required'),
+    email: z
+      .string({ message: 'Email confirmation is required' })
+      .email('Please enter your account email')
+      .trim()
+      .toLowerCase(),
+    confirmationText: z
+      .string({ message: 'Confirmation text is required' })
+      .trim()
+      .refine((value) => value === 'DELETE MY ACCOUNT', {
+        message: 'Type DELETE MY ACCOUNT exactly to continue',
+      }),
+    acknowledgeRisk: z.literal(true, {
+      message: 'You must confirm that this action is permanent',
+    }),
+  })
+  .strict();
+
+export type DeleteOwnAccountInput = z.infer<typeof zodDeleteOwnAccountSchema>;
+
 /**
  * Named validators — use these directly in your Express routes
  */
@@ -131,3 +162,4 @@ export const validateCreateUser = validateBody(zodCreateUserSchema);
 export const validateCreateManyUser = validateBody(zodCreateManyUserSchema);
 export const validateUpdateUser = validateBody(zodUpdateUserSchema);
 export const validateUpdateManyUser = validateBody(zodUpdateManyUserSchema);
+export const validateDeleteOwnAccount = validateBody(zodDeleteOwnAccountSchema);

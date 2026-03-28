@@ -1,13 +1,13 @@
 import { base_url } from "@/utils/utils";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import Cookies from "js-cookie";
 
 export const AffiliateApi = createApi({
   reducerPath: "AffiliateApi",
   baseQuery: fetchBaseQuery({
     baseUrl: base_url,
     prepareHeaders: (headers) => {
-      const token =
-        typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      const token = typeof window !== "undefined" ? Cookies.get("token") : null;
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
@@ -17,56 +17,92 @@ export const AffiliateApi = createApi({
   }),
   tagTypes: ["Affiliate"],
   endpoints: (builder) => ({
-    createAffiliate: builder.mutation({
+    createAffiliateRequest: builder.mutation({
       query: (data) => ({
-        url: "/affiliate",
+        url: "/affiliate/request",
         method: "POST",
         body: data,
       }),
       invalidatesTags: ["Affiliate"],
     }),
-    updateAffiliate: builder.mutation({
-      query: ({ id, data }) => ({
-        url: `/affiliate/${id}`,
+    updateAffiliateRequest: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/affiliate/request/${id}`,
         method: "PUT",
-        body: data,
+        body,
       }),
       invalidatesTags: ["Affiliate"],
     }),
-    deleteAffiliate: builder.mutation({
-      query: (id) => ({
-        url: `/affiliate/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Affiliate"],
-    }),
-    deleteManyAffiliate: builder.mutation({
-      query: (data) => ({
-        url: "/affiliate/delete-many",
-        method: "DELETE",
-        body: data,
+    approveAffiliateRequest: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/affiliate/approve/${id}`,
+        method: "PUT",
+        body,
       }),
       invalidatesTags: ["Affiliate"],
     }),
     getManyAffiliate: builder.query({
       query: (params) => ({
-        url: "/affiliate",
+        url: "/affiliate/many",
         params,
       }),
       providesTags: ["Affiliate"],
     }),
-    getAffiliateById: builder.query({
-      query: (id) => `/affiliate/${id}`,
+    getMyAffiliate: builder.query({
+      query: () => ({
+        url: "/affiliate/me",
+      }),
       providesTags: ["Affiliate"],
+    }),
+    getAffiliateAdminSummary: builder.query({
+      query: () => ({
+        url: "/affiliate/summary/admin",
+      }),
+      providesTags: ["Affiliate"],
+    }),
+    createWithdrawalRequest: builder.mutation({
+      query: (body) => ({
+        url: "/affiliate/withdrawal",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Affiliate"],
+    }),
+    retryWithdrawalRequest: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/affiliate/withdrawal/${id}/retry`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Affiliate"],
+    }),
+    getWithdrawalRequests: builder.query({
+      query: (params) => ({
+        url: "/affiliate/withdrawal/many",
+        params,
+      }),
+      providesTags: ["Affiliate"],
+    }),
+    updateWithdrawalRequest: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/affiliate/withdrawal/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Affiliate"],
     }),
   }),
 });
 
 export const {
-  useCreateAffiliateMutation,
-  useUpdateAffiliateMutation,
-  useDeleteAffiliateMutation,
-  useDeleteManyAffiliateMutation,
+  useCreateAffiliateRequestMutation,
+  useUpdateAffiliateRequestMutation,
+  useApproveAffiliateRequestMutation,
   useGetManyAffiliateQuery,
-  useGetAffiliateByIdQuery,
+  useGetMyAffiliateQuery,
+  useGetAffiliateAdminSummaryQuery,
+  useCreateWithdrawalRequestMutation,
+  useRetryWithdrawalRequestMutation,
+  useGetWithdrawalRequestsQuery,
+  useUpdateWithdrawalRequestMutation,
 } = AffiliateApi;

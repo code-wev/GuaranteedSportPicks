@@ -86,7 +86,7 @@ export default function MySubscriptionPage() {
 
   const statusInfo = STATUS_CONFIG[sub?.status] || STATUS_CONFIG["PENDING"];
   const isActive = sub?.status === "PAID" && sub?.isSubscribed;
-  const isRecurring = sub && !sub.isSession && sub.stripeSubscriptionId;
+  const isRecurring = sub && !sub.isSeasonal && sub.stripeSubscriptionId;
 
   return (
     <div className='w-full px-4 md:px-8 py-6 max-w-3xl mx-auto'>
@@ -136,10 +136,10 @@ export default function MySubscriptionPage() {
                   {sub.packageName?.charAt(0) +
                     sub.packageName?.slice(1).toLowerCase()}{" "}
                   Plan
-                  {sub.isSession && ` (${sub.customDays} days)`}
+                  {sub.isSeasonal && ` (${sub.seasonalDays} days)`}
                 </h3>
                 <p className='text-sm text-gray-500 mt-1'>
-                  {sub.isSession
+                  {sub.isSeasonal
                     ? "One-time sessional payment"
                     : "Recurring subscription"}
                 </p>

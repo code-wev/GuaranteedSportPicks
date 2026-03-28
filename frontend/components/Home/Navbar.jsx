@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FiChevronDown, FiLayout, FiLogOut, FiMenu, FiX } from "react-icons/fi";
+import { useMyProfileQuery } from "@/feature/UserApi";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +14,8 @@ export default function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef(null);
   const pathName = usePathname();
+  const { data } = useMyProfileQuery(undefined, { skip: !isLoggedIn });
+  const user = data?.data;
 
   useEffect(() => {
     const token = Cookies.get("token");
@@ -178,10 +181,10 @@ export default function Navbar() {
                       />
                       <div>
                         <p className='text-sm font-bold text-[#1f2937]'>
-                          Welcome Back
+                          {user ? `${user.firstName} ${user.lastName}` : "Welcome Back"}
                         </p>
                         <p className='text-xs text-[#6b7280]'>
-                          Access your account
+                          {user?.email || "Access your account"}
                         </p>
                       </div>
                     </div>

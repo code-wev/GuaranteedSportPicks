@@ -17,7 +17,8 @@ const ServerResponse = (
   message: string,
   data?: object | null,
   errors?: any[] | null,
-  error?: any
+  error?: any,
+  meta?: object
 ): Response => {
   return res.status(statusCode).json({
     message,
@@ -29,6 +30,7 @@ const ServerResponse = (
     ...(success && { data }), // Include data only if success is true
     ...(errors && { errors }), // Always include errors if they exist
     ...(error && { error }), // Always include error if it exists
+    ...(meta && { meta }), // Include meta if it exists
   });
 };
 

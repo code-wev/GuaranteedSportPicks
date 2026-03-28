@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import { newslatterServices } from './newslatter.service';
+import { AuthenticatedRequest } from 'src/middlewares/is-authorized';
 import { SearchQueryInput } from '../../handlers/common-zod-validator';
 import ServerResponse from '../../helpers/responses/custom-response';
 import catchAsync from '../../utils/catch-async/catch-async';
+import { newslatterServices } from './newslatter.service';
 
 /**
  * Controller function to handle the creation of a single newslatter.
@@ -12,8 +13,13 @@ import catchAsync from '../../utils/catch-async/catch-async';
  * @returns {Promise<Partial<INewslatter>>} - The created newslatter.
  * @throws {Error} - Throws an error if the newslatter creation fails.
  */
-export const createNewslatter = catchAsync(async (req: Request, res: Response) => {
-  // Call the service method to create a new newslatter and get the result
+export const createNewslatter = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const userId = req.user!._id;
+  req.body.userId = userId;
+  req.body.email = req.user!.email;
+  if (req.body.isActive === undefined) {
+    req.body.isActive = true;
+  }
   const result = await newslatterServices.createNewslatter(req.body);
   if (!result) throw new Error('Failed to create newslatter');
   // Send a success response with the created newslatter data
@@ -45,11 +51,19 @@ export const updateNewslatter = catchAsync(async (req: Request, res: Response) =
  * @returns {Promise<Partial<INewslatter>>} - The retrieved newslatter.
  * @throws {Error} - Throws an error if the newslatter retrieval fails.
  */
-export const getNewslatterById = catchAsync(async (req: Request, res: Response) => {
-  const { id } = req.params;
+export const getNewslatterById = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const id = req.user!._id;
+
   // Call the service method to get the newslatter by ID and get the result
   const result = await newslatterServices.getNewslatterById(id as string);
-  if (!result) throw new Error('Newslatter not found');
+  if (!result) {
+    ServerResponse(res, true, 200, 'Newslatter retrieved successfully', {
+      email: req.user!.email,
+      userId: id,
+      isActive: false,
+    });
+    return;
+  }
   // Send a success response with the retrieved resource data
   ServerResponse(res, true, 200, 'Newslatter retrieved successfully', result);
 });
@@ -76,3 +90,18 @@ export const getManyNewslatter = catchAsync(async (req: Request, res: Response) 
   });
 });
 
+export const sendNewsletterCampaign = catchAsync(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const result = await newslatterServices.sendNewsletterCampaign(req.body, req.user!._id);
+
+    ServerResponse(res, true, 200, 'Newsletter sent successfully', result);
+  }
+);
+
+export const getNewsletterCampaigns = catchAsync(async (_req: Request, res: Response) => {
+  const campaigns = await newslatterServices.getNewsletterCampaigns();
+
+  ServerResponse(res, true, 200, 'Newsletter campaigns retrieved successfully', {
+    campaigns,
+  });
+});

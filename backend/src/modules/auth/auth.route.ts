@@ -39,7 +39,7 @@ const router = Router();
  * @param {function} validation - ['validateCreateUser']
  * @param {function} controller - ['registerUser']
  */
-router.post('/register', validateCreateUser, registerUser);
+router.post(['/register', '/auth/register'], validateCreateUser, registerUser);
 
 /**
  * @route POST /api/v1/auth/login
@@ -48,7 +48,7 @@ router.post('/register', validateCreateUser, registerUser);
  * @param {function} validation - ['validateCreateAuth']
  * @param {function} controller - ['createAuth']
  */
-router.post('/login', validateLogin, login);
+router.post(['/login', '/auth/login'], validateLogin, login);
 
 /**
  * @route PATCH /api/v1/auth/verify-email
@@ -57,7 +57,7 @@ router.post('/login', validateLogin, login);
  * @param {function} validation - ['verifyEmailTokenAuth']
  * @param {function} controller - ['verifyEmail']
  */
-router.patch('/verify-email', validateVerifyEmail, verifyEmail);
+router.patch(['/verify-email', '/auth/verify-email'], validateVerifyEmail, verifyEmail);
 
 /**
  * @route POST /api/v1/auth/resend-verification-email
@@ -68,7 +68,7 @@ router.patch('/verify-email', validateVerifyEmail, verifyEmail);
  * @param {function} controller - ['resendVerificationEmail']
  */
 router.post(
-  '/resend-verification-email',
+  ['/resend-verification-email', '/auth/resend-verification-email'],
 
   validateResendVerificationEmail,
   resendVerificationEmail
@@ -82,7 +82,7 @@ router.post(
  * @param {function} validation - ['forgetPasswordAuth']
  * @param {function} controller - ['forgetPassword']
  */
-router.post('/forget-password', validateForgotPassword, forgetPassword);
+router.post(['/forget-password', '/auth/forget-password'], validateForgotPassword, forgetPassword);
 
 /**
  * @route POST /api/v1/auth/reset-password
@@ -91,7 +91,7 @@ router.post('/forget-password', validateForgotPassword, forgetPassword);
  * @param {function} validation - ['resetPasswordAuth']
  * @param {function} controller - ['resetPassword']
  */
-router.post('/reset-password', validateResetPassword, resetPassword);
+router.post(['/reset-password', '/auth/reset-password'], validateResetPassword, resetPassword);
 
 /**
  * @route PATCH /api/v1/auth/change-password
@@ -102,7 +102,7 @@ router.post('/reset-password', validateResetPassword, resetPassword);
  * @param {function} controller - ['changePassword']
  */
 
-router.patch('/change-password', isAuthorized, validateChangePassword, changePassword);
+router.patch(['/change-password', '/auth/change-password'], isAuthorized, validateChangePassword, changePassword);
 
 // Export the router
 

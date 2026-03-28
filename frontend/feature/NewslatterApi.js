@@ -1,9 +1,34 @@
 import { base_url } from "@/utils/utils";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import Cookies from 'js-cookie';
+
+// Cookie থেকে token নেওয়ার ফাংশন
+const getToken = () => {
+  if (typeof window === "undefined") return null;
+  return Cookies.get("token") || null;
+};
 
 export const NewslatterApi = createApi({
   reducerPath: "NewslatterApi",
-  baseQuery: fetchBaseQuery({ baseUrl: base_url }),
+  baseQuery: fetchBaseQuery({ 
+    baseUrl: base_url,
+    prepareHeaders: (headers) => {
+      // Token cookie 
+      const token = getToken();
+      
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
+      }
+      
+      // Content-Type set 
+      if (!headers.has("Content-Type")) {
+        headers.set("Content-Type", "application/json");
+      }
+      
+      return headers;
+    },
+    credentials: "include", // cookies 
+  }),
   tagTypes: ["Newslatter"],
   endpoints: (builder) => ({
     createNewslatter: builder.mutation({
@@ -29,9 +54,37 @@ export const NewslatterApi = createApi({
       }),
       providesTags: ["Newslatter"],
     }),
+    getNewsletterCampaigns: builder.query({
+      query: () => ({
+        url: "/newslatter/admin/campaigns",
+      }),
+      providesTags: ["Newslatter"],
+    }),
     getNewslatterById: builder.query({
       query: (id) => `/newslatter/${id}`,
       providesTags: ["Newslatter"],
+    }),
+    // User এর newsletter status 
+    getUserNewsletterStatus: builder.query({
+      query: () => `/newslatter/me`,
+      providesTags: ["Newslatter"],
+    }),
+
+    toggleNewsletter: builder.mutation({
+      query: (data) => ({
+        url: `/newslatter/toggle`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Newslatter"],
+    }),
+    sendNewsletterCampaign: builder.mutation({
+      query: (data) => ({
+        url: `/newslatter/admin/send`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Newslatter"],
     }),
   }),
 });
@@ -40,5 +93,10 @@ export const {
   useCreateNewslatterMutation,
   useUpdateNewslatterMutation,
   useGetManyNewslatterQuery,
+  useGetNewsletterCampaignsQuery,
   useGetNewslatterByIdQuery,
+  useGetUserNewsletterStatusQuery,
+  useToggleNewsletterMutation,
+  useSendNewsletterCampaignMutation,
+  
 } = NewslatterApi;

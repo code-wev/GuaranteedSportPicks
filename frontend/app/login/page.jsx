@@ -110,10 +110,12 @@ export default function LoginPage() {
         sameSite: "Strict",
       });
 
-      toast.success("Login Success");
+      // user info save
+      if (response?.data?.user) {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+      }
 
-      // চাইলে user info ও save করতে পারো
-      // Cookies.set("user", JSON.stringify(response?.data?.user), { expires: 7 });
+      toast.success("Login Success");
 
       // redirect
       window.location.href = "/dashboard";
@@ -219,7 +221,11 @@ export default function LoginPage() {
                 <span>Remember me</span>
               </label>
 
-              <button type='button' className='text-rose-500'>
+              <button
+                type='button'
+                className='text-rose-500'
+                onClick={() => (window.location.href = "/forgot-password")}
+              >
                 Forgot Password?
               </button>
             </div>

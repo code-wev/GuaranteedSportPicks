@@ -40,6 +40,9 @@ export type IdOrIdsInput = z.infer<typeof zodIdSchema>;
 const zodSearchQuerySchema = z
   .object({
     searchKey: z.string({ message: 'Please specify the search key' }).optional(),
+    isActive: z
+      .enum(['true', 'false'], { message: 'isActive must be true or false' })
+      .optional(),
 
     showPerPage: z
       .string()

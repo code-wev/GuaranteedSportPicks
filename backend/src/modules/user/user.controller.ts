@@ -40,6 +40,13 @@ export const updateUser = catchAsync(async (req: AuthenticatedRequest, res: Resp
   ServerResponse(res, true, 200, 'User updated successfully', result);
 });
 
+export const updateUserById = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await userServices.updateUser(id as string, req.body);
+  if (!result) throw new Error('Failed to update user');
+  ServerResponse(res, true, 200, 'User updated successfully', result);
+});
+
 /**
  * Controller function to handle the deletion of a single user.
  *
@@ -55,6 +62,12 @@ export const deleteUser = catchAsync(async (req: AuthenticatedRequest, res: Resp
   if (!result) throw new Error('Failed to delete user');
   // Send a success response confirming the deletion
   ServerResponse(res, true, 200, 'User deleted successfully');
+});
+
+export const deleteOwnAccount = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const id = req.user!._id;
+  const result = await userServices.deleteOwnAccount(id as string, req.body);
+  ServerResponse(res, true, 200, 'Account deleted successfully', result);
 });
 
 /**
@@ -84,6 +97,24 @@ export const getUserByAutorization = catchAsync(
     ServerResponse(res, true, 200, 'User retrieved successfully', result);
   }
 );
+
+export const getUserDashboardSummary = catchAsync(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const id = req.user!._id;
+    const result = await userServices.getUserDashboardSummary(id as string);
+    ServerResponse(res, true, 200, 'User dashboard summary retrieved successfully', result);
+  }
+);
+
+export const getAdminDashboardSummary = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const result = await userServices.getAdminDashboardSummary();
+  ServerResponse(res, true, 200, 'Admin dashboard summary retrieved successfully', result);
+});
+
+export const getAdminOrdersSummary = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const result = await userServices.getAdminOrdersSummary();
+  ServerResponse(res, true, 200, 'Admin orders summary retrieved successfully', result);
+});
 
 /**
  * Controller function to handle the retrieval of multiple users.

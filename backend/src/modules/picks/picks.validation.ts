@@ -117,6 +117,8 @@ const zodUpdatePicksSchema = z
 
     // Admin fields
     selected_team: z.string().optional(),
+    price: z.number().optional(),
+    pickBanner: z.string().optional(),
     market_type: z.enum(['moneyline', 'spread', 'totals']).optional(),
     units: z.number().optional(),
     confidence: z.enum(['low', 'medium', 'high']).optional(),
@@ -151,6 +153,19 @@ const zodUpdateManyPicksSchema = z
 
 export type UpdateManyPicksInput = z.infer<typeof zodUpdateManyPicksSchema>;
 
+const zodCreatePickPurchaseSchema = z
+  .object({
+    pickId: z.string().refine(isMongoId, {
+      message: 'Please provide a valid MongoDB ObjectId',
+    }),
+    paymentModel: z.enum(['PREPAID', 'PAY_AFTER_WIN'], {
+      message: 'paymentModel must be PREPAID or PAY_AFTER_WIN',
+    }),
+  })
+  .strict();
+
+export type CreatePickPurchaseInput = z.infer<typeof zodCreatePickPurchaseSchema>;
+
 /**
  * ------------------------------------------------------
  * Validator Middlewares
@@ -160,3 +175,4 @@ export const validateCreatePicks = validateBody(zodCreatePicksSchema);
 export const validateCreateManyPicks = validateBody(zodCreateManyPicksSchema);
 export const validateUpdatePicks = validateBody(zodUpdatePicksSchema);
 export const validateUpdateManyPicks = validateBody(zodUpdateManyPicksSchema);
+export const validateCreatePickPurchase = validateBody(zodCreatePickPurchaseSchema);
