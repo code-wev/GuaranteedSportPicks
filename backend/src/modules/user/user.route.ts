@@ -6,6 +6,7 @@ import {
   updateUser,
   updateUserById,
   deleteUser,
+  deleteOwnAccount,
   getUserById,
   getManyUser,
   getUserByAutorization,
@@ -15,7 +16,7 @@ import {
 } from './user.controller';
 
 //Import validation from corresponding module
-import { validateUpdateUser } from './user.validation';
+import { validateDeleteOwnAccount, validateUpdateUser } from './user.validation';
 import {
   validateId,
   validateIds,
@@ -62,6 +63,13 @@ router.delete(
   authorizedRoles([UserRole.ADMIN]),
   deleteUser
 ); // todo: teasting done
+
+router.post(
+  ['/delete-account', '/user/delete-account'],
+  isAuthorized,
+  validateDeleteOwnAccount,
+  deleteOwnAccount
+);
 
 /**
  * @route GET /api/v1/user/get-user/many

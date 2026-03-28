@@ -64,6 +64,12 @@ export const deleteUser = catchAsync(async (req: AuthenticatedRequest, res: Resp
   ServerResponse(res, true, 200, 'User deleted successfully');
 });
 
+export const deleteOwnAccount = catchAsync(async (req: AuthenticatedRequest, res: Response) => {
+  const id = req.user!._id;
+  const result = await userServices.deleteOwnAccount(id as string, req.body);
+  ServerResponse(res, true, 200, 'Account deleted successfully', result);
+});
+
 /**
  * Controller function to handle the retrieval of a single user by ID.
  *
