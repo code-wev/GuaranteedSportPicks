@@ -1,6 +1,6 @@
 // Import the model
 import mongoose from 'mongoose';
-import { v4 } from '../../../node_modules/uuid/dist';
+import { v4 as uuidv4 } from 'uuid';
 import config from '../../../src/config/config';
 import compareInfo from '../../../src/utils/bcrypt/compare-info';
 import HashInfo from '../../../src/utils/bcrypt/hash-info';
@@ -43,8 +43,8 @@ const registerUser = async (data: CreateUserInput): Promise<IRegisterResponse> =
   const affiliateReferral = await affiliateServices.resolveAffiliateReferral(data.referralCode);
   // Hash password for MongoDB (even if Keycloak also stores it)
   const hashedPassword = await HashInfo(data.password);
-  // Genaretae email verificaiton token
-  const emailVerificationToken = v4();
+  // Generate email verification token
+  const emailVerificationToken = uuidv4();
   const emailVerificationExpiry = new Date(Date.now() + 12 * 60 * 60 * 1000); // 12 hours
 
   // Create new auth document with hashed password and email verification details
@@ -453,7 +453,7 @@ const forgetPassword = async (data: ForgotPasswordInput): Promise<void> => {
   }
 
   // Generate reset password token
-  const resetPasswordToken = v4();
+  const resetPasswordToken = uuidv4();
   const resetPasswordExpiry = new Date(Date.now() + 1 * 60 * 60 * 1000); // 1 hour
 
   // Set the user's password reset token and expiry
