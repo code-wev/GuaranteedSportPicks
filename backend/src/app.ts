@@ -52,7 +52,7 @@ app.use(fileUpload(config.EXPRESS_FILE_UPLOAD_CONFIG));
 // Security middleware initialization with CORS configuration
 app.use(
   cors({
-    origin: ['http://localhost:3000', 'http://localhost:3000/', 'https://guaranteed-sport-picks.vercel.app', 'https://guaranteed-sport-picks.vercel.app/'], // frontend origin
+    origin: ['http://localhost:3000', 'http://localhost:3000/', 'https://guaranteed-sport-picks.vercel.app', 'https://guaranteed-sport-picks.vercel.app/', 'https://guaranteedsportpicks.com', 'https://guaranteedsportpicks.com/'], // frontend origin
     credentials: true, // if you are using cookies or authorization headers
   })
 );
