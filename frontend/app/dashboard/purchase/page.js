@@ -1,12 +1,16 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
-import Link from "next/link";
 import OrderSummary from "@/components/Dashboard/Purchase/OrderSummary";
 import SelectPackage from "@/components/Dashboard/Purchase/SelectPackage";
 import SelectSport from "@/components/Dashboard/Purchase/SelectSport";
-import { useCreatePickPurchaseMutation, useCreateSubscriptionMutation, useGetMySubscriptionQuery } from "@/feature/PaymentApi";
+import {
+  useCreatePickPurchaseMutation,
+  useCreateSubscriptionMutation,
+  useGetMySubscriptionQuery,
+} from "@/feature/PaymentApi";
 import { useGetManyPicksQuery } from "@/feature/PicksApi";
+import Link from "next/link";
+import React, { useMemo, useState } from "react";
 
 export default function Purchase() {
   const [packageName, setPackageName] = useState(null);
@@ -17,9 +21,12 @@ export default function Purchase() {
   const [validationErrors, setValidationErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
 
-  const [createSubscription, { isLoading: isCreatingSubscription, isError, error }] =
-    useCreateSubscriptionMutation();
-  const [createPickPurchase, { isLoading: isCreatingPickPurchase }] = useCreatePickPurchaseMutation();
+  const [
+    createSubscription,
+    { isLoading: isCreatingSubscription, isError, error },
+  ] = useCreateSubscriptionMutation();
+  const [createPickPurchase, { isLoading: isCreatingPickPurchase }] =
+    useCreatePickPurchaseMutation();
   const { data: subscriptionData } = useGetMySubscriptionQuery();
   const { data: picksData, isLoading: isLoadingPicks } = useGetManyPicksQuery({
     pageNo: 1,
@@ -27,44 +34,10 @@ export default function Purchase() {
   });
 
   const activeSubscription = subscriptionData?.data;
-  const subscriptionStartTime = useMemo(() => {
-    if (!activeSubscription?.subscriptionStart) return null;
-    const timestamp = new Date(activeSubscription.subscriptionStart).getTime();
-    return Number.isNaN(timestamp) ? null : timestamp;
-  }, [activeSubscription]);
-
-  const eligiblePremiumPicks = useMemo(() => {
+  const activePremiumPicks = useMemo(() => {
     const picks = picksData?.data?.pickss || [];
-    const premiumActivePicks = picks.filter((pick) => pick.premium && pick.status === "active");
-
-    if (!subscriptionStartTime) {
-      return premiumActivePicks;
-    }
-
-    // If subscription starts today, do not show older picks from before subscription start.
-    return premiumActivePicks.filter((pick) => {
-      const pickTime = new Date(pick.commence_time).getTime();
-      if (Number.isNaN(pickTime)) return true;
-      return pickTime >= subscriptionStartTime;
-    });
-  }, [picksData, subscriptionStartTime]);
-
-  const { availablePicks, expiredPicks } = useMemo(() => {
-    const now = Date.now();
-    const available = [];
-    const expired = [];
-
-    eligiblePremiumPicks.forEach((pick) => {
-      const pickTime = new Date(pick.commence_time).getTime();
-      if (!Number.isNaN(pickTime) && pickTime < now) {
-        expired.push(pick);
-      } else {
-        available.push(pick);
-      }
-    });
-
-    return { availablePicks: available, expiredPicks: expired };
-  }, [eligiblePremiumPicks]);
+    return picks.filter((pick) => pick.premium && pick.status === "active");
+  }, [picksData]);
 
   React.useEffect(() => {
     if (isError && error) {
@@ -172,7 +145,7 @@ export default function Purchase() {
       setSuccessMessage(
         paymentModel === "PAY_AFTER_WIN"
           ? "Redirecting to secure Pay After Win authorization..."
-          : "Redirecting to secure prepaid checkout..."
+          : "Redirecting to secure prepaid checkout...",
       );
 
       setTimeout(() => {
@@ -218,13 +191,16 @@ export default function Purchase() {
   };
 
   return (
-    <div className="p-4 md:p-8 bg-[#fafafa] min-h-screen space-y-10">
+    <div className='p-4 md:p-8 bg-[#fafafa] min-h-screen space-y-10'>
       <div>
-        <h1 className="text-2xl font-semibold mb-2">Purchase Access</h1>
-        <p className="text-gray-500">
-          Buy a subscription for ongoing access, or purchase a single premium pick with prepaid or Pay After Win.
+        <h1 className='text-2xl font-semibold mb-2'>Purchase Access</h1>
+        <p className='text-gray-500'>
+          Buy a subscription for ongoing access, or purchase a single premium
+          pick with prepaid or Pay After Win.
         </p>
-        <Link href="/dashboard/cart" className="inline-block mt-3 text-sm font-semibold text-red-700 hover:underline">
+        <Link
+          href='/dashboard/cart'
+          className='inline-block mt-3 text-sm font-semibold text-red-700 hover:underline'>
           View Cart & Purchase Tracker
         </Link>
       </div>
@@ -235,26 +211,31 @@ export default function Purchase() {
             errorMessage
               ? "bg-red-50 border-red-200 text-red-700"
               : "bg-green-50 border-green-200 text-green-700"
-          }`}
-        >
+          }`}>
           {errorMessage || successMessage}
         </div>
       )}
 
       {activeSubscription && (
-        <div className="bg-white border border-green-200 rounded-xl p-5">
-          <h2 className="text-lg font-semibold text-gray-900">Active Subscription</h2>
-          <p className="text-sm text-gray-600 mt-1">
-            Your current plan already unlocks all premium picks. You do not need to buy single picks separately.
+        <div className='bg-white border border-green-200 rounded-xl p-5'>
+          <h2 className='text-lg font-semibold text-gray-900'>
+            Active Subscription
+          </h2>
+          <p className='text-sm text-gray-600 mt-1'>
+            Your current plan already unlocks all premium picks. You do not need
+            to buy single picks separately.
           </p>
         </div>
       )}
 
-      <section className="space-y-6">
+      <section className='space-y-6'>
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">1. Subscription Plans</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Best if you want access to all premium picks in the selected sports during the plan period.
+          <h2 className='text-xl font-semibold text-gray-900'>
+            1. Subscription Plans
+          </h2>
+          <p className='text-sm text-gray-500 mt-1'>
+            Best if you want access to all premium picks in the selected sports
+            during the plan period.
           </p>
         </div>
 
@@ -285,148 +266,107 @@ export default function Purchase() {
         />
       </section>
 
-      <section className="space-y-6">
+      <section className='space-y-6'>
         <div>
-          <h2 className="text-xl font-semibold text-gray-900">2. Buy Individual Premium Picks</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            `Prepaid` charges immediately. `Pay After Win` places a card authorization hold and only captures it if the pick wins.
+          <h2 className='text-xl font-semibold text-gray-900'>
+            2. Buy Individual Premium Picks
+          </h2>
+          <p className='text-sm text-gray-500 mt-1'>
+            `Prepaid` charges immediately. `Pay After Win` places a card
+            authorization hold and only captures it if the pick wins.
           </p>
-          {activeSubscription?.subscriptionStart && (
-            <p className="text-xs text-gray-400 mt-2">
-              Showing subscription picks from {new Date(activeSubscription.subscriptionStart).toLocaleString()} and later.
-            </p>
-          )}
         </div>
 
         {isLoadingPicks ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-500">
+          <div className='bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-500'>
             Loading premium picks...
           </div>
-        ) : availablePicks.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-500">
-            No available premium picks are open right now.
+        ) : activePremiumPicks.length === 0 ? (
+          <div className='bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-500'>
+            No active premium picks are available right now.
           </div>
         ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {availablePicks.map((pick) => {
+          <div className='grid grid-cols-1 xl:grid-cols-2 gap-6'>
+            {activePremiumPicks.map((pick) => {
               const coveredBySubscription = Boolean(activeSubscription);
 
               return (
-                <div key={pick._id} className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                  <div className="flex items-start justify-between gap-4 mb-4">
+                <div
+                  key={pick._id}
+                  className='bg-white border border-gray-200 rounded-2xl p-6 shadow-sm'>
+                  <div className='flex items-start justify-between gap-4 mb-4'>
                     <div>
-                      <p className="text-xs uppercase tracking-[0.18em] text-red-600 font-bold">
+                      <p className='text-xs uppercase tracking-[0.18em] text-red-600 font-bold'>
                         {pick.sport_title}
                       </p>
-                      <h3 className="text-xl font-bold text-gray-900 mt-1">
-                        {pick.away_team} @ {pick.home_team}
+                      <h3 className='text-xl font-bold text-gray-900 mt-1'>
+                        {pick.away_team}{" "}
+                        <span className='text-[#B91C1C]'>VS</span>{" "}
+                        {pick.home_team}
                       </h3>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className='text-sm text-gray-500 mt-1'>
                         {new Date(pick.commence_time).toLocaleString()}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-gray-400">Single Pick Price</p>
-                      <p className="text-2xl font-bold text-[#B91C1C]">${Number(pick.price).toFixed(2)}</p>
+                    <div className='text-right'>
+                      <p className='text-xs text-gray-400'>Single Pick Price</p>
+                      <p className='text-2xl font-bold text-[#B91C1C]'>
+                        ${Number(pick.price).toFixed(2)}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 text-sm mb-5">
-                    <div className="rounded-xl bg-gray-50 p-3">
-                      <p className="text-gray-400">Market</p>
-                      <p className="font-semibold capitalize text-gray-800">{pick.market_type}</p>
+                  <div className='grid grid-cols-2 gap-4 text-sm mb-5'>
+                    <div className='rounded-xl bg-gray-50 p-3'>
+                      <p className='text-gray-400'>Market</p>
+                      <p className='font-semibold capitalize text-gray-800'>
+                        {pick.market_type}
+                      </p>
                     </div>
-                    <div className="rounded-xl bg-gray-50 p-3">
-                      <p className="text-gray-400">Confidence</p>
-                      <p className="font-semibold capitalize text-gray-800">{pick.confidence}</p>
+                    <div className='rounded-xl bg-gray-50 p-3'>
+                      <p className='text-gray-400'>Confidence</p>
+                      <p className='font-semibold capitalize text-gray-800'>
+                        {pick.confidence}
+                      </p>
                     </div>
-                    <div className="rounded-xl bg-gray-50 p-3 col-span-2">
-                      <p className="text-gray-400">Selected Team</p>
-                      <p className="font-semibold text-gray-800">{pick.selected_team || "Not set yet"}</p>
+                    <div className='rounded-xl bg-gray-50 p-3 col-span-2'>
+                      <p className='text-gray-400'>Selected Team</p>
+                      <p className='font-semibold text-gray-800'>
+                        {pick.selected_team || "Not set yet"}
+                      </p>
                     </div>
                   </div>
 
                   {coveredBySubscription ? (
-                    <div className="rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 font-medium">
-                      Included in your active subscription for {pick.sport_title}.
+                    <div className='rounded-xl bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 font-medium'>
+                      Included in your active subscription for{" "}
+                      {pick.sport_title}.
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
                       <button
                         onClick={() => handlePickPurchase(pick._id, "PREPAID")}
                         disabled={isCreatingPickPurchase}
-                        className="rounded-xl bg-[#B91C1C] text-white py-3 font-semibold hover:bg-red-800 disabled:opacity-50"
-                      >
-                        {isCreatingPickPurchase ? "Please wait..." : "Buy Prepaid"}
+                        className='rounded-xl bg-[#B91C1C] text-white py-3 font-semibold hover:bg-red-800 disabled:opacity-50'>
+                        {isCreatingPickPurchase
+                          ? "Please wait..."
+                          : "Buy Prepaid"}
                       </button>
                       <button
-                        onClick={() => handlePickPurchase(pick._id, "PAY_AFTER_WIN")}
+                        onClick={() =>
+                          handlePickPurchase(pick._id, "PAY_AFTER_WIN")
+                        }
                         disabled={isCreatingPickPurchase}
-                        className="rounded-xl border border-[#B91C1C] text-[#B91C1C] py-3 font-semibold hover:bg-red-50 disabled:opacity-50"
-                      >
-                        {isCreatingPickPurchase ? "Please wait..." : "Pay After Win"}
+                        className='rounded-xl border border-[#B91C1C] text-[#B91C1C] py-3 font-semibold hover:bg-red-50 disabled:opacity-50'>
+                        {isCreatingPickPurchase
+                          ? "Please wait..."
+                          : "Pay After Win"}
                       </button>
                     </div>
                   )}
                 </div>
               );
             })}
-          </div>
-        )}
-      </section>
-
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">3. Expired Picks</h2>
-          <p className="text-sm text-gray-500 mt-1">
-            These picks are already past kickoff time, so purchase is disabled.
-          </p>
-        </div>
-
-        {isLoadingPicks ? null : expiredPicks.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-500">
-            No expired picks in your current visible range.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {expiredPicks.map((pick) => (
-              <div
-                key={pick._id}
-                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm opacity-85"
-              >
-                <div className="flex items-start justify-between gap-4 mb-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.18em] text-gray-500 font-bold">
-                      {pick.sport_title}
-                    </p>
-                    <h3 className="text-xl font-bold text-gray-900 mt-1">
-                      {pick.away_team} @ {pick.home_team}
-                    </h3>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {new Date(pick.commence_time).toLocaleString()}
-                    </p>
-                  </div>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
-                    Expired
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="rounded-xl bg-gray-50 p-3">
-                    <p className="text-gray-400">Market</p>
-                    <p className="font-semibold capitalize text-gray-800">{pick.market_type}</p>
-                  </div>
-                  <div className="rounded-xl bg-gray-50 p-3">
-                    <p className="text-gray-400">Confidence</p>
-                    <p className="font-semibold capitalize text-gray-800">{pick.confidence}</p>
-                  </div>
-                  <div className="rounded-xl bg-gray-50 p-3 col-span-2">
-                    <p className="text-gray-400">Selected Team</p>
-                    <p className="font-semibold text-gray-800">{pick.selected_team || "Not set yet"}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
           </div>
         )}
       </section>
