@@ -50,7 +50,6 @@ export default function Users() {
   return (
     <div className="bg-[#FAFAFA] min-h-screen p-4">
       <h1 className="text-[22px] font-semibold mb-6">Users</h1>
-
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div className="bg-white flex justify-between items-center rounded-xl p-5 shadow-sm">
           <div>
@@ -107,7 +106,6 @@ export default function Users() {
           </div>
         </div>
       </div>
-
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
         <div className="p-4 text-xl font-medium">Users ({users.length})</div>
 

@@ -4,12 +4,17 @@ import { useMyProfileQuery } from "@/feature/UserApi";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FiGrid, FiShoppingBag, FiUser, FiX } from "react-icons/fi";
+import {
+  FiGrid,
+  FiMessageSquare,
+  FiShoppingBag,
+  FiUser,
+  FiX,
+} from "react-icons/fi";
 import { GrUserAdmin } from "react-icons/gr";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { RiFileHistoryFill } from "react-icons/ri";
 import { TbUsersGroup } from "react-icons/tb";
-import { FiMessageSquare } from "react-icons/fi";
 
 const userMenu = [
   { title: "Dashboard", icon: <FiGrid />, url: "/dashboard" },
@@ -41,8 +46,7 @@ const userMenu = [
   },
   { title: "Profile & Settings", icon: <FiUser />, url: "/dashboard/profile" },
 ];
-const adminMenu =  [
-
+const adminMenu = [
   { title: "Dashboard", icon: <GrUserAdmin />, url: "/dashboard/admin" },
   {
     title: "Manage picks",
@@ -79,15 +83,14 @@ const adminMenu =  [
     icon: <IoDocumentTextOutline />,
     url: "/dashboard/admin/newsletters",
   },
- 
 ];
 
 export default function Sidebar({ open, setOpen }) {
   const path = usePathname();
-  const {data} = useMyProfileQuery();
+  const { data } = useMyProfileQuery();
 
   const role = data?.data?.role;
-  const menu = role === 'ADMIN' ? adminMenu : userMenu;
+  const menu = role === "ADMIN" ? adminMenu : userMenu;
 
   return (
     <>
@@ -95,7 +98,7 @@ export default function Sidebar({ open, setOpen }) {
       {open && (
         <div
           onClick={() => setOpen(false)}
-          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
+          className='fixed inset-0 bg-black/40 z-40 lg:hidden'
         />
       )}
 
@@ -103,36 +106,35 @@ export default function Sidebar({ open, setOpen }) {
         className={`fixed top-0 left-0 w-64 bg-white shadow-xl p-5 z-50 
         transform transition-transform duration-300
         ${open ? "translate-x-0" : "-translate-x-full"} 
-        lg:translate-x-0 lg:static`}
-      >
+        lg:translate-x-0 lg:static`}>
         {/* Close button for mobile */}
-        <div className="flex justify-between items-center mb-6 lg:hidden">
-          <Link href="/">
+        <div className='flex justify-between items-center mb-6 lg:hidden'>
+          <Link href='/'>
             <Image
-              src="/dashboard/SportPicks.png"
+              src='/dashboard/SportPicks.png'
               width={120}
               height={40}
-              alt="logo"
+              alt='logo'
             />
           </Link>
           <FiX
-            className="text-2xl cursor-pointer"
+            className='text-2xl cursor-pointer'
             onClick={() => setOpen(false)}
           />
         </div>
 
         {/* Desktop Logo */}
-        <Link href="/">
+        <Link href='/'>
           <Image
-            src="/dashboard/SportPicks.png"
+            src='/dashboard/SportPicks.png'
             width={150}
             height={40}
-            alt="logo"
-            className="mb-6 hidden lg:block"
+            alt='logo'
+            className='mb-6 hidden lg:block'
           />
         </Link>
 
-        <ul className="space-y-2 pt-4">
+        <ul className='space-y-2 pt-4'>
           {menu.map((item, index) => {
             const isActive = path === item.url;
 
@@ -144,9 +146,8 @@ export default function Sidebar({ open, setOpen }) {
                       isActive
                         ? "bg-red-50 text-red-600 font-semibold"
                         : "hover:bg-gray-100"
-                    }`}
-                >
-                  <span className="text-xl">{item.icon}</span>
+                    }`}>
+                  <span className='text-xl'>{item.icon}</span>
                   {item.title}
                 </li>
               </Link>
