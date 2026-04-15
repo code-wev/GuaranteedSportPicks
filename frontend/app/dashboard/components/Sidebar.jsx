@@ -13,21 +13,6 @@ import { FiMessageSquare } from "react-icons/fi";
 
 const userMenu = [
   { title: "Dashboard", icon: <FiGrid />, url: "/dashboard" },
-
-
-
-
-
-  {
-    title: "Affiliate Program",
-    icon: <IoDocumentTextOutline />,
-    url: "/dashboard/admin/affiliate",
-  },
-  {
-    title: "Newsletters",
-    icon: <IoDocumentTextOutline />,
-    url: "/dashboard/admin/newsletters",
-  },
   { title: "My Picks", icon: <FiShoppingBag />, url: "/dashboard/my-picks" },
   {
     title: "Purchase Picks",
@@ -43,6 +28,11 @@ const userMenu = [
     title: "Payment History",
     icon: <RiFileHistoryFill />,
     url: "/dashboard/purchase-history",
+  },
+  {
+    title: "Cart",
+    icon: <FiShoppingBag />,
+    url: "/dashboard/cart",
   },
   {
     title: "Testimonials",
@@ -97,7 +87,6 @@ export default function Sidebar({ open, setOpen }) {
   const {data} = useMyProfileQuery();
 
   const role = data?.data?.role;
-  console.log(role, 'user role');
   const menu = role === 'ADMIN' ? adminMenu : userMenu;
 
   return (

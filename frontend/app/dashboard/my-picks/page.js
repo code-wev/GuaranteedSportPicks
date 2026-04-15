@@ -55,13 +55,54 @@ export default function MyPicksPage() {
   const purchases = purchasesData?.data || [];
   const accessiblePicks = accessiblePicksData?.data || [];
   const activeSubscription = subscriptionData?.data;
+  const purchasedPickIds = new Set(
+    purchases.map((purchase) => purchase?.pickId?._id || purchase?.pickId).filter(Boolean)
+  );
+  const subscriptionStartTime = activeSubscription?.subscriptionStart
+    ? new Date(activeSubscription.subscriptionStart).getTime()
+    : null;
 
-  const activePicks = accessiblePicks.filter((pick) => !pick.result);
-  const completedPicks = accessiblePicks.filter(
+  const picksAfterSubscriptionRule = accessiblePicks.filter((pick) => {
+    if (!activeSubscription || !subscriptionStartTime || Number.isNaN(subscriptionStartTime)) {
+      return true;
+    }
+
+    if (purchasedPickIds.has(pick._id)) {
+      return true;
+    }
+
+    if (!pick.premium) {
+      return true;
+    }
+
+    const pickTime = new Date(pick.commence_time).getTime();
+    if (Number.isNaN(pickTime)) {
+      return true;
+    }
+
+    return pickTime >= subscriptionStartTime;
+  });
+
+  const now = Date.now();
+  const expiredPicks = picksAfterSubscriptionRule.filter((pick) => {
+    if (pick.result) return false;
+    const pickTime = new Date(pick.commence_time).getTime();
+    return !Number.isNaN(pickTime) && pickTime < now;
+  });
+
+  const activePicks = picksAfterSubscriptionRule.filter((pick) => {
+    if (pick.result) return false;
+    const pickTime = new Date(pick.commence_time).getTime();
+    if (Number.isNaN(pickTime)) return true;
+    return pickTime >= now;
+  });
+
+  const completedPicks = picksAfterSubscriptionRule.filter(
     (pick) => pick.result === "win" || pick.result === "loss" || pick.result === "void"
   );
 
-  const visiblePicks = tab === "active" ? activePicks : completedPicks;
+  const visiblePicks =
+    tab === "active" ? activePicks : tab === "expired" ? expiredPicks : completedPicks;
   const isLoading = isLoadingPurchases || isLoadingAccessible;
 
   return (
@@ -104,6 +145,16 @@ export default function MyPicksPage() {
             >
               Completed ({completedPicks.length})
             </button>
+            <button
+              onClick={() => setTab("expired")}
+              className={`whitespace-nowrap px-6 py-2.5 text-sm font-semibold rounded-xl border transition-all ${
+                tab === "expired"
+                  ? "bg-[#B91C1C] text-white border-red-600 shadow-md shadow-red-100"
+                  : "bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100"
+              }`}
+            >
+              Expired ({expiredPicks.length})
+            </button>
           </div>
 
           <div className="text-sm font-medium text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
@@ -119,7 +170,11 @@ export default function MyPicksPage() {
         ) : visiblePicks.length === 0 ? (
           <div className="py-20 text-center border-2 border-dashed border-gray-100 rounded-2xl">
             <p className="text-gray-400 text-lg">
-              {tab === "active" ? "No active accessible picks right now." : "No completed picks yet."}
+              {tab === "active"
+                ? "No active accessible picks right now."
+                : tab === "expired"
+                ? "No expired picks right now."
+                : "No completed picks yet."}
             </p>
             <p className="text-gray-400 text-sm mt-1">
               Visit the <a href="/dashboard/purchase" className="text-red-600 font-bold hover:underline">Purchase</a> page to unlock premium picks.

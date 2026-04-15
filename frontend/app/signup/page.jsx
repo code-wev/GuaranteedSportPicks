@@ -4,6 +4,7 @@ import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import toast, { Toaster } from "react-hot-toast";
 
 /**
@@ -25,6 +26,8 @@ export default function RegisterPage() {
 
   const [errors, setErrors] = useState({});
   const [isLoading, SetLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // ✅ Put your real backend register endpoint here
   // Examples:
@@ -46,7 +49,8 @@ export default function RegisterPage() {
     }
 
     const params = new URLSearchParams(window.location.search);
-    const referralCode = params.get("ref") || params.get("affiliate") || "";
+    const referralCode =
+      params.get("promo") || params.get("ref") || params.get("affiliate") || "";
 
     if (referralCode) {
       setForm((prev) => ({
@@ -189,7 +193,7 @@ export default function RegisterPage() {
           <div>
             <div className='relative w-full h-56 md:h-72 bg-gray-200 rounded-xl overflow-hidden mb-6'>
               <Image
-                src='/mnt/data/83d819e8-10a0-4732-ba5b-1927424bfb7e.png'
+                src='/home/homeBannerBg.png'
                 alt='hero'
                 fill
                 className='object-cover'
@@ -349,13 +353,13 @@ export default function RegisterPage() {
 
               <div>
                 <label className='block text-xs text-gray-600 mb-1'>
-                  Affiliate Code
+                  Affiliate Promo Code
                 </label>
                 <input
                   name='referralCode'
                   value={form.referralCode}
                   onChange={handleChange}
-                  placeholder='Optional referral code'
+                  placeholder='Optional promo code'
                   className='w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none uppercase'
                 />
               </div>
@@ -364,16 +368,27 @@ export default function RegisterPage() {
                 <label className='block text-xs text-gray-600 mb-1'>
                   Password
                 </label>
-                <input
-                  name='password'
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder='Create a password'
-                  type='password'
-                  className={`w-full px-3 py-2 rounded-lg border ${
-                    errors.password ? "border-rose-500" : "border-gray-200"
-                  } bg-gray-50 text-sm focus:outline-none`}
-                />
+                <div className='relative'>
+                  <input
+                    name='password'
+                    value={form.password}
+                    onChange={handleChange}
+                    placeholder='Create a password'
+                    type={showPassword ? "text" : "password"}
+                    className={`w-full px-3 py-2 pr-10 rounded-lg border ${
+                      errors.password ? "border-rose-500" : "border-gray-200"
+                    } bg-gray-50 text-sm focus:outline-none`}
+                  />
+                  <button
+                    type='button'
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700'
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }>
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
                 {errors.password && (
                   <p className='text-rose-500 text-xs mt-1'>
                     {errors.password}
@@ -385,18 +400,31 @@ export default function RegisterPage() {
                 <label className='block text-xs text-gray-600 mb-1'>
                   Confirm Password
                 </label>
-                <input
-                  name='confirmPassword'
-                  value={form.confirmPassword}
-                  onChange={handleChange}
-                  placeholder='Confirm your password'
-                  type='password'
-                  className={`w-full px-3 py-2 rounded-lg border ${
-                    errors.confirmPassword
-                      ? "border-rose-500"
-                      : "border-gray-200"
-                  } bg-gray-50 text-sm focus:outline-none`}
-                />
+                <div className='relative'>
+                  <input
+                    name='confirmPassword'
+                    value={form.confirmPassword}
+                    onChange={handleChange}
+                    placeholder='Confirm your password'
+                    type={showConfirmPassword ? "text" : "password"}
+                    className={`w-full px-3 py-2 pr-10 rounded-lg border ${
+                      errors.confirmPassword
+                        ? "border-rose-500"
+                        : "border-gray-200"
+                    } bg-gray-50 text-sm focus:outline-none`}
+                  />
+                  <button
+                    type='button'
+                    onClick={() => setShowConfirmPassword((prev) => !prev)}
+                    className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700'
+                    aria-label={
+                      showConfirmPassword
+                        ? "Hide confirm password"
+                        : "Show confirm password"
+                    }>
+                    {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+                  </button>
+                </div>
                 {errors.confirmPassword && (
                   <p className='text-rose-500 text-xs mt-1'>
                     {errors.confirmPassword}

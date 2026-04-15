@@ -16,6 +16,12 @@ export enum PaymentModel {
 export interface IPickPurchase extends Document {
   userId: mongoose.Schema.Types.ObjectId;
   pickId: mongoose.Schema.Types.ObjectId;
+  pickSnapshot?: {
+    sportTitle?: string;
+    awayTeam?: string;
+    homeTeam?: string;
+    commenceTime?: string;
+  };
   paymentModel: PaymentModel;
   price: number;
   status: PickPurchaseStatus;
@@ -39,6 +45,21 @@ const PickPurchaseSchema = new Schema<IPickPurchase>(
       type: Schema.Types.ObjectId,
       required: true,
       ref: 'Picks',
+    },
+
+    pickSnapshot: {
+      sportTitle: {
+        type: String,
+      },
+      awayTeam: {
+        type: String,
+      },
+      homeTeam: {
+        type: String,
+      },
+      commenceTime: {
+        type: String,
+      },
     },
 
     paymentModel: {

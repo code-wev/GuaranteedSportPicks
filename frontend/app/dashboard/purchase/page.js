@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
+import Link from "next/link";
 import OrderSummary from "@/components/Dashboard/Purchase/OrderSummary";
 import SelectPackage from "@/components/Dashboard/Purchase/SelectPackage";
 import SelectSport from "@/components/Dashboard/Purchase/SelectSport";
@@ -26,10 +27,44 @@ export default function Purchase() {
   });
 
   const activeSubscription = subscriptionData?.data;
-  const activePremiumPicks = useMemo(() => {
+  const subscriptionStartTime = useMemo(() => {
+    if (!activeSubscription?.subscriptionStart) return null;
+    const timestamp = new Date(activeSubscription.subscriptionStart).getTime();
+    return Number.isNaN(timestamp) ? null : timestamp;
+  }, [activeSubscription]);
+
+  const eligiblePremiumPicks = useMemo(() => {
     const picks = picksData?.data?.pickss || [];
-    return picks.filter((pick) => pick.premium && pick.status === "active");
-  }, [picksData]);
+    const premiumActivePicks = picks.filter((pick) => pick.premium && pick.status === "active");
+
+    if (!subscriptionStartTime) {
+      return premiumActivePicks;
+    }
+
+    // If subscription starts today, do not show older picks from before subscription start.
+    return premiumActivePicks.filter((pick) => {
+      const pickTime = new Date(pick.commence_time).getTime();
+      if (Number.isNaN(pickTime)) return true;
+      return pickTime >= subscriptionStartTime;
+    });
+  }, [picksData, subscriptionStartTime]);
+
+  const { availablePicks, expiredPicks } = useMemo(() => {
+    const now = Date.now();
+    const available = [];
+    const expired = [];
+
+    eligiblePremiumPicks.forEach((pick) => {
+      const pickTime = new Date(pick.commence_time).getTime();
+      if (!Number.isNaN(pickTime) && pickTime < now) {
+        expired.push(pick);
+      } else {
+        available.push(pick);
+      }
+    });
+
+    return { availablePicks: available, expiredPicks: expired };
+  }, [eligiblePremiumPicks]);
 
   React.useEffect(() => {
     if (isError && error) {
@@ -189,6 +224,9 @@ export default function Purchase() {
         <p className="text-gray-500">
           Buy a subscription for ongoing access, or purchase a single premium pick with prepaid or Pay After Win.
         </p>
+        <Link href="/dashboard/cart" className="inline-block mt-3 text-sm font-semibold text-red-700 hover:underline">
+          View Cart & Purchase Tracker
+        </Link>
       </div>
 
       {(errorMessage || successMessage) && (
@@ -253,19 +291,24 @@ export default function Purchase() {
           <p className="text-sm text-gray-500 mt-1">
             `Prepaid` charges immediately. `Pay After Win` places a card authorization hold and only captures it if the pick wins.
           </p>
+          {activeSubscription?.subscriptionStart && (
+            <p className="text-xs text-gray-400 mt-2">
+              Showing subscription picks from {new Date(activeSubscription.subscriptionStart).toLocaleString()} and later.
+            </p>
+          )}
         </div>
 
         {isLoadingPicks ? (
           <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-500">
             Loading premium picks...
           </div>
-        ) : activePremiumPicks.length === 0 ? (
+        ) : availablePicks.length === 0 ? (
           <div className="bg-white rounded-xl border border-gray-200 p-10 text-center text-gray-500">
-            No active premium picks are available right now.
+            No available premium picks are open right now.
           </div>
         ) : (
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-            {activePremiumPicks.map((pick) => {
+            {availablePicks.map((pick) => {
               const coveredBySubscription = Boolean(activeSubscription);
 
               return (
@@ -297,6 +340,10 @@ export default function Purchase() {
                       <p className="text-gray-400">Confidence</p>
                       <p className="font-semibold capitalize text-gray-800">{pick.confidence}</p>
                     </div>
+                    <div className="rounded-xl bg-gray-50 p-3 col-span-2">
+                      <p className="text-gray-400">Selected Team</p>
+                      <p className="font-semibold text-gray-800">{pick.selected_team || "Not set yet"}</p>
+                    </div>
                   </div>
 
                   {coveredBySubscription ? (
@@ -324,6 +371,62 @@ export default function Purchase() {
                 </div>
               );
             })}
+          </div>
+        )}
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">3. Expired Picks</h2>
+          <p className="text-sm text-gray-500 mt-1">
+            These picks are already past kickoff time, so purchase is disabled.
+          </p>
+        </div>
+
+        {isLoadingPicks ? null : expiredPicks.length === 0 ? (
+          <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-500">
+            No expired picks in your current visible range.
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {expiredPicks.map((pick) => (
+              <div
+                key={pick._id}
+                className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm opacity-85"
+              >
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.18em] text-gray-500 font-bold">
+                      {pick.sport_title}
+                    </p>
+                    <h3 className="text-xl font-bold text-gray-900 mt-1">
+                      {pick.away_team} @ {pick.home_team}
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {new Date(pick.commence_time).toLocaleString()}
+                    </p>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                    Expired
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="rounded-xl bg-gray-50 p-3">
+                    <p className="text-gray-400">Market</p>
+                    <p className="font-semibold capitalize text-gray-800">{pick.market_type}</p>
+                  </div>
+                  <div className="rounded-xl bg-gray-50 p-3">
+                    <p className="text-gray-400">Confidence</p>
+                    <p className="font-semibold capitalize text-gray-800">{pick.confidence}</p>
+                  </div>
+                  <div className="rounded-xl bg-gray-50 p-3 col-span-2">
+                    <p className="text-gray-400">Selected Team</p>
+                    <p className="font-semibold text-gray-800">{pick.selected_team || "Not set yet"}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </section>
