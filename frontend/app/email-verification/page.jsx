@@ -112,7 +112,7 @@ const EmailVerification = () => {
 
   return (
     <div className='min-h-screen flex items-center justify-center bg-[#f5f5f5]'>
-      <Toaster />
+      {/* <Toaster /> */}
       <div className='w-[90%] max-w-5xl bg-white p-10 shadow-lg rounded-lg overflow-hidden'>
         <div className='text-center'>
           <h2 className='text-2xl font-bold'>Email Verification</h2>

@@ -168,3 +168,9 @@ export const getMyAccessiblePicks = catchAsync(async (req: AuthenticatedRequest,
   const result = await picksServices.getMyAccessiblePicks(userId);
   ServerResponse(res, true, 200, 'Accessible picks retrieved successfully', result);
 });
+
+export const notifyPickPublished = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  await picksServices.notifyPickPublished(id as string);
+  ServerResponse(res, true, 200, 'Pick published notification sent successfully');
+});

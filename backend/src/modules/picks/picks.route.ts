@@ -11,6 +11,7 @@ import {
   getManyPicks,
   getMyAccessiblePicks,
   getMyPickPurchases,
+  notifyPickPublished,
   getPicksById,
   updatePicks,
 } from './picks.controller';
@@ -139,6 +140,14 @@ router.get(
   isAuthorized,
   authorizedRoles([UserRole.USER]),
   getMyAccessiblePicks
+);
+
+router.post(
+  ['/:id/notify-published', '/picks/:id/notify-published'],
+  isAuthorized,
+  authorizedRoles([UserRole.ADMIN]),
+  validateId,
+  notifyPickPublished
 );
 
 /**

@@ -26,6 +26,7 @@ export const loginSchema = z.object({
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;
+
 const zodCreateUserSchema = z
   .object({
     firstName: z
@@ -47,11 +48,12 @@ const zodCreateUserSchema = z
       .trim(),
 
     phoneNumber: z
-      .string({ message: 'Phone number is required' })
+      .string()
       .min(10, 'Phone number must be at least 10 digits')
       .max(15, 'Phone number cannot exceed 15 digits')
       .regex(/^[0-9+\-\s]+$/, 'Phone number can only contain digits, +, -, and spaces')
-      .trim(),
+      .trim()
+      .optional(),
 
     password: z
       .string({ message: 'Password is required' })
@@ -61,6 +63,7 @@ const zodCreateUserSchema = z
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
         'Password must contain at least one uppercase letter, one lowercase letter, and one number'
       ),
+
     referralCode: z.string().trim().toUpperCase().optional(),
   })
   .strict();

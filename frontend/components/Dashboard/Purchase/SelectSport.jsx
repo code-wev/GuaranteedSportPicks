@@ -32,6 +32,7 @@ export default function SelectSport({ selectedSport, onSelectSport, validationEr
         {sports.map((sport) => (
           <button
             key={sport.id}
+            type="button"
             onClick={() => handleSportToggle(sport)}
             className={`
               border border-gray-100 rounded-xl py-4 text-sm font-medium 

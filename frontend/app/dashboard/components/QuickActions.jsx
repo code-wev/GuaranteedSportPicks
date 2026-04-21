@@ -22,10 +22,10 @@ export default function QuickActions() {
         </Link>
 
         <Link
-          href="/dashboard/purchase-history"
+          href="/dashboard/cart"
           className="flex items-center gap-2 text-red-600 border w-full md:w-1/3 py-3 rounded-lg justify-center"
         >
-          <FiClock /> Purchase History
+          <FiClock /> View Cart
         </Link>
       </div>
     </div>

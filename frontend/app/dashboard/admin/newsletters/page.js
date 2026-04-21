@@ -373,7 +373,6 @@ function AdminNewsletterPanel() {
 export default function NewslettersPage() {
   const { data: profileData, isLoading } = useMyProfileQuery();
   const role = profileData?.data?.role;
-  console.log(role, 'amot role madari');
 
   if (isLoading) {
     return (

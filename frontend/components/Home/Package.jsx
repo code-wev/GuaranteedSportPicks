@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FaCheck } from "react-icons/fa";
 
 export default function Package() {
+  const router = useRouter();
   return (
     <section className='relative w-full bg-[#fff6f6] py-20 text-center'>
       {/* Ripple background */}
@@ -56,7 +57,9 @@ export default function Package() {
             ))}
           </ul>
 
-          <button className='mt-8 bg-[#c62828] text-white py-3 rounded-full font-semibold hover:bg-red-700 transition'>
+          <button
+            onClick={() => router.push("/packages")}
+            className='mt-8 bg-[#c62828] text-white py-3 rounded-full font-semibold hover:bg-red-700 transition'>
             Get Started
           </button>
         </div>
@@ -97,7 +100,9 @@ export default function Package() {
             ))}
           </ul>
 
-          <button className='mt-8 bg-white text-[#c01818] py-3 rounded-full font-semibold hover:bg-gray-100 transition'>
+          <button
+            onClick={() => router.push("/packages")}
+            className='mt-8 bg-white text-[#c01818] py-3 rounded-full font-semibold hover:bg-gray-100 transition'>
             Get Started
           </button>
         </div>
@@ -139,18 +144,20 @@ export default function Package() {
             ))}
           </ul>
 
-          <button className='mt-8 bg-[#c62828] text-white py-3 rounded-full font-semibold hover:bg-red-700 transition'>
+          <button
+            onClick={() => router.push("/packages")}
+            className='mt-8 bg-[#c62828] text-white py-3 rounded-full font-semibold hover:bg-red-700 transition'>
             Get Started
           </button>
         </div>
       </div>
 
       <div className='mt-20'>
-        <Link href='/dashboard/purchase'>
-          <button className='bg-[#e53935] text-white px-8 py-4 rounded-full font-semibold hover:bg-red-700 transition'>
-            Experience our Packages
-          </button>
-        </Link>
+        <button
+          onClick={() => router.push("/packages")}
+          className='bg-[#e53935] text-white px-8 py-4 rounded-full font-semibold hover:bg-red-700 transition'>
+          Experience our Packages
+        </button>
       </div>
     </section>
   );
