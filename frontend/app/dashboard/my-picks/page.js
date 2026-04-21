@@ -147,7 +147,9 @@ export default function MyPicksPage() {
                         )}
                       </div>
                       <h3 className="text-xl font-bold text-gray-900 leading-tight">
-                        {pick.away_team} @ {pick.home_team}
+                        {pick.away_team}{" "}
+                        <span className="text-[#B91C1C]">VS</span>{" "}
+                        {pick.home_team}
                       </h3>
                       <p className="text-xs text-gray-400 font-medium mt-1">
                         {new Date(pick.commence_time).toLocaleString('en-US', { 
@@ -172,7 +174,7 @@ export default function MyPicksPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
                     <div className="rounded-xl bg-gray-50 p-3 border border-gray-100">
                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">My Pick</p>
-                      <p className="font-bold text-gray-800 truncate">{pick.selected_team}</p>
+                      <p className="font-bold text-gray-800 truncate">{pick.selected_team || "Not set yet"}</p>
                     </div>
                     <div className="rounded-xl bg-gray-50 p-3 border border-gray-100">
                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Units</p>

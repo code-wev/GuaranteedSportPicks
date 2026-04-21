@@ -1,15 +1,15 @@
 import { Request, Response } from 'express';
-import { authServices } from './auth.service';
+import { AuthenticatedRequest } from 'src/middlewares/is-authorized';
 import { SearchQueryInput } from '../../handlers/common-zod-validator';
 import ServerResponse from '../../helpers/responses/custom-response';
 import catchAsync from '../../utils/catch-async/catch-async';
+import { IChangePassword, ILogin } from './auth.interface';
+import { authServices } from './auth.service';
 import {
   ForgotPasswordInput,
   ResendVerificationEmailInput,
   VerifyEmailInput,
 } from './auth.validation';
-import { IChangePassword, ILogin } from './auth.interface';
-import { AuthenticatedRequest } from 'src/middlewares/is-authorized';
 
 /**
  * Controller function to handle the creation of a single auth.
@@ -21,6 +21,7 @@ import { AuthenticatedRequest } from 'src/middlewares/is-authorized';
  */
 export const registerUser = catchAsync(async (req: Request, res: Response) => {
   // Call the service method to create a new auth and get the result
+
   const result = await authServices.registerUser(req.body);
   if (!result) throw new Error('Failed to create auth');
   // Send a success response with the created auth data

@@ -1,14 +1,14 @@
 // Import the model
-import mongoose from 'mongoose';
 import { randomUUID } from 'crypto';
+import mongoose from 'mongoose';
 import config from '../../../src/config/config';
 import compareInfo from '../../../src/utils/bcrypt/compare-info';
 import HashInfo from '../../../src/utils/bcrypt/hash-info';
 import SendEmail from '../../../src/utils/email/send-email';
 import EncodeToken from '../../../src/utils/jwt/encode-token';
 import { IdOrIdsInput, SearchQueryInput } from '../../handlers/common-zod-validator';
-import { affiliateServices } from '../affiliate/affiliate.service';
 import User, { IUser } from '../../model/user/user.schema';
+import { affiliateServices } from '../affiliate/affiliate.service';
 import { IChangePassword, ILogin, ILoginResponse, IRegisterResponse } from './auth.interface';
 import {
   CreateUserInput,
@@ -30,10 +30,13 @@ const registerUser = async (data: CreateUserInput): Promise<IRegisterResponse> =
   // todo: hash password for save on the mo ngodb
   // todo: generate token for the user and send it in response
   // Check if user already exists in Database
+  console.log(data, 'kire data');
 
-  const existNumber = await User.findOne({ phoneNumber: data.phoneNumber });
-  if (existNumber) {
-    throw new Error('User with this Number already exists');
+  if (data.phoneNumber) {
+    const existNumber = await User.findOne({ phoneNumber: data.phoneNumber });
+    if (existNumber) {
+      throw new Error('User with this Number already exists');
+    }
   }
 
   const existingUser = await User.findOne({ email: data.email });

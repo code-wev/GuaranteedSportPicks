@@ -18,17 +18,6 @@ import { TbUsersGroup } from "react-icons/tb";
 
 const userMenu = [
   { title: "Dashboard", icon: <FiGrid />, url: "/dashboard" },
-
-  {
-    title: "Affiliate Program",
-    icon: <IoDocumentTextOutline />,
-    url: "/dashboard/admin/affiliate",
-  },
-  {
-    title: "Newsletters",
-    icon: <IoDocumentTextOutline />,
-    url: "/dashboard/admin/newsletters",
-  },
   { title: "My Picks", icon: <FiShoppingBag />, url: "/dashboard/my-picks" },
   {
     title: "Purchase Picks",
@@ -44,6 +33,11 @@ const userMenu = [
     title: "Payment History",
     icon: <RiFileHistoryFill />,
     url: "/dashboard/purchase-history",
+  },
+  {
+    title: "Cart",
+    icon: <FiShoppingBag />,
+    url: "/dashboard/cart",
   },
   {
     title: "Testimonials",
@@ -96,7 +90,6 @@ export default function Sidebar({ open, setOpen }) {
   const { data } = useMyProfileQuery();
 
   const role = data?.data?.role;
-  console.log(role, "user role");
   const menu = role === "ADMIN" ? adminMenu : userMenu;
 
   return (
@@ -110,10 +103,10 @@ export default function Sidebar({ open, setOpen }) {
       )}
 
       <aside
-        className={`w-64 bg-white shadow-xl p-5 z-50 h-screen
-        fixed top-0 left-0 transform transition-transform duration-300
-        ${open ? "translate-x-0" : "-translate-x-full"}
-        lg:sticky lg:top-0 lg:translate-x-0`}>
+        className={`fixed top-0 left-0 w-64 bg-white shadow-xl p-5 z-50 
+        transform transition-transform duration-300
+        ${open ? "translate-x-0" : "-translate-x-full"} 
+        lg:translate-x-0 lg:static`}>
         {/* Close button for mobile */}
         <div className='flex justify-between items-center mb-6 lg:hidden'>
           <Link href='/'>

@@ -10,7 +10,7 @@ export interface IUser extends Document {
   firstName: string; // User's first name
   lastName: string; // User's last name
   email: string; // User's email address
-  phoneNumber: string; // User's phone number
+  phoneNumber?: string; // User's phone number (optional)
   password: string; // User's password (hashed)
   isEmailVerified: boolean; // Indicates if the user's email has been verified
   emailVerificationToken?: string; // Token used for email verification (optional)
@@ -46,9 +46,12 @@ const UserSchema: Schema<IUser> = new Schema(
     },
     phoneNumber: {
       type: String,
-      required: true, // Phone number is required
-      unique: true, // Phone number must be unique
-      trim: true, // Removes whitespace from both ends
+      required: false,
+      trim: true,
+      // sparse: true means null/missing values are excluded from the unique index
+      // so multiple users without a phone number won't cause duplicate key errors
+      unique: true,
+      sparse: true,
     },
     password: {
       type: String,

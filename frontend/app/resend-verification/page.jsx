@@ -52,7 +52,7 @@ const ResendVerification = () => {
 
   return (
     <div className='min-h-screen flex items-center justify-center bg-[#f5f5f5]'>
-      <Toaster /> {/* Toast notifications */}
+      {/* <Toaster /> Toast notifications */}
       <div className='w-[90%] max-w-md bg-white p-8 shadow-lg rounded-lg overflow-hidden'>
         <h2 className='text-2xl font-bold text-center'>
           Resend Verification Email

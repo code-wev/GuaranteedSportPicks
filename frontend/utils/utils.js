@@ -1,3 +1,4 @@
+// export const base_url = "http://localhost:5000/api/v1";
 export const base_url = "https://api.guaranteedsportpicks.com/api/v1";
 export const otpGenerator = () => {
   const n = Math.floor(Math.random() * 100000); // 0 .. 99999f

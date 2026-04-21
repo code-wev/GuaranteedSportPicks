@@ -5,11 +5,13 @@ import Subscription, {
   ISubscription,
   SubscriptionStatus
 } from '../../../src/model/subscription/subscription.model';
+import User from '../../model/user/user.schema';
 import { IdOrIdsInput, SearchQueryInput } from '../../handlers/common-zod-validator';
 import { CreateSubscriptionInput, UpdateSubscriptionInput } from './subscription.validation';
 import { affiliateServices } from '../affiliate/affiliate.service';
 import { processPickPurchaseWebhookEvent } from '../picks/picks.service';
 import { stripe } from '../../utils/stripe/stripe';
+import SendEmail from '../../utils/email/send-email';
 
 // Type augmentation for Stripe Invoice endpoint compatibility
 // The subscription property might come as string from certain API versions
@@ -48,6 +50,32 @@ const calculateSeasonalEndDate = (startDate: Date, days: number): Date => {
   const endDate = new Date(startDate);
   endDate.setDate(startDate.getDate() + days);
   return endDate;
+};
+
+const sendSubscriptionConfirmationEmail = async (subscription: ISubscription): Promise<void> => {
+  const user = await User.findById(subscription.userId).select('email firstName lastName').lean();
+  if (!user?.email) {
+    return;
+  }
+
+  const customerName = [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || 'there';
+  const loginLink = `${config.FRONTEND_URL}/login`;
+  const plan = subscription.packageName;
+
+  await SendEmail({
+    to: user.email,
+    subject: 'Subscription confirmed',
+    text: `Hi ${customerName}, your ${plan} subscription is now active. Login to your customer portal: ${loginLink}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;padding:24px;color:#111827;">
+        <h2 style="margin:0 0 12px;">Subscription confirmed</h2>
+        <p style="margin:0 0 8px;">Hi ${customerName},</p>
+        <p style="margin:0 0 8px;">Your <strong>${plan}</strong> subscription has been activated successfully.</p>
+        <p style="margin:0 0 16px;">You can access your picks and packages from your customer portal.</p>
+        <a href="${loginLink}" style="display:inline-block;background:#b91c1c;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:600;">Login to your customer portal</a>
+      </div>
+    `,
+  });
 };
 
 /**
@@ -275,6 +303,7 @@ const webHook = async (req: any) => {
             session.id,
             'INITIAL'
           );
+          await sendSubscriptionConfirmationEmail(activatedSeasonalSubscription as ISubscription);
         }
 
         console.log(`✅ Seasonal Plan Activated: ${subscriptionId}, Ends: ${endDate.toISOString()}`);
@@ -296,7 +325,7 @@ const webHook = async (req: any) => {
           endDate = new Date(periodEndUnix * 1000);
         }
 
-        await Subscription.findByIdAndUpdate(subscriptionId, {
+        const activatedRecurringSubscription = await Subscription.findByIdAndUpdate(subscriptionId, {
           status: SubscriptionStatus.PAID,
           isSubscribed: true,
           subscriptionStart: startDate.toISOString(),
@@ -304,7 +333,11 @@ const webHook = async (req: any) => {
           nextBilling: endDate.toISOString(),
           stripeSubscriptionId: stripeSubscriptionId,
           stripeSessionId: session.id,
-        });
+        }, { new: true });
+
+        if (activatedRecurringSubscription) {
+          await sendSubscriptionConfirmationEmail(activatedRecurringSubscription as ISubscription);
+        }
 
         console.log(`✅ Recurring Subscription Activated: ${subscriptionId}, Next Billing: ${endDate.toISOString()}`);
       }
