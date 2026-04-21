@@ -85,7 +85,6 @@ export default function Purchase() {
         errors.seasonalPrice = "Please enter valid price (minimum $1.00)";
       }
     }
-
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };

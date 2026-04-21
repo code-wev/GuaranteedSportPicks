@@ -12,7 +12,6 @@ export default function AllProvider({children}) {
 
         {children}
     </div>
-
     </Provider>
   )
 }

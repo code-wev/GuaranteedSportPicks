@@ -191,7 +191,7 @@ export default function RegisterPage() {
 
   return (
     <div className='min-h-screen bg-gray-50 flex items-center justify-center p-6'>
-      <Toaster />
+      {/* <Toaster /> */}
       <div className='max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8'>
         {/* LEFT: image + info */}
         <div className='lg:col-span-7 bg-white rounded-2xl p-8 shadow-sm flex flex-col justify-between'>

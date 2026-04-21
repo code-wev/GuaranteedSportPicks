@@ -3,8 +3,8 @@ import { base_url } from "@/utils/utils";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useState } from "react";
-import { FiEye, FiEyeOff } from "react-icons/fi";
 import toast, { Toaster } from "react-hot-toast";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -144,7 +144,12 @@ export default function LoginPage() {
 
   return (
     <div className='min-h-screen flex items-center justify-center bg-[#f5f5f5]'>
-      <Toaster />
+      {/* <Toaster
+        position='top-right'
+        toastOptions={{
+          duration: 3000,
+        }}
+      /> */}
       <div className='w-[90%] max-w-5xl bg-white grid grid-cols-1 md:grid-cols-2 shadow-lg rounded-lg overflow-hidden'>
         {/* LEFT SIDE */}
         <div className='p-8 flex flex-col justify-between'>
@@ -235,8 +240,7 @@ export default function LoginPage() {
               <button
                 type='button'
                 className='text-rose-500'
-                onClick={() => (window.location.href = "/forgot-password")}
-              >
+                onClick={() => (window.location.href = "/forgot-password")}>
                 Forgot Password?
               </button>
             </div>

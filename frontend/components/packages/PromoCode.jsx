@@ -59,7 +59,7 @@ export default function PromoCode() {
           </div>
         </div>
       </div>
-      <Toaster />
+      {/* <Toaster /> */}
     </div>
   );
 }
