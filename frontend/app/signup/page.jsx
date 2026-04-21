@@ -4,8 +4,8 @@ import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { FiEye, FiEyeOff } from "react-icons/fi";
 import toast, { Toaster } from "react-hot-toast";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 /**
  * Tailwind CSS is used for styling.
@@ -70,7 +70,7 @@ export default function RegisterPage() {
     else if (!/^\S+@\S+\.\S+$/.test(form.email.trim()))
       err.email = "Invalid email";
 
-    if (!form.phoneNumber.trim()) err.phoneNumber = "Phone number is required";
+    // phoneNumber is optional — no validation required
 
     if (!form.password) err.password = "Password is required";
     else if (form.password.length < 6)
@@ -142,13 +142,18 @@ export default function RegisterPage() {
     SetLoading(true);
 
     // backend payload (CreateUserInput)
+    // phoneNumber and referralCode are fully omitted from the object
+    // if empty — so the key never reaches the backend at all
+    const trimmedPhone = form.phoneNumber.trim();
+    const trimmedReferral = form.referralCode.trim().toUpperCase();
+
     const payload = {
       firstName: form.firstName.trim(),
       lastName: form.lastName.trim(),
       email: form.email.trim().toLowerCase(),
-      phoneNumber: form.phoneNumber.trim(),
       password: form.password,
-      referralCode: form.referralCode.trim().toUpperCase() || undefined,
+      ...(trimmedPhone && { phoneNumber: trimmedPhone }),
+      ...(trimmedReferral && { referralCode: trimmedReferral }),
     };
 
     try {
@@ -339,21 +344,14 @@ export default function RegisterPage() {
                   name='phoneNumber'
                   value={form.phoneNumber}
                   onChange={handleChange}
-                  placeholder='Enter your phone number'
-                  className={`w-full px-3 py-2 rounded-lg border ${
-                    errors.phoneNumber ? "border-rose-500" : "border-gray-200"
-                  } bg-gray-50 text-sm focus:outline-none`}
+                  placeholder='Enter your phone number (optional)'
+                  className='w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm focus:outline-none'
                 />
-                {errors.phoneNumber && (
-                  <p className='text-rose-500 text-xs mt-1'>
-                    {errors.phoneNumber}
-                  </p>
-                )}
               </div>
 
               <div>
                 <label className='block text-xs text-gray-600 mb-1'>
-                  Affiliate Promo Code
+                  Promo Code
                 </label>
                 <input
                   name='referralCode'

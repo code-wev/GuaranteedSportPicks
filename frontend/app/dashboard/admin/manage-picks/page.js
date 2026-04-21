@@ -177,7 +177,9 @@ export default function PickManagement() {
                     <td className="px-4 py-4">
                       <div className="flex flex-col">
                         <span className="font-semibold text-gray-800">
-                          {pick.away_team} @ {pick.home_team}
+                          {pick.away_team}{" "}
+                          <span className="text-[#B91C1C]">VS</span>{" "}
+                          {pick.home_team}
                         </span>
                         <span className="text-xs text-gray-500">
                           {new Date(pick.commence_time).toLocaleDateString()} {new Date(pick.commence_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

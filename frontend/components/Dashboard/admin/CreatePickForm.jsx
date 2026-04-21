@@ -84,7 +84,9 @@ export default function CreatePickForm() {
     const fetchOdds = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`/odds.json`);
+        const response = await axios.get(
+          `https://api.the-odds-api.com/v4/sports/upcoming/odds/?regions=us&markets=h2h&oddsFormat=american&apiKey=bc0075b9407c1c846f9916be0bf39d07`,
+        );
         setOdds(response?.data || []);
         setLoading(false);
       } catch (error) {
@@ -157,19 +159,21 @@ export default function CreatePickForm() {
         ?.outcomes?.find((o) => o.name === "Draw")?.price || 0;
 
     // Format bookmakers data correctly with exact field names as expected by API
-    const formattedBookmakers = game.bookmakers?.map(bookmaker => ({
-      key: bookmaker.key,
-      title: bookmaker.title,
-      last_update: bookmaker.last_update,
-      markets: bookmaker.markets?.map(market => ({
-        Key: market.key, // Note: Capital K
-        last_update: market.last_update,
-        outComes: market.outcomes?.map(outcome => ({ // Note: Capital C
-          name: outcome.name,
-          price: outcome.price
-        }))
-      }))
-    })) || [];
+    const formattedBookmakers =
+      game.bookmakers?.map((bookmaker) => ({
+        key: bookmaker.key,
+        title: bookmaker.title,
+        last_update: bookmaker.last_update,
+        markets: bookmaker.markets?.map((market) => ({
+          Key: market.key, // Note: Capital K
+          last_update: market.last_update,
+          outComes: market.outcomes?.map((outcome) => ({
+            // Note: Capital C
+            name: outcome.name,
+            price: outcome.price,
+          })),
+        })),
+      })) || [];
 
     setFormData({
       ...formData,
@@ -291,7 +295,7 @@ export default function CreatePickForm() {
   const getRtkErrorMessage = (err) => {
     const data = err?.data;
     if (data?.errors) {
-      return data.errors.map(e => `${e.field}: ${e.message}`).join('\n');
+      return data.errors.map((e) => `${e.field}: ${e.message}`).join("\n");
     }
     return (
       data?.message ||
@@ -333,18 +337,21 @@ export default function CreatePickForm() {
     }
 
     // Format bookmakers data with exact field names as expected by API
-    const formattedBookmakers = formData.bookmakers.map(bookmaker => ({
+    const formattedBookmakers = formData.bookmakers.map((bookmaker) => ({
       key: bookmaker.key,
       title: bookmaker.title,
       last_update: bookmaker.last_update,
-      markets: bookmaker.markets.map(market => ({
+      markets: bookmaker.markets.map((market) => ({
         Key: market.Key || market.key, // Use Key with capital K
         last_update: market.last_update,
-        outComes: market.outComes || market.outcomes?.map(outcome => ({ // Use outComes with capital C
-          name: outcome.name,
-          price: outcome.price
-        }))
-      }))
+        outComes:
+          market.outComes ||
+          market.outcomes?.map((outcome) => ({
+            // Use outComes with capital C
+            name: outcome.name,
+            price: outcome.price,
+          })),
+      })),
     }));
 
     // Build payload with correct structure
@@ -358,7 +365,7 @@ export default function CreatePickForm() {
       odds: {
         home_team: Number(formData.odds.home_team),
         away_team: Number(formData.odds.away_team),
-        draw: Number(formData.odds.draw)
+        draw: Number(formData.odds.draw),
       },
       bookmakers: formattedBookmakers,
 
@@ -375,7 +382,7 @@ export default function CreatePickForm() {
     // CRITICAL FIX: Always include price in payload, even if 0
     // Convert to number to ensure it's sent correctly
     payload.price = Number(formData.price);
-    
+
     // If you want to only send price for premium picks, use this:
     // if (formData.premium) {
     //   payload.price = Number(formData.price);
@@ -395,7 +402,7 @@ export default function CreatePickForm() {
       console.log("✅ PICK CREATE RESPONSE:", res);
 
       alert(
-        `✅ Pick Created Successfully!\n\n${payload.selected_team} - ${payload.units} units${payload.price > 0 ? ` - $${payload.price}` : ''}`,
+        `✅ Pick Created Successfully!\n\n${payload.selected_team} - ${payload.units} units${payload.price > 0 ? ` - $${payload.price}` : ""}`,
       );
 
       // Reset form after success
@@ -890,7 +897,12 @@ export default function CreatePickForm() {
               <label
                 className='text-sm font-medium mb-2 block'
                 style={{ color: colors.text }}>
-                Price ($) {!formData.premium && <span className="text-xs text-gray-500">(Premium picks only)</span>}
+                Price ($){" "}
+                {!formData.premium && (
+                  <span className='text-xs text-gray-500'>
+                    (Premium picks only)
+                  </span>
+                )}
               </label>
               <input
                 type='number'
@@ -900,16 +912,16 @@ export default function CreatePickForm() {
                 onChange={(e) => handleFieldChange("price", e.target.value)}
                 placeholder='Enter price (e.g., 9.99)'
                 className='w-full px-4 py-3 border rounded-lg bg-white outline-none'
-                style={{ 
-                  borderColor: colors.border, 
+                style={{
+                  borderColor: colors.border,
                   color: colors.text,
-                  opacity: !formData.premium ? 0.6 : 1
+                  opacity: !formData.premium ? 0.6 : 1,
                 }}
                 disabled={!formData.premium}
               />
               <p className='text-xs mt-1' style={{ color: colors.textLight }}>
-                {formData.premium 
-                  ? "Set price for this premium pick" 
+                {formData.premium
+                  ? "Set price for this premium pick"
                   : "Enable premium to set price"}
               </p>
             </div>
@@ -1156,12 +1168,14 @@ export default function CreatePickForm() {
                   type='submit'
                   disabled={isCreating}
                   className='px-8 py-3 rounded-lg text-white font-medium flex items-center gap-2'
-                  style={{ 
-                    backgroundColor: isCreating ? colors.border : colors.success,
-                    cursor: isCreating ? 'not-allowed' : 'pointer'
+                  style={{
+                    backgroundColor: isCreating
+                      ? colors.border
+                      : colors.success,
+                    cursor: isCreating ? "not-allowed" : "pointer",
                   }}>
                   <FiCheckCircle />
-                  {isCreating ? 'Creating...' : 'Create Pick'}
+                  {isCreating ? "Creating..." : "Create Pick"}
                 </button>
               </div>
             </div>
@@ -1293,7 +1307,9 @@ export default function CreatePickForm() {
                 {formData.price > 0 && (
                   <div className='flex items-center justify-between mb-4'>
                     <span className='opacity-80'>Price</span>
-                    <span className='font-bold' style={{ color: colors.primary }}>
+                    <span
+                      className='font-bold'
+                      style={{ color: colors.primary }}>
                       ${formData.price}
                     </span>
                   </div>

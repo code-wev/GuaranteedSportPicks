@@ -77,7 +77,9 @@ export default function PurchaseHistory() {
       return {
         id: `pick-${purchase._id}`,
         source: "PICK",
-        itemName: `${awayTeam} @ ${homeTeam}`,
+        awayTeam,
+        homeTeam,
+        itemName: `${awayTeam} VS ${homeTeam}`,
         sport: sportTitle,
         amount: Number(purchase.price || 0),
         status: purchase.status,
@@ -162,7 +164,17 @@ export default function PurchaseHistory() {
                       className="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition text-sm"
                     >
                       <td className="px-5 py-4 text-gray-700 font-semibold">{record.source}</td>
-                      <td className="px-5 py-4 text-gray-800 font-medium">{record.itemName}</td>
+                      <td className="px-5 py-4 text-gray-800 font-medium">
+                        {record.source === "PICK" ? (
+                          <>
+                            {record.awayTeam}{" "}
+                            <span className="text-[#B91C1C]">VS</span>{" "}
+                            {record.homeTeam}
+                          </>
+                        ) : (
+                          record.itemName
+                        )}
+                      </td>
                       <td className="px-5 py-4 text-gray-600">{record.sport}</td>
                       <td className="px-5 py-4 font-semibold text-[#B91C1C]">${record.amount.toFixed(2)}</td>
                       <td className="px-5 py-4 text-xs text-gray-600 font-semibold uppercase">{record.method}</td>

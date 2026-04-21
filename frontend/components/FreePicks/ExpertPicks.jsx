@@ -41,7 +41,9 @@ export default function ExpertPicks() {
                         {pick.sport_title}
                       </p>
                       <h2 className="text-2xl font-semibold leading-snug mt-2">
-                        {pick.away_team} @ {pick.home_team}
+                        {pick.away_team}{" "}
+                        <span className="text-[#B91C1C]">VS</span>{" "}
+                        {pick.home_team}
                       </h2>
                     </div>
                     <span

@@ -3,11 +3,13 @@ import { base_url } from "@/utils/utils";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useState } from "react";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const LOGIN_URL = `${base_url}/auth/login`;
@@ -205,14 +207,23 @@ export default function LoginPage() {
 
             <div className='flex flex-col'>
               <label className='text-sm font-medium'>Password</label>
-              <input
-                type='password'
-                className='border border-[#BDBDBD] rounded-lg p-3 text-sm'
-                placeholder='Enter your password'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
+              <div className='relative'>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className='border border-[#BDBDBD] rounded-lg p-3 pr-10 text-sm w-full'
+                  placeholder='Enter your password'
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type='button'
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className='absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700'
+                  aria-label={showPassword ? "Hide password" : "Show password"}>
+                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                </button>
+              </div>
             </div>
 
             <div className='flex justify-between items-center text-sm'>

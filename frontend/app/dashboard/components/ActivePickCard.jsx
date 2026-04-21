@@ -29,7 +29,8 @@ export default function ActivePickCard() {
             >
               <div>
                 <p className="font-medium">
-                  {pick.away_team} @ {pick.home_team}
+                  {pick.away_team} <span className="text-[#B91C1C]">VS</span>{" "}
+                  {pick.home_team}
                 </p>
                 <p className="text-xs text-gray-500">
                   {pick.sport_title} • {new Date(pick.commence_time).toLocaleString()}

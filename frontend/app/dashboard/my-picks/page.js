@@ -147,7 +147,9 @@ export default function MyPicksPage() {
                         )}
                       </div>
                       <h3 className="text-xl font-bold text-gray-900 leading-tight">
-                        {pick.away_team} @ {pick.home_team}
+                        {pick.away_team}{" "}
+                        <span className="text-[#B91C1C]">VS</span>{" "}
+                        {pick.home_team}
                       </h3>
                       <p className="text-xs text-gray-400 font-medium mt-1">
                         {new Date(pick.commence_time).toLocaleString('en-US', { 
