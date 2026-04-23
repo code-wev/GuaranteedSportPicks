@@ -2,18 +2,18 @@
 
 import Script from "next/script";
 
-const GA_ID = "G-D44CQRPJ56";
+const GA_ID = "G-YCV1G74BT3";
 
 export default function GoogleAnalytics() {
   return (
     <>
-      {/* Load gtag */}
+      {/* Load Google Analytics */}
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
         strategy='afterInteractive'
       />
 
-      {/* Init script */}
+      {/* Initialize GA */}
       <Script id='google-analytics' strategy='afterInteractive'>
         {`
           window.dataLayer = window.dataLayer || [];

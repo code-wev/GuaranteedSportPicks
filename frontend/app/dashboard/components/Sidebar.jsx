@@ -103,8 +103,8 @@ export default function Sidebar({ open, setOpen }) {
       )}
 
       <aside
-        className={`fixed top-0 left-0 w-64 bg-white shadow-xl p-5 z-50 
-        transform transition-transform duration-300
+        className={`fixed top-0 left-0 w-64 h-screen bg-white shadow-xl p-5 z-50 
+        transform transition-transform duration-300 overflow-y-auto
         ${open ? "translate-x-0" : "-translate-x-full"} 
         lg:translate-x-0 lg:static`}>
         {/* Close button for mobile */}
@@ -112,8 +112,8 @@ export default function Sidebar({ open, setOpen }) {
           <Link href='/'>
             <Image
               src='/dashboard/SportPicks.png'
-              width={120}
-              height={40}
+              width={100}
+              height={32}
               alt='logo'
             />
           </Link>
@@ -127,8 +127,8 @@ export default function Sidebar({ open, setOpen }) {
         <Link href='/'>
           <Image
             src='/dashboard/SportPicks.png'
-            width={150}
-            height={40}
+            width={130}
+            height={36}
             alt='logo'
             className='mb-6 hidden lg:block'
           />

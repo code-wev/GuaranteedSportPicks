@@ -1,12 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
+import { useMyProfileQuery } from "@/feature/UserApi";
 import Cookies from "js-cookie";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FiChevronDown, FiLayout, FiLogOut, FiMenu, FiX } from "react-icons/fi";
-import { useMyProfileQuery } from "@/feature/UserApi";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -53,7 +53,7 @@ export default function Navbar() {
 
   return (
     <nav className='w-full bg-[#FFEEEE]'>
-      <div className='max-w-7xl mx-auto px-6 flex items-center justify-between h-[80px]'>
+      <div className='max-w-7xl mx-auto px-6 flex items-center justify-between h-20'>
         {/* Logo */}
         <Link href='/'>
           <div className='flex items-center space-x-1'>
@@ -67,7 +67,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Links */}
-        <ul className='hidden lg:flex items-center space-x-6 text-[16px] font-[600] text-[#4B556C]'>
+        <ul className='hidden lg:flex items-center space-x-6 text-[16px] font-semibold text-[#4B556C]'>
           <li>
             <Link
               href='/'
@@ -181,7 +181,9 @@ export default function Navbar() {
                       />
                       <div>
                         <p className='text-sm font-bold text-[#1f2937]'>
-                          {user ? `${user.firstName} ${user.lastName}` : "Welcome Back"}
+                          {user
+                            ? `${user.firstName} ${user.lastName}`
+                            : "Welcome Back"}
                         </p>
                         <p className='text-xs text-[#6b7280]'>
                           {user?.email || "Access your account"}
@@ -212,7 +214,7 @@ export default function Navbar() {
           )}
 
           <Link
-            href='#'
+            href='/freepicks'
             className='ml-4 bg-[#d93732] text-white  px-3 py-2 lg:px-5 lg:py-3 rounded lg:rounded-full text-xs font-semibold hover:bg-[#c22f2b] transition'>
             Get Picks Now
           </Link>
