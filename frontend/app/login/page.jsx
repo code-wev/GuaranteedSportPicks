@@ -3,7 +3,7 @@ import { base_url } from "@/utils/utils";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 export default function LoginPage() {
@@ -257,11 +257,11 @@ export default function LoginPage() {
             </button>
 
             <p className='text-center text-sm mt-2'>
-              Don’t have an account?
+              Don't have an account?{" "}
               <span
-                className='text-[#B91C1C] cursor-pointer'
+                className='text-[#B91C1C] cursor-pointer bg-yellow-200 hover:bg-yellow-300 px-2 py-0.5 rounded transition inline-block font-medium'
                 onClick={() => (window.location.href = "/signup")}>
-                Sign Up
+                Free Sign Up
               </span>
             </p>
           </form>

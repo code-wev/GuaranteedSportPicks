@@ -3,6 +3,7 @@
 import RelatedArticles from "@/components/BlogDetails/RelatedArticles";
 import { useGetArticleByIdQuery } from "@/feature/ArticleApi";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 import { FaXTwitter } from "react-icons/fa6";
 import { GoDotFill } from "react-icons/go";
 import { GrLinkedinOption } from "react-icons/gr";
@@ -23,7 +24,8 @@ const getSafeImageSrc = (src) => {
 };
 
 export default function BlogDetails({ params }) {
-  const { slug } = params;
+  const { slug } = useParams();
+
   const { data, isLoading, isError } = useGetArticleByIdQuery(slug);
 
   const handleShare = () => {
@@ -93,11 +95,12 @@ export default function BlogDetails({ params }) {
               {article.author?.firstName?.charAt(0) || "E"}
             </div>
             <div>
-              <h3 className='font-bold text-lg text-gray-900'>
+              {/* TODO: Remove author */}
+              {/* <h3 className='font-bold text-lg text-gray-900'>
                 {article.author
                   ? `${article.author.firstName} ${article.author.lastName}`
                   : "Expert Team"}
-              </h3>
+              </h3> */}
               <p className='text-gray-500 text-sm font-medium'>
                 Senior Analyst
               </p>

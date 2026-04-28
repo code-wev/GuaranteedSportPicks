@@ -157,7 +157,8 @@ function ArticleCard({
         </p>
 
         <div className='mt-4 flex items-center justify-between text-[12px] text-[#9a9a9a]'>
-          <span>{date}</span>
+          {/* TODO: Remove D a t e */}
+          {/* <span>{date}</span> */}
           <span>{read}</span>
         </div>
 
