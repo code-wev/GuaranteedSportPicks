@@ -4,7 +4,6 @@ import { useGetAllArticlesQuery } from "@/feature/ArticleApi";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { GoDotFill } from "react-icons/go";
 
 const CATEGORIES = [
   "All",
@@ -92,7 +91,9 @@ export default function Article() {
                 <span className='bg-[#B91C1C] text-white px-3 py-1 rounded'>
                   {featuredArticle.category}
                 </span>
-                <p className='flex items-center gap-1'>
+
+                {/*  RemOve D a t e */}
+                {/* <p className='flex items-center gap-1'>
                   <GoDotFill className='text-gray-400' />
                   {new Date(featuredArticle.createdAt).toLocaleDateString(
                     "en-US",
@@ -102,10 +103,10 @@ export default function Article() {
                       year: "numeric",
                     },
                   )}
-                </p>
+                </p> */}
               </div>
 
-              <Link href={`/blog/${featuredArticle.slug}`}>
+              <Link href={`/blog/${featuredArticle._id}`}>
                 <h3 className='text-3xl font-bold hover:text-[#B91C1C] transition-colors cursor-pointer line-clamp-2'>
                   {featuredArticle.title}
                 </h3>
@@ -115,12 +116,12 @@ export default function Article() {
                 {stripHtml(featuredArticle.content)}
               </p>
 
-              <p className='text-lg text-gray-800 font-medium'>
+              {/* <p className='text-lg text-gray-800 font-medium'>
                 By{" "}
                 {featuredArticle.author
                   ? `${featuredArticle.author.firstName} ${featuredArticle.author.lastName}`
                   : "Expert Team"}
-              </p>
+              </p> */}
             </div>
           </div>
         )}
@@ -152,13 +153,15 @@ export default function Article() {
                     <span className='bg-[#B91C1C] text-white px-2 py-0.5 rounded text-[10px] uppercase font-bold'>
                       {article.category}
                     </span>
-                    <p className='flex items-center'>
+
+                    {/* TODO: REmove D a t e */}
+                    {/* <p className='flex items-center'>
                       <GoDotFill className='text-gray-400' />
                       {new Date(article.createdAt).toLocaleDateString()}
-                    </p>
+                    </p> */}
                   </div>
 
-                  <Link href={`/blog/${article.slug}`}>
+                  <Link href={`/blog/${article._id}`}>
                     <h4 className='font-bold text-xl hover:text-[#B91C1C] transition-colors cursor-pointer line-clamp-2'>
                       {article.title}
                     </h4>
@@ -168,12 +171,14 @@ export default function Article() {
                     {stripHtml(article.content)}
                   </p>
 
-                  <p className='text-base font-medium'>
+                  {/* Remove author */}
+
+                  {/* <p className='text-base font-medium'>
                     By{" "}
                     {article.author
                       ? `${article.author.firstName} ${article.author.lastName}`
                       : "Expert Team"}
-                  </p>
+                  </p> */}
                 </div>
               </div>
             );
@@ -277,9 +282,10 @@ function RecentArticlesList() {
                 <p className='font-bold group-hover:text-[#B91C1C] transition-colors line-clamp-2'>
                   {article.title}
                 </p>
-                <p className='text-gray-400 font-medium'>
+                {/* TODO: REmove D a t e */}
+                {/* <p className='text-gray-400 font-medium'>
                   {new Date(article.createdAt).toLocaleDateString()}
-                </p>
+                </p> */}
               </div>
             </Link>
           );
